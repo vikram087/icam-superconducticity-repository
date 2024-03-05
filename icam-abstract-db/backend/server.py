@@ -89,10 +89,11 @@ def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
     return papers
 
 # /api/papers/${paperId}
-@app.route('/api/papers/<paper_id>', methods=['GET'])
+@app.route('/api/papers/<paper_id>', methods=['POST'])
 def get_paper(paper_id):
+    data = request.get_json()
+    page = int(data.get('page', 0))
     id = int(paper_id)
-    page = id // 25 + 1
     papers = findInfo(page)
     paper = next((paper for paper in papers if paper.id == id), None)
     paper_dict = paper.__dict__

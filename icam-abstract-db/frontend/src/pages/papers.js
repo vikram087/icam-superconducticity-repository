@@ -2,19 +2,27 @@ import '../styles/papers.css';
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 
+window.page = 0;
+
 export function PaperDetail() {
-  let { id } = useParams();
   const [paper, setPaper] = useState(null);
 
+  let navigate = useNavigate();
+  let { id } = useParams();
+
   useEffect(() => {
-    fetch(`http://localhost:8080/api/papers/${id}`)
+    fetch(`http://localhost:8080/api/papers/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ "page": window.page }),
+    })
     .then((response) => response.json())
     .then(data => {
       setPaper(data);
     })
   }, [id]);
-
-  let navigate = useNavigate();
 
   function goBack() {
     navigate(`/papers`);
@@ -41,6 +49,8 @@ export function PaperDetail() {
 export function Papers() {
   const [papers, setPapers] = useState([]);
   const [page, setPage] = useState(1)
+
+  let navigate = useNavigate();
 
   useEffect(() => {
     getPapers(page);
@@ -72,9 +82,8 @@ export function Papers() {
   const changePage = (page) => {
     getPapers(page);
     setPage(page);
+    window.page = page;
   };
-
-  let navigate = useNavigate();
 
   function changePaper(paperId) {
     navigate(`/papers/${paperId}`);
