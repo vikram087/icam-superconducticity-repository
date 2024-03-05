@@ -23,7 +23,9 @@ export function PaperDetail() {
   return (
     paper && (
       <div className='paper'>
-        <button className='return' onClick={goBack}>Go Back</button>
+        <div className='button'>
+          <button className='return' onClick={goBack}>Go Back</button>
+        </div>
         <a href={paper.link} target='_blank' rel="noreferrer">
           <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
         </a>
@@ -89,9 +91,7 @@ export function Papers() {
               <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
             </a>
             <p>Authors: {paper.authors}</p>
-            <p>Date: {paper.date}</p>
-            <div dangerouslySetInnerHTML={{ __html: `Citation: ${paper.citation}` }}></div>
-            <div className='abstract' dangerouslySetInnerHTML={{ __html: `Abstract: ${paper.summary}` }}></div>
+            <div dangerouslySetInnerHTML={{ __html: `Abstract: ${paper.summary}` }}></div>
           </div>
         ))}
       </ul>

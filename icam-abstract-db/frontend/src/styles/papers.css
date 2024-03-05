@@ -4,6 +4,8 @@
     border-radius: 10px;
     margin-bottom: 10px;
     cursor: pointer;
+    height: 200px;
+    overflow-y: auto;
 }
 
 .paper {
@@ -28,8 +30,6 @@
 
 .list {
     padding: 10px;
-}
-
-.abstract {
-    padding-top: 10px;
+    padding-left: 10%;
+    padding-right: 10%;
 }
