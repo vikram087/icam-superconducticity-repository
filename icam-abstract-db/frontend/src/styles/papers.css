@@ -1,0 +1,35 @@
+.container {
+    border: 1px solid black;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.paper {
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.return {
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+.button {
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.container:hover {
+    box-shadow: 1px 1px 5px grey;
+}
+
+.list {
+    padding: 10px;
+}
+
+.abstract {
+    padding-top: 10px;
+}

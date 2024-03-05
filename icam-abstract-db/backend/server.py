@@ -9,12 +9,14 @@ app = Flask(__name__)
 CORS(app)
 
 class Paper:
-    def __init__(self, link: str, title: str, date: str, citation: str, summary: str):
+    def __init__(self, link: str, title: str, date: str, citation: str, summary: str, authors: str, id: int):
         self.link = link
         self.title = title
         self.date = date
         self.citation = citation
         self.summary = summary
+        self.authors = authors
+        self.id = id
         
     def __init__(self):
         self.link = ''
@@ -22,12 +24,14 @@ class Paper:
         self.date = ''
         self.citation = ''
         self.summary = ''
+        self.authors = ''
+        self.id = -1
         
     def __str__(self):
-        return f"link: {self.link}\ntitle: {self.title}\ndate: {self.date}\ncitation: {self.citation}\nabstract: {self.summary}"        
+        return f"link: {self.link}\ntitle: {self.title}\ndate: {self.date}\ncitation: {self.citation}\nabstract: {self.summary}\nauthors: {self.authors}\nid: {self.id}"        
         
 def findInfo(page) -> list[Paper]:
-    url = f"https://journals.aps.org/search/results?sort=recent&clauses=%5B%7B%22field%22:%22abstitle%22,%22value%22:%22superconductivity%22,%22operator%22:%22AND%22%7D%5D&page={page}&per_page=20"
+    url = f"https://journals.aps.org/search/results?sort=recent&clauses=%5B%7B%22field%22:%22abstitle%22,%22value%22:%22superconductivity%22,%22operator%22:%22AND%22%7D%5D&page={page}&per_page=50"
 
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
@@ -38,15 +42,27 @@ def findInfo(page) -> list[Paper]:
     matches = re.finditer(pattern, text, re.DOTALL)
 
     extracted_texts = [f"{match.group(1)}" for match in matches]
+    
+    # for extracted in extracted_texts:
+    #     print(extracted)
             
     return assignPaperMetadata(extracted_texts)
 
 def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
     papers = []
-    fields = ["link", "title", "date", "citation", "summary"]
+    fields = ["link", "title", "date", "citation", "summary", "authors"]
+    paperIds = []
     
     for extracted in extracted_texts:
         paper = Paper()
+        if(len(paperIds) == 0):
+            id = 0
+            setattr(paper, "id", id)
+        else:
+            id = papers[len(papers)-1].id + 1
+            setattr(paper, "id", id)
+        paperIds.append(id)
+            
         for field in fields:
             patterns = rf'"{field}":"(.*?)(?=",")'
         
@@ -61,10 +77,29 @@ def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
             decoded_text = field1.encode().decode('unicode-escape').replace('\\"', '"')
                 
             setattr(paper, field, decoded_text)
-            
-        papers.append(paper)
+        
+        exists = False
+        for pub in papers:
+            if(pub.title == paper.title):
+                exists = True
+                break
+        if(not exists):
+            papers.append(paper)
             
     return papers
+
+# /api/papers/${paperId}
+@app.route('/api/papers/<paper_id>', methods=['GET'])
+def get_paper(paper_id):
+    id = int(paper_id)
+    page = id // 25 + 1
+    papers = findInfo(page)
+    paper = next((paper for paper in papers if paper.id == id), None)
+    paper_dict = paper.__dict__
+    if paper:
+        return jsonify(paper_dict)
+    else:
+        return jsonify({"error": "Paper not found"}), 404
     
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
