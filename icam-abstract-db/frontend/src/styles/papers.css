@@ -1,35 +1,122 @@
 .container {
-    border: 1px solid black;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    height: 200px;
-    overflow-y: auto;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  height: 150px;
+}
+
+.expanded-container {
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .paper {
-    padding-left: 10%;
-    padding-right: 10%;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
 .return {
-    padding: 5px;
-    border-radius: 10px;
-    border: 1px solid black;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid black;
 }
 
 .button {
-    padding-bottom: 10px;
-    padding-top: 10px;
+  padding-bottom: 10px;
+  padding-top: 10px;
 }
 
 .container:hover {
-    box-shadow: 1px 1px 5px grey;
+  box-shadow: 1px 1px 5px grey;
 }
 
 .list {
-    padding: 10px;
-    padding-left: 10%;
-    padding-right: 10%;
+  padding: 10px;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+.abstract {
+  padding-top: 10px;
+}
+
+.pagination {
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+  justify-content: center; 
+  align-items: center;
+}
+  
+.pagination li {
+  margin: 0 3px; 
+}
+
+.pagination li a {
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  text-decoration: none; 
+  color: #000;
+  background-color: #fff;
+  cursor: pointer; 
+}
+
+.pagination li a:hover,
+.pagination li a.active {
+  background-color: #eee; 
+}
+
+.pagination li a.active {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.pagination li.disabled a {
+  display: none;
+}
+
+.pagination li.previous a,
+.pagination li.next a {
+  font-weight: bold;
+}
+
+.pagination li.break-me a {
+  cursor: default;
+  background-color: transparent;
+  border: none;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader p {
+  font-size: x-large;
+}
+
+.text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0px;
+}
+
+.expanded {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  max-width: none;
+}
+
+.expand-button {
+  padding-top: 10px;
 }

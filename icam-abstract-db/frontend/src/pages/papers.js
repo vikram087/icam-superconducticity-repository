@@ -1,6 +1,8 @@
 import '../styles/papers.css';
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
+import ReactPaginate from 'react-paginate';
+import { TailSpin } from 'react-loader-spinner';
 
 window.page = 0;
 
@@ -29,26 +31,44 @@ export function PaperDetail() {
   }
 
   return (
-    paper && (
+    paper ? 
       <div className='paper'>
         <div className='button'>
           <button className='return' onClick={goBack}>Go Back</button>
         </div>
+          <div dangerouslySetInnerHTML={{ __html: `<u>${paper.title}</u>` }}></div>
+        <p><strong>Authors:</strong> {paper.authors}</p>
         <a href={paper.link} target='_blank' rel="noreferrer">
-          <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
+          <p><strong>DOI:</strong> {paper.doi}</p>
         </a>
-        <p>Authors: {paper.authors}</p>
-        <p>Date: {paper.date}</p>
-        <div dangerouslySetInnerHTML={{ __html: `Citation: ${paper.citation}` }}></div>
-        <div className='abstract' dangerouslySetInnerHTML={{ __html: `Abstract: ${paper.summary}` }}></div>
+        <p><strong>Journal:</strong> {paper.journal}</p>
+        <p><strong>Date:</strong> {paper.date}</p>
+        <div dangerouslySetInnerHTML={{ __html: `<strong>Citation:</strong> ${paper.citation}` }}></div>
+        <div className='abstract' dangerouslySetInnerHTML={{ __html: `<strong>Abstract:</strong> ${paper.summary}` }}></div>
       </div>
-    )
+    :
+    <div className='loader'>
+      <p>Loading ...</p>
+      <TailSpin color="#00BFFF" height={100} width={100} />
+    </div>
   );
 }
 
 export function Papers() {
   const [papers, setPapers] = useState([]);
   const [page, setPage] = useState(1)
+  const pageCount = 250;
+  // const [currentPage, setCurrentPage] = useState(0);
+  const [expandedIndex, setExpandedIndex] = useState(-1);
+
+  const toggleExpand = (index) => {
+    if (expandedIndex === index) {
+      setExpandedIndex(-1);
+    } else {
+      setExpandedIndex(index);
+    }
+  }
+
 
   let navigate = useNavigate();
 
@@ -86,23 +106,67 @@ export function Papers() {
   };
 
   function changePaper(paperId) {
+    // let doi = paperId.replace(/\//g, "-");
+    // navigate(`/papers/${doi}`);
     navigate(`/papers/${paperId}`);
   }
 
+  const handlePageClick = (data) => {
+    let selectedPage = data.selected;
+    // setCurrentPage(selectedPage);
+    setPapers([]);
+    changePage(selectedPage+1);
+  };
+
   return (
     <div>
-      <button onClick={() => changePage(page-1)}>&lt;</button>
-      <button onClick={() => changePage(page+1)}>&gt;</button>
+      <ReactPaginate
+        previousLabel={'previous'}
+        nextLabel={'next'}
+        breakLabel={'...'}
+        breakClassName={'break-me'}
+        pageCount={pageCount}
+        marginPagesDisplayed={2}
+        pageRangeDisplayed={5}
+        onPageChange={handlePageClick}
+        containerClassName={'pagination'}
+        activeClassName={'active'}
+        // initialPage={currentPage}
+        // forcePage={currentPage} 
+      />
       <ul className="list">
-        {papers.map((paper, index) => (
-          <div className='container' key={index} onClick={() => changePaper(paper.id)}>
-            <a href={paper.link} target='_blank' rel="noreferrer">
-              <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
-            </a>
-            <p>Authors: {paper.authors}</p>
-            <div dangerouslySetInnerHTML={{ __html: `Abstract: ${paper.summary}` }}></div>
+        {papers.length !== 0 ?
+          papers.map((paper, index) => (
+            // <div className='container' key={index} onClick={() => changePaper(paper.doi)}>
+            <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
+              <div onClick={() => changePaper(paper.id)}>
+                  <u>
+                    <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
+                  </u>
+                  <p>Authors: {paper.authors}</p>
+                  <div>Abstract: </div>
+              </div>
+              <div className='expand-button'>
+                <button onClick={() => toggleExpand(index)}>
+                  {expandedIndex === index ? '-' : '+'}
+                </button>
+              </div>
+              {expandedIndex === index ?
+                <div onClick={() => changePaper(paper.id)}>
+                  <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
+                </div>
+                :
+                <div>
+                  <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
+                </div>
+              }
+            </div>
+          )) :
+          <div className='loader'>
+            <p>Loading ...</p>
+            <TailSpin color="#00BFFF" height={100} width={100} />
           </div>
-        ))}
+        }
       </ul>
     </div>
   );

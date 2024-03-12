@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)
 
 class Paper:
-    def __init__(self, link: str, title: str, date: str, citation: str, summary: str, authors: str, id: int):
+    def __init__(self, link: str, title: str, date: str, citation: str, summary: str, authors: str, id: int, doi: str, journal: str):
         self.link = link
         self.title = title
         self.date = date
@@ -17,6 +17,8 @@ class Paper:
         self.summary = summary
         self.authors = authors
         self.id = id
+        self.doi = doi
+        self.journal = journal
         
     def __init__(self):
         self.link = ''
@@ -26,32 +28,37 @@ class Paper:
         self.summary = ''
         self.authors = ''
         self.id = -1
+        self.doi = ''
+        self.journal = ''
         
     def __str__(self):
-        return f"link: {self.link}\ntitle: {self.title}\ndate: {self.date}\ncitation: {self.citation}\nabstract: {self.summary}\nauthors: {self.authors}\nid: {self.id}"        
+        return f"link: {self.link}\ntitle: {self.title}\ndate: {self.date}\ncitation: {self.citation}\nabstract: {self.summary}\nauthors: {self.authors}\nid: {self.id}\ndoi: {self.doi}\njournal: {self.journal}"        
         
 def findInfo(page) -> list[Paper]:
-    url = f"https://journals.aps.org/search/results?sort=recent&clauses=%5B%7B%22field%22:%22abstitle%22,%22value%22:%22superconductivity%22,%22operator%22:%22AND%22%7D%5D&page={page}&per_page=50"
+    url = f"https://journals.aps.org/search/results?sort=recent&clauses=%5B%7B%22field%22:%22abstitle%22,%22value%22:%22superconductivity%22,%22operator%22:%22AND%22%7D%5D&page={page}&per_page=20"
 
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
     content = soup.find_all("script")
-    text = ''.join(str(element) for element in content)
-    
-    pattern = r'html(.*?)html'
-    matches = re.finditer(pattern, text, re.DOTALL)
+    text = ''.join(str(element) for element in content) # possibly unnecessary, join just to split again
+                                                        # consider omitting and just iterating through content
+                                                        # then only keeping those which match html pattern
 
-    extracted_texts = [f"{match.group(1)}" for match in matches]
+    extracted_texts = [part.strip() for part in text.split('"html"') if part.strip()]
+    extracted_texts.pop(0)
+        
+    # pattern = r'html(.*?)html'
+    # matches = re.finditer(pattern, text, re.DOTALL) # Issue is here "html" ... "html" ... "html" ... "html"
+                                                    # Only gets the alternates, bc it searches after each tag
     
-    # for extracted in extracted_texts:
-    #     print(extracted)
-            
+    # extracted_texts = [f"{match.group(1)}" for match in matches]
+                
     return assignPaperMetadata(extracted_texts)
 
 def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
     papers = []
-    fields = ["link", "title", "date", "citation", "summary", "authors"]
-    paperIds = []
+    fields = ["link", "title", "date", "citation", "summary", "authors", "doi", "journal"]
+    paperIds = [] # id possibly not necessary once DB is setup, because page for each paper will just be DOI
     
     for extracted in extracted_texts:
         paper = Paper()
@@ -88,14 +95,42 @@ def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
             
     return papers
 
+def get_all_papers():
+    pages = range(1, 625)
+    all_papers = []
+    
+    for page in pages:
+        papers = findInfo(page)
+        for paper in papers:
+            paper_dict = {
+                "title": paper.title,
+                "authors": paper.authors,
+                "link": paper.link,
+                "date": paper.date,
+                "citation": paper.citation,
+                "doi": paper.doi,
+                "journal": paper.journal,
+                "summary": paper.summary
+            }
+            all_papers.append(paper_dict)
+        print(page)
+        
+    with open('papers.json', 'w') as file:
+        json.dump(all_papers, file, indent=4)
+                
+# get_all_papers() 
+
 # /api/papers/${paperId}
 @app.route('/api/papers/<paper_id>', methods=['POST'])
 def get_paper(paper_id):
     data = request.get_json()
     page = int(data.get('page', 0))
-    id = int(paper_id)
     papers = findInfo(page)
-    paper = next((paper for paper in papers if paper.id == id), None)
+    # paper = next((paper for paper in papers if paper.doi.replace("/", "-") == str(paper_id)), None)
+    paper = next((paper for paper in papers if paper.id == int(paper_id)), None)
+    if(paper == None):
+        paper = Paper()
+        print("ID not correct")
     paper_dict = paper.__dict__
     if paper:
         return jsonify(paper_dict)
