@@ -4,6 +4,17 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import json
+from elasticsearch import Elasticsearch
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_KEY = os.getenv('API_KEY')
+
+client = Elasticsearch(
+  "https://d3e6ab8052bf4bc79ddc6e6682153d0e.us-central1.gcp.cloud.es.io:443",
+  api_key=API_KEY
+)
 
 app = Flask(__name__)
 CORS(app)
@@ -95,9 +106,11 @@ def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
             
     return papers
 
-def get_all_papers():
-    pages = range(1, 625)
+def upload_all_papers():
+    limit = 626
+    pages = range(1, limit)
     all_papers = []
+    ES = { "index" : { "_index" : "search-papers-meta" } }
     
     for page in pages:
         papers = findInfo(page)
@@ -111,14 +124,13 @@ def get_all_papers():
                 "doi": paper.doi,
                 "journal": paper.journal,
                 "summary": paper.summary
-            }
+            }            
+            all_papers.append(ES)
             all_papers.append(paper_dict)
         print(page)
         
-    with open('papers.json', 'w') as file:
-        json.dump(all_papers, file, indent=4)
-                
-# get_all_papers() 
+    client.bulk(operations=all_papers, pipeline="ent-search-generic-ingestion")
+    # print(client.search(index="search-papers-meta", q="supercon")) # example query
 
 # /api/papers/${paperId}
 @app.route('/api/papers/<paper_id>', methods=['POST'])
