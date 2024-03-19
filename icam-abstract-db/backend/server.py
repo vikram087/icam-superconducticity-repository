@@ -20,14 +20,13 @@ app = Flask(__name__)
 CORS(app)
 
 class Paper:
-    def __init__(self, link: str, title: str, date: str, citation: str, summary: str, authors: str, id: int, doi: str, journal: str):
+    def __init__(self, link: str, title: str, date: str, citation: str, summary: str, authors: str, doi: str, journal: str):
         self.link = link
         self.title = title
         self.date = date
         self.citation = citation
         self.summary = summary
         self.authors = authors
-        self.id = id
         self.doi = doi
         self.journal = journal
         
@@ -38,12 +37,11 @@ class Paper:
         self.citation = ''
         self.summary = ''
         self.authors = ''
-        self.id = -1
         self.doi = ''
         self.journal = ''
         
     def __str__(self):
-        return f"link: {self.link}\ntitle: {self.title}\ndate: {self.date}\ncitation: {self.citation}\nabstract: {self.summary}\nauthors: {self.authors}\nid: {self.id}\ndoi: {self.doi}\njournal: {self.journal}"        
+        return f"link: {self.link}\ntitle: {self.title}\ndate: {self.date}\ncitation: {self.citation}\nabstract: {self.summary}\nauthors: {self.authors}\ndoi: {self.doi}\njournal: {self.journal}"        
         
 def findInfo(page) -> list[Paper]:
     url = f"https://journals.aps.org/search/results?sort=recent&clauses=%5B%7B%22field%22:%22abstitle%22,%22value%22:%22superconductivity%22,%22operator%22:%22AND%22%7D%5D&page={page}&per_page=20"
@@ -69,17 +67,9 @@ def findInfo(page) -> list[Paper]:
 def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
     papers = []
     fields = ["link", "title", "date", "citation", "summary", "authors", "doi", "journal"]
-    paperIds = [] # id possibly not necessary once DB is setup, because page for each paper will just be DOI
     
     for extracted in extracted_texts:
         paper = Paper()
-        if(len(paperIds) == 0):
-            id = 0
-            setattr(paper, "id", id)
-        else:
-            id = papers[len(papers)-1].id + 1
-            setattr(paper, "id", id)
-        paperIds.append(id)
             
         for field in fields:
             patterns = rf'"{field}":"(.*?)(?=",")'
@@ -115,6 +105,12 @@ def upload_all_papers():
     for page in pages:
         papers = findInfo(page)
         for paper in papers:
+            action = {
+                "create": {
+                    "_index": "search-papers-meta",
+                    "_id": paper.doi
+                }
+            }
             paper_dict = {
                 "title": paper.title,
                 "authors": paper.authors,
@@ -124,40 +120,97 @@ def upload_all_papers():
                 "doi": paper.doi,
                 "journal": paper.journal,
                 "summary": paper.summary
-            }            
-            all_papers.append(ES)
-            all_papers.append(paper_dict)
+            }    
+            all_papers.append(json.dumps(action))
+            all_papers.append(json.dumps(paper_dict))
         print(page)
         
-    client.bulk(operations=all_papers, pipeline="ent-search-generic-ingestion")
-    # print(client.search(index="search-papers-meta", q="supercon")) # example query
+    client.bulk(body='\n'.join(all_papers) + '\n', pipeline="ent-search-generic-ingestion")
+    # results = client.search(index="search-papers-meta", q="supercon")
+    # hits = results['hits']['hits']
+    # papers = [hit['_source'] for hit in hits]
+    # print(papers[0]['summary'])
+    
+@app.route('/api/results', methods=['POST'])
+def get_results():
+    data = request.get_json()
+    query = str(data.get('query', ''))
+    results = client.search(index="search-papers-meta", q=query)
+    hits = results['hits']['hits']
+    papers = [hit['_source'] for hit in hits]
+    
+    if papers:
+        return jsonify(papers)
+    else:
+        return jsonify({"error": "No results found"}), 404
 
 # /api/papers/${paperId}
-@app.route('/api/papers/<paper_id>', methods=['POST'])
+@app.route('/api/papers/<paper_id>', methods=['GET'])
 def get_paper(paper_id):
-    data = request.get_json()
-    page = int(data.get('page', 0))
-    papers = findInfo(page)
-    # paper = next((paper for paper in papers if paper.doi.replace("/", "-") == str(paper_id)), None)
-    paper = next((paper for paper in papers if paper.id == int(paper_id)), None)
-    if(paper == None):
-        paper = Paper()
-        print("ID not correct")
-    paper_dict = paper.__dict__
+    doi = paper_id.replace("-", "/")
+
+    results = client.get(index="search-papers-meta", id=doi)
+    paper = results['_source']
     if paper:
-        return jsonify(paper_dict)
+        return jsonify(paper)
     else:
-        return jsonify({"error": "Paper not found"}), 404
-    
+        return jsonify({"error": "No results found"}), 404
+
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
 def papers():
     data = request.get_json()
     page = int(data.get('page', 0))
-    papers = findInfo(page)
-    papers_dict = [paper.__dict__ for paper in papers]
-    papers_json = json.dumps(papers_dict)
-    return jsonify(papers_dict)
+    numResults = int(data.get('results', 0))
+    query = str(data.get('query', ""))
+    sorting = str(data.get('sorting', ""))
+
+    if(sorting == "Most-Recent"):
+        sort = "desc"
+    elif(sorting == "Oldest-First"):
+        sort = "asc"
+    else:
+        sort = ""
+    
+    if query == "all":
+        results = client.search(
+            index="search-papers-meta",
+            body={
+                "query": {
+                    "match_all": {}
+                },
+                "sort": [
+                    {"date": {"order": sort}}
+                ],
+                "size": numResults,
+                "from": (page-1)*numResults
+            }
+        )
+    else:
+        results = client.search(
+            index="search-papers-meta",
+            body={
+                "query": {
+                    "match": {
+                        "summary": query
+                    }                
+                },
+                "sort": [
+                    {"date": {"order": sort}}
+                ],
+                "size": numResults,
+                "from": (page-1)*numResults
+            }
+        )
+        
+    hits = results['hits']['hits']
+    papers = [hit['_source'] for hit in hits]
+    total = results['hits']['total']['value']
+    if papers:
+        # return jsonify(papers)
+        return jsonify({ "papers": papers, "total": total })
+    else:
+        return jsonify({"error": "No results found"}), 404
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)

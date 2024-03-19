@@ -1,10 +1,38 @@
+.page-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%; 
+}
+
+.results-per-page {
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+.journals {
+  padding-top: 10px;
+}
+
+.filters {
+  flex: 1;
+  border-right: 2px solid #eee;
+  padding-top: 5%;
+  margin-left: 5%;
+}
+
+.content-area {
+  padding-left: 5%;
+  flex: 3; 
+}
+
 .container {
   border: 1px solid black;
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
   cursor: pointer;
-  height: 150px;
+  height: 175px;
 }
 
 .expanded-container {
@@ -36,9 +64,10 @@
 }
 
 .list {
+  flex: 3;
   padding: 10px;
-  padding-left: 10%;
-  padding-right: 10%;
+  /* padding-left: 22%; */
+  padding-right: 5%;
 }
 
 .abstract {
