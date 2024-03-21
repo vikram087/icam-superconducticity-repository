@@ -6,7 +6,7 @@ export function HomePage() {
     let navigate = useNavigate();
 
     const goToSearch = (query) => {
-        navigate(`/papers?page=1&per_page=20&query=${query}&sort=Most-Recent`);
+        navigate(`/papers?page=1&per_page=20&query=${query}&sort=Most-Recent&journals=None`);
     };
 
     return (
@@ -26,7 +26,7 @@ export function Search() {
     let navigate = useNavigate();
 
     const goToSearch = (query) => {
-        navigate(`/papers?page=1&per_page=20&query=${query}&sort=Most-Recent`);
+        navigate(`/papers?page=1&per_page=20&query=${query}&sort=Most-Recent&journals=None`);
     };
 
     const handleChange = (event) => {

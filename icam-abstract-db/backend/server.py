@@ -164,6 +164,9 @@ def papers():
     numResults = int(data.get('results', 0))
     query = str(data.get('query', ""))
     sorting = str(data.get('sorting', ""))
+    journals = str(data.get('journals', ""))
+    
+    # journalArr = [] if journals == "None" else journals.split(',') # fails to return results
 
     if(sorting == "Most-Recent"):
         sort = "desc"
@@ -172,36 +175,21 @@ def papers():
     else:
         sort = ""
     
+    base_query = {
+        "size": numResults,
+        "from": (page-1)*numResults,
+        "sort": [{"date": {"order": sort}}]
+    }
+
     if query == "all":
-        results = client.search(
-            index="search-papers-meta",
-            body={
-                "query": {
-                    "match_all": {}
-                },
-                "sort": [
-                    {"date": {"order": sort}}
-                ],
-                "size": numResults,
-                "from": (page-1)*numResults
-            }
-        )
+        base_query["query"] = {"match_all": {}}
     else:
-        results = client.search(
-            index="search-papers-meta",
-            body={
-                "query": {
-                    "match": {
-                        "summary": query
-                    }                
-                },
-                "sort": [
-                    {"date": {"order": sort}}
-                ],
-                "size": numResults,
-                "from": (page-1)*numResults
-            }
-        )
+        base_query["query"] = {"match": {"summary": query}}
+
+    results = client.search(
+        index="search-papers-meta",
+        body=base_query
+    )
         
     hits = results['hits']['hits']
     papers = [hit['_source'] for hit in hits]

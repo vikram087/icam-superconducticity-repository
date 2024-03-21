@@ -8,7 +8,8 @@ function App() {
     per_page: 20,
     page: 1,
     query: "",
-    sorting: "Most-Recent"
+    sorting: "Most-Recent",
+    journals: "None"
   });
 
   return (

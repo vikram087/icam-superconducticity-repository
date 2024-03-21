@@ -22,7 +22,7 @@ export function PaperDetail({ searchParams }) {
   }, [id]);
 
   const goBack = () => {
-    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}`);
+    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
   };
 
   return (
@@ -50,34 +50,52 @@ export function PaperDetail({ searchParams }) {
 }
 
 function Filters({ searchParams }) {
+  const [selected, setSelected] = useState([]);
+
   const navigate = useNavigate();
   
-  const journals = [
-    "Phys. Rev. B",
-    "Phys. Rev. Lett.",
-    "Phys. Rev.",
-    "Phys. Rev. D",
-    "Phys. Rev. Materials",
-    "Phys. Rev. Research",
-    "Phys. Rev. X",
-    "Rev. Mod. Phys.",
-    "Phys. Rev. A",
-    "Phys. Rev. C",
-    "Phys. Rev. Applied",
-    "Physics",
-    "Phys. Rev. E",
-    "Phys. Rev. Focus",
-    "Phys. Rev. Accel. Beams",
-    "Phys. Rev. ST Accel. Beams",
-    "Physics Physique Fizika",
-    "PRX Quantum",
-    "PRX Energy",
-    "PRX Life",
-    "Phys. Rev. Fluids",
-    "Phys. Rev. Phys. Educ. Res.",
-    "Phys. Rev. ST Phys. Educ. Res.",
-    "Phys. Rev. (Series I)"
-  ];
+  const journals = {
+    "Phys. Rev. B": "PRB",
+    "Phys. Rev. Lett.": "PRL",
+    "Phys. Rev.": "PR",
+    "Phys. Rev. D": "PRD",
+    "Phys. Rev. Materials": "PRMATERIALS",
+    "Phys. Rev. Research": "PRRESEARCH",
+    "Phys. Rev. X": "PRX",
+    "Rev. Mod. Phys.": "RMP",
+    "Phys. Rev. A": "PRA",
+    "Phys. Rev. C": "PRC",
+    "Phys. Rev. Applied": "PRAPPLIED",
+    "Physics": "PHYSICS",
+    "Phys. Rev. E": "PRE",
+    "Phys. Rev. Focus": "FOCUS",
+    "Phys. Rev. Accel. Beams": "PRAB",
+    "Phys. Rev. ST Accel. Beams": "PRSTAB",
+    "Physics Physique Fizika": "PPF",
+    "PRX Quantum": "PRXQUANTUM",
+    "PRX Energy": "PRXENERGY",
+    "PRX Life": "PRXLIFE",
+    "Phys. Rev. Fluids": "PRFLUIDS",
+    "Phys. Rev. Phys. Educ. Res.": "PRPER",
+    "Phys. Rev. ST Phys. Educ. Res.": "PRSTPER",
+    "Phys. Rev. (Series I)": "PRI"
+  };
+
+  //FIXME: Add support to searchParams for journals selection
+  const handleJournals = (value, isChecked) => {
+    setSelected(prevParams => {
+      const newSelected = isChecked ? [...prevParams, value] : prevParams.filter(item => item !== value);
+      const journalsParam = newSelected.join(',');
+
+      const newUrl = newSelected.length > 0
+        ? `?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${journalsParam}`
+        : `?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=None`;
+
+      navigate(newUrl);
+
+      return newSelected;
+    });
+  };
 
   const results = ["No Selection", "20", '10', "50", "100"];
 
@@ -92,7 +110,7 @@ function Filters({ searchParams }) {
 
     const modified = sorting.replace(" ", "-");
 
-    navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}`);
+    navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}&journals=${searchParams.journals}`);
   };
 
   const changeResultsPerPage = (e) => {
@@ -101,7 +119,7 @@ function Filters({ searchParams }) {
       resultsPerPage = "20";
     }
 
-    navigate(`?page=${searchParams.page}&per_page=${resultsPerPage}&query=${searchParams.query}&sort=${searchParams.sorting}`);
+    navigate(`?page=${searchParams.page}&per_page=${resultsPerPage}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
   };
 
   return (
@@ -127,10 +145,10 @@ function Filters({ searchParams }) {
       </div>
       <br></br>
       <u>Journal</u>
-      {journals.map((journal, index) => (
-        <div  key={index} className='journals'>
-          <input type="checkbox"></input>
-          {journal}
+      {Object.entries(journals).map(([key, value], index) => (
+        <div key={index} className='journals'>
+          <input onClick={(e) => handleJournals(value, e.target.checked)} type="checkbox"></input>
+          {key}
         </div>
       ))}
     </div>
@@ -144,6 +162,7 @@ export function Papers({ searchParams, setSearchParams }) {
   const [pageCount, setPageCount] = useState(250);
   // const pageCount = 250;
   const [expandedIndex, setExpandedIndex] = useState(-1);
+  const [total, setTotal] = useState(0);
 
   const navigate = useNavigate();
 
@@ -161,30 +180,32 @@ export function Papers({ searchParams, setSearchParams }) {
     let perPage = query.get('per_page') || searchParams.per_page;
     let search = query.get('query') || searchParams.query;
     let sorting = query.get('sort') || searchParams.sorting;
+    let journals = query.get('journals') || searchParams.journals;
 
     setSearchParams({
       per_page: perPage,
       page: page,
       query: search,
-      sorting: sorting
+      sorting: sorting,
+      journals: journals
     });
 
-    getPapers(page, perPage, search, sorting);
-  }, [searchParams.page, searchParams.per_page, searchParams.sorting, setSearchParams, searchParams.query, location]);
+    getPapers(page, perPage, search, sorting, journals);
+  }, [searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, searchParams.journals, location]);
 
-  const getPapers = (page, results, query, sorting) => {
+  const getPapers = (page, results, query, sorting, journals) => {
     fetch("http://localhost:8080/api/papers", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting }),
+      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting, "journals": journals }),
     })
     .then(response => response.json())
     .then(data => {
       setPapers(data.papers);
+      setTotal(data.total);
       setPageCount(data.total/searchParams.per_page);
-      // setPapers(data);
 
       if (window.MathJax) {
         window.MathJax.typesetPromise().then(() => {
@@ -203,9 +224,9 @@ export function Papers({ searchParams, setSearchParams }) {
       page: page
     }));
 
-    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting);
+    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, searchParams.journals);
     window.page = page;
-    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}`);
+    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
   };
 
   const changePaper = (paperId) => {
@@ -240,6 +261,7 @@ export function Papers({ searchParams, setSearchParams }) {
             activeClassName={'active'}
             forcePage={searchParams.page-1} 
           />
+          {papers.length !== 0 && (<p>{total} Results</p>)}
           <ul className="list">
             {papers.length !== 0 ?
               papers.map((paper, index) => (
