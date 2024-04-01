@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import '../styles/homepage.css'
 import { useNavigate } from 'react-router-dom';
+import { TailSpin } from 'react-loader-spinner';
 
-export function HomePage() {
+export function HomePage({ searchParams }) {
     let navigate = useNavigate();
 
     const goToSearch = (query) => {
-        navigate(`/papers?page=1&per_page=20&query=${query}&sort=Most-Recent&journals=None`);
+        if(query === "") {
+            query = "all";
+        }
+        navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
     };
 
     return (
@@ -15,18 +19,21 @@ export function HomePage() {
             <br></br>
             <button onClick={() => goToSearch("all")}>Go to Papers</button>
             <br></br>
-            <Search />
+            <Search searchParams={searchParams} />
         </div>
     );
 }
 
-export function Search() {
+export function Search({ searchParams }) {
     const [inputValue, setInputValue] = useState('');
 
     let navigate = useNavigate();
 
     const goToSearch = (query) => {
-        navigate(`/papers?page=1&per_page=20&query=${query}&sort=Most-Recent&journals=None`);
+        if(query === "") {
+            query = "all";
+        }
+        navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
     };
 
     const handleChange = (event) => {
@@ -45,12 +52,19 @@ export function Search() {
     };
 
     return (
-        <input
-            type="text"
-            value={inputValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Type something and press Enter"
-        />        
+        <div className="top-bar">
+        <div className="form-container">
+            <div className="input-box">
+                <input
+                    className="text-field"
+                    type="text"
+                    value={inputValue}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Search Database"
+                />  
+            </div>  
+        </div>
+        </div>
     )
 }

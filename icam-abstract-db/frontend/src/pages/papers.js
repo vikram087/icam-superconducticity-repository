@@ -163,6 +163,7 @@ export function Papers({ searchParams, setSearchParams }) {
   // const pageCount = 250;
   const [expandedIndex, setExpandedIndex] = useState(-1);
   const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -190,8 +191,10 @@ export function Papers({ searchParams, setSearchParams }) {
       journals: journals
     });
 
+    setLoading(true);
+
     getPapers(page, perPage, search, sorting, journals);
-  }, [searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, searchParams.journals, location]);
+  }, [location.search]);
 
   const getPapers = (page, results, query, sorting, journals) => {
     fetch("http://localhost:8080/api/papers", {
@@ -212,6 +215,8 @@ export function Papers({ searchParams, setSearchParams }) {
           console.log("MathJax typesetting complete");
         }).catch((err) => console.error('MathJax typesetting failed: ', err));
       }
+
+      setLoading(false);
     })
     .catch(error => {
       console.error('Error fetching papers:', error);
@@ -242,10 +247,10 @@ export function Papers({ searchParams, setSearchParams }) {
 
   return (
     <div>
-      <Search />
+      <Search searchParams={searchParams} papers={papers}/>
       <div className='page-container'>
         <div className='filters'>
-          <Filters searchParams={searchParams} papers={papers} />
+          <Filters searchParams={searchParams} />
         </div>
         <div className='content-area'>
           <ReactPaginate
@@ -261,9 +266,9 @@ export function Papers({ searchParams, setSearchParams }) {
             activeClassName={'active'}
             forcePage={searchParams.page-1} 
           />
-          {papers.length !== 0 && (<p>{total} Results</p>)}
+          {!loading && (<p>{total} Results</p>)}
           <ul className="list">
-            {papers.length !== 0 ?
+            {!loading ?
               papers.map((paper, index) => (
                 <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
                   <div onClick={() => changePaper(paper.doi)}>

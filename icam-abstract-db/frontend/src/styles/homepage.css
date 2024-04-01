@@ -1,3 +1,39 @@
 .main {
     text-align: center;
 }
+
+.input-box {
+    background-color: white; 
+    border-radius: 9999px;
+    width: fit-content; 
+    text-align: center;
+    margin: auto;
+    border: 1px solid black;
+}
+
+/* .form-container {
+    padding: 50px;
+} */
+
+.top-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+  }
+  
+  .form-container {
+    align-self: flex-end; /* Align the input field container to the right */
+    padding: 50px;
+  }
+
+.text-field {
+    background-color: white; 
+    outline: none; 
+    margin-left: 0.25rem;
+    width: 800px; 
+    padding: 20px;
+    border-radius: 999px;
+    border: none; 
+    font-size: 20px;
+}
