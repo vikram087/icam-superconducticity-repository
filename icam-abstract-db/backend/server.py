@@ -12,8 +12,7 @@ API_KEY = os.getenv('API_KEY')
 #   api_key=API_KEY
 # )
 
-client = Elasticsearch(
-  "http://localhost:9200")
+client = Elasticsearch("http://localhost:9200")
 
 app = Flask(__name__)
 CORS(app)

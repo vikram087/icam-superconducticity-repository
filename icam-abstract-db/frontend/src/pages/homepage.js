@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import '../styles/homepage.css'
 import { useNavigate } from 'react-router-dom';
-import { TailSpin } from 'react-loader-spinner';
 
 export function HomePage({ searchParams }) {
     let navigate = useNavigate();
@@ -15,11 +14,14 @@ export function HomePage({ searchParams }) {
 
     return (
         <div className="main">
-            This is the HomePage
+            <p className='home-title' onClick={() => navigate("/")}>ICAM Superconductivity Database</p>
             <br></br>
-            <button onClick={() => goToSearch("all")}>Go to Papers</button>
+            <div className="go-to-papers" onClick={() => goToSearch("all")}>
+                <button className="go-to-button">Go to Papers</button>
+            </div>
             <br></br>
             <Search searchParams={searchParams} />
+            <p>Funded by the Institute for Complex Adaptive Matter</p>
         </div>
     );
 }
@@ -53,18 +55,18 @@ export function Search({ searchParams }) {
 
     return (
         <div className="top-bar">
-        <div className="form-container">
-            <div className="input-box">
-                <input
-                    className="text-field"
-                    type="text"
-                    value={inputValue}
-                    onChange={handleChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Search Database"
-                />  
-            </div>  
-        </div>
+            <div className="form-container">
+                <div className="input-box">
+                    <input
+                        className="text-field"
+                        type="text"
+                        value={inputValue}
+                        onChange={handleChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Search Database"
+                    />  
+                </div>  
+            </div>
         </div>
     )
 }

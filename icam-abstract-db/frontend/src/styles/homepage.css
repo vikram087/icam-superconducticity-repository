@@ -11,29 +11,48 @@
     border: 1px solid black;
 }
 
-/* .form-container {
-    padding: 50px;
-} */
-
 .top-bar {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    width: 100%;
-  }
-  
-  .form-container {
-    align-self: flex-end; /* Align the input field container to the right */
+    align-items: center;
+    width: 100%; 
+    justify-content: center;
+}
+
+.form-container {
+    align-self: center; 
     padding: 50px;
-  }
+}
 
 .text-field {
-    background-color: white; 
-    outline: none; 
+    background-color: white;
+    outline: none;
     margin-left: 0.25rem;
-    width: 800px; 
+    width: 800px;
     padding: 20px;
     border-radius: 999px;
-    border: none; 
+    border: none;
     font-size: 20px;
+}
+
+.home-title {
+    font-size: xx-large;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.go-to-papers {
+    border-radius: 100px;
+    border: 1px solid black;
+    padding: 10px 20px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.go-to-button {
+    background-color: transparent;
+    border: none; 
+    font: inherit; 
+    padding: 0;
+    cursor: pointer;
 }

@@ -9,11 +9,13 @@ import os
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
 
-client = Elasticsearch(
-  "http://localhost:9200")
+# client = Elasticsearch(
+#   "https://localhost:9200",
 #   api_key=API_KEY,
-#   ca_certs="http_ca.crt",
+#   ssl_context=context,
 # )
+
+client = Elasticsearch("http://localhost:9200")
 
 # print(client.info())
 
@@ -135,4 +137,8 @@ def upload_all_papers(start, end):
     # print(papers[0]['summary'])
     
 createIndex()
-upload_all_papers(1, 8)
+upload_all_papers(51, 101)
+# 1-8
+# 8-21
+# 21-51
+# 51-101

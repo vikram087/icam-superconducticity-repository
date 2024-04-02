@@ -245,8 +245,49 @@ export function Papers({ searchParams, setSearchParams }) {
     changePage(selectedPage+1);
   };
 
+  const chooseBody = () => {
+    if(!loading && total === undefined) {
+      return <div>No Results Found or Incorrect Search Query</div>;
+    }
+    else if(!loading) {
+      console.log(total);
+      return papers.map((paper, index) => (
+        <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
+          <div onClick={() => changePaper(paper.doi)}>
+              <u>
+                <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
+              </u>
+              <p>Authors: {paper.authors}</p>
+              <div>Abstract: </div>
+          </div>
+          <div className='expand-button'>
+            <button onClick={() => toggleExpand(index)}>
+              {expandedIndex === index ? '-' : '+'}
+            </button>
+          </div>
+          {expandedIndex === index ?
+            <div onClick={() => changePaper(paper.doi)}>
+              <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
+            </div>
+            :
+            <div>
+              <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
+            </div>
+          }
+        </div>
+      ))
+    }
+    else if(loading) {
+      return <div className='loader'>
+        <p>Loading ...</p>
+        <TailSpin color="#00BFFF" height={100} width={100} />
+      </div>
+    }
+  }
+
   return (
     <div>
+      <p className='title' onClick={() => navigate("/")}>ICAM Superconductivity Database</p>
       <Search searchParams={searchParams} papers={papers}/>
       <div className='page-container'>
         <div className='filters'>
@@ -268,37 +309,7 @@ export function Papers({ searchParams, setSearchParams }) {
           />
           {!loading && (<p>{total} Results</p>)}
           <ul className="list">
-            {!loading ?
-              papers.map((paper, index) => (
-                <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
-                  <div onClick={() => changePaper(paper.doi)}>
-                      <u>
-                        <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
-                      </u>
-                      <p>Authors: {paper.authors}</p>
-                      <div>Abstract: </div>
-                  </div>
-                  <div className='expand-button'>
-                    <button onClick={() => toggleExpand(index)}>
-                      {expandedIndex === index ? '-' : '+'}
-                    </button>
-                  </div>
-                  {expandedIndex === index ?
-                    <div onClick={() => changePaper(paper.doi)}>
-                      <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
-                    </div>
-                    :
-                    <div>
-                      <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
-                    </div>
-                  }
-                </div>
-              )) :
-              <div className='loader'>
-                <p>Loading ...</p>
-                <TailSpin color="#00BFFF" height={100} width={100} />
-              </div>
-            }
+            {chooseBody()}
           </ul>
         </div>
       </div>
