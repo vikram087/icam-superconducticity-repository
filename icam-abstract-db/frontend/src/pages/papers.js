@@ -1,5 +1,5 @@
 import '../styles/papers.css';
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import { TailSpin } from 'react-loader-spinner';
@@ -50,6 +50,7 @@ export function PaperDetail({ searchParams }) {
 }
 
 function Filters({ searchParams }) {
+
   const [selected, setSelected] = useState([]);
 
   const navigate = useNavigate();
@@ -113,7 +114,7 @@ function Filters({ searchParams }) {
     navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}&journals=${searchParams.journals}`);
   };
 
-  const changeResultsPerPage = (e) => {
+  const changeResultsPerPage = async (e) => {
     let resultsPerPage = e.target.value;
     if(resultsPerPage === "No Selection") {
       resultsPerPage = "20";
@@ -155,11 +156,11 @@ function Filters({ searchParams }) {
   );
 }
 
-export function Papers({ searchParams, setSearchParams }) {
+export function Papers ({ searchParams, setSearchParams }) {
   const location = useLocation();
 
   const [papers, setPapers] = useState([]);
-  const [pageCount, setPageCount] = useState(250);
+  const [pageCount, setPageCount] = useState(0);
   // const pageCount = 250;
   const [expandedIndex, setExpandedIndex] = useState(-1);
   const [total, setTotal] = useState(0);
@@ -182,6 +183,19 @@ export function Papers({ searchParams, setSearchParams }) {
     let search = query.get('query') || searchParams.query;
     let sorting = query.get('sort') || searchParams.sorting;
     let journals = query.get('journals') || searchParams.journals;
+
+    if(perPage >= 100) { perPage = 100 }
+    else if(perPage >= 50) { perPage = 50; }
+    else if(perPage >= 20) { perPage = 20; }
+    else { perPage = 10; }
+
+    if(sorting !== "Most-Recent" && sorting !== "Oldest-First" && sorting !== "Most-Relevant") {
+      sorting = "Most-Recent";
+    }
+
+    // if(page > total/perPage) {
+    //   page = total/perPage;
+    // }
 
     setSearchParams({
       per_page: perPage,
@@ -206,9 +220,14 @@ export function Papers({ searchParams, setSearchParams }) {
     })
     .then(response => response.json())
     .then(data => {
+      setExpandedIndex(-1);
       setPapers(data.papers);
       setTotal(data.total);
       setPageCount(data.total/searchParams.per_page);
+      if(data.total === undefined) {
+        setTotal(0);
+        setPapers([]);
+      }
 
       if (window.MathJax) {
         window.MathJax.typesetPromise().then(() => {
@@ -246,11 +265,10 @@ export function Papers({ searchParams, setSearchParams }) {
   };
 
   const chooseBody = () => {
-    if(!loading && total === undefined) {
-      return <div>No Results Found or Incorrect Search Query</div>;
+    if(!loading && total === 0) {
+      return <></>;
     }
     else if(!loading) {
-      console.log(total);
       return papers.map((paper, index) => (
         <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
           <div onClick={() => changePaper(paper.doi)}>
@@ -275,7 +293,7 @@ export function Papers({ searchParams, setSearchParams }) {
             </div>
           }
         </div>
-      ))
+        ))
     }
     else if(loading) {
       return <div className='loader'>
@@ -286,7 +304,7 @@ export function Papers({ searchParams, setSearchParams }) {
   }
 
   return (
-    <div>
+    <div> 
       <p className='title' onClick={() => navigate("/")}>ICAM Superconductivity Database</p>
       <Search searchParams={searchParams} papers={papers}/>
       <div className='page-container'>
