@@ -1,7 +1,6 @@
 import '../styles/papers.css';
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import ReactPaginate from 'react-paginate';
 import { TailSpin } from 'react-loader-spinner';
 import { Search } from './homepage';
 
@@ -223,7 +222,7 @@ export function Papers ({ searchParams, setSearchParams }) {
       setExpandedIndex(-1);
       setPapers(data.papers);
       setTotal(data.total);
-      setPageCount(data.total/searchParams.per_page);
+      setPageCount(Math.floor(data.total/searchParams.per_page));
       if(data.total === undefined) {
         setTotal(0);
         setPapers([]);
@@ -258,10 +257,9 @@ export function Papers ({ searchParams, setSearchParams }) {
     navigate(`/papers/${doi}`);
   }
 
-  const handlePageClick = (data) => {
-    let selectedPage = data.selected;
+  const handlePageClick = (pageNumber) => {
     setPapers([]);
-    changePage(selectedPage+1);
+    changePage(pageNumber);
   };
 
   const chooseBody = () => {
@@ -312,25 +310,68 @@ export function Papers ({ searchParams, setSearchParams }) {
           <Filters searchParams={searchParams} />
         </div>
         <div className='content-area'>
-          <ReactPaginate
-            previousLabel={'previous'}
-            nextLabel={'next'}
-            breakLabel={'...'}
-            breakClassName={'break-me'}
-            pageCount={pageCount}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
-            onPageChange={handlePageClick}
-            containerClassName={'pagination'}
-            activeClassName={'active'}
-            forcePage={searchParams.page-1} 
-          />
+          <Pagination handlePageClick={handlePageClick} page={searchParams.page} totalPages={pageCount} />
           {!loading && (<p>{total} Results</p>)}
           <ul className="list">
             {chooseBody()}
           </ul>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Pagination({ handlePageClick, page, totalPages }) {
+
+  const [pageNumber, setPageNumber] = useState(page);
+
+  const handleBack = () => {
+    if(page < 2) {
+      handlePageClick(1);
+      return;
+    }
+    handlePageClick(page-1);
+  };
+
+  const handleFront = () => {
+    if(page > totalPages-1) {
+      handlePageClick(totalPages);
+      return;
+    }
+    handlePageClick((Number)(page)+1);
+  };
+
+  const handleSubmit = (event) => {
+    if(event.key === "Enter") {
+      if(pageNumber < 2) {
+        handlePageClick(1);
+        return;
+      }
+      else if(pageNumber > totalPages-1) {
+        handlePageClick(totalPages);
+        return;
+      }
+
+      handlePageClick(pageNumber);
+    }
+  };
+
+  const handleInputChange = (event) => {
+    setPageNumber(event.target.value);
+  };  
+
+  return (
+    <div className='pagination-container'>
+      <span style={{cursor: "pointer" }} onClick={() => handlePageClick(1)}>&lt;&lt;&nbsp;</span>
+      <span style={{cursor: "pointer" }} onClick={handleBack}>&nbsp;&lt;&nbsp;</span>
+      <input 
+        type="number"
+        onKeyDown={handleSubmit}
+        value={pageNumber}
+        onChange={handleInputChange}
+      ></input>
+      <span style={{cursor: "pointer" }} onClick={handleFront}>&nbsp;&gt;&nbsp;</span>
+      <span style={{cursor: "pointer" }} onClick={() => handlePageClick(totalPages)}>&nbsp;&gt;&gt;&nbsp;</span>
     </div>
   );
 }
