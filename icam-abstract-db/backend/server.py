@@ -3,6 +3,8 @@ from flask_cors import CORS
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 import os
+from sentence_transformers import SentenceTransformer
+from cachetools import TTLCache
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -16,31 +18,36 @@ client = Elasticsearch("http://localhost:9200")
 
 app = Flask(__name__)
 CORS(app)
-    
-@app.route('/api/results', methods=['POST'])
-def get_results():
-    data = request.get_json()
-    query = str(data.get('query', ''))
-    results = client.search(index="search-papers-meta", q=query)
-    hits = results['hits']['hits']
-    papers = [hit['_source'] for hit in hits]
-    
-    if papers:
-        return jsonify(papers)
-    else:
-        return jsonify({"error": "No results found"}), 404
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def getEmbedding(text):
+    return model.encode(text)
 
 # /api/papers/${paperId}
 @app.route('/api/papers/<paper_id>', methods=['GET'])
 def get_paper(paper_id):
     doi = paper_id.replace("-", "/")
 
-    results = client.get(index="search-papers-meta", id=doi)
+    results = client.get(index="search-papers", id=doi)
     paper = results['_source']
     if paper:
         return jsonify(paper)
     else:
         return jsonify({"error": "No results found"}), 404
+
+
+cache = TTLCache(maxsize=100, ttl=3600)
+def get_cached_results(cache_key):
+    return cache.get(cache_key)
+
+def cache_results(cache_key, data):
+    cache[cache_key] = data
+    
+def make_cache_key(query, sorting, page, numResults):
+    key = f"{query}_{sorting}_{page}_{numResults}"
+    return key
+
+# cache.clear()
 
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
@@ -52,25 +59,19 @@ def papers():
     sorting = str(data.get('sorting', ""))
     journals = str(data.get('journals', ""))
     
+    cache_key = make_cache_key(query, sorting, page, numResults)
+    cached = get_cached_results(cache_key)
+    if cached:
+        return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
+    
     journalArr = [] if journals == "None" else journals.split(',') # fails to return results
 
-    if(sorting == "Most-Recent"):
+    if(sorting == "Most-Recent" or sorting == "Most-Relevant"):
         sort = "desc"
     elif(sorting == "Oldest-First"):
         sort = "asc"
-    else:
-        sort = ""
-    
-    base_query = {
-        "size": numResults,
-        "from": (page-1)*numResults,
-        "sort": [{"date": {"order": sort}}]
-    }
-
-    if query == "all":
-        base_query["query"] = {"match_all": {}}
-    else:
-        base_query["query"] = {"match": {"summary": query}}
+        
+    knnSearch = False
         
     # if journalArr:
     #     base_query["query"] = {
@@ -86,21 +87,91 @@ def papers():
     #     'sort': [{'date': {'order': 'desc'}}], 
     #     'query': {"match": {'journal': 'PRB'}} # journal needs to be of type keyword
     # }
-
-    results = client.search(
-        index="search-papers-meta",
-        body=base_query
-    )
+    
+    size = client.search(query={"match_all": {}}, index="search-papers")['hits']['total']['value']
+        
+    if query == "all":
+        results = client.search(
+            query={"match_all": {}},
+            size=numResults,
+            from_=(page-1)*numResults,
+            sort=[{"date": {"order": sort}}],
+            index="search-papers"
+        )
+    else:
+        knnSearch = True
+        if (sorting == "Most-Recent") or (sorting == "Oldest-First"):
+            results = client.search(
+                knn={
+                    'field': 'embedding',
+                    'query_vector': getEmbedding(query),
+                    'num_candidates': size,
+                    'k': size,
+                },
+                # size=numResults,
+                # from_=(page-1)*numResults,
+                from_=0,
+                size=size,
+                sort=[{"date": {"order": sort}}, "_score"],
+                index="search-papers"
+            )
+        elif sorting == "Most-Relevant":
+            results = client.search(
+                knn={
+                    'field': 'embedding',
+                    'query_vector': getEmbedding(query),
+                    'num_candidates': size,
+                    'k': size,
+                },
+                # size=numResults,
+                # from_=(page-1)*numResults,
+                from_=0,
+                size=size,
+                sort=[{'_score': {'order': sort}}],
+                index="search-papers"
+            )
+    #     results = client.search(
+    #     query={
+    #         'text_expansion': {
+    #             'elser_embedding': {
+    #                 'model_id': '.elser_model_2',
+    #                 'model_text': query,
+    #             }
+    #         },
+    #     },
+    #     size=numResults,
+    #     from_=(page-1)*numResults,
+    #     index="search-papers"
+    # )
         
     hits = results['hits']['hits']
-    papers = [hit['_source'] for hit in hits]
-    total = results['hits']['total']['value']
+    papers = []
+    accuracy = {}
+    
+    if not knnSearch:
+        papers = [hit['_source'] for hit in hits]
+    
+    for hit in hits:
+        if not knnSearch or not hit['_score']:
+            break
+        if hit['_score'] >= 0.6:
+            papers.append(hit['_source'])
+            accuracy[hit['_source']['doi']] = hit['_score']
+            
+    # total = results['hits']['total']['value']
+    filtered_papers = list(papers)
+    if knnSearch:
+        filtered_papers = papers[numResults*(page-1):numResults*page]
+        total = len(papers)
+    else:
+        total = results['hits']['total']['value']
     
     # print(f"total: {total}\nbase query: {base_query}\njournals: {journalArr}")
         
     if papers:
         # return jsonify(papers)
-        return jsonify({ "papers": papers, "total": total })
+        cache_results(cache_key, ( filtered_papers, total, accuracy ))
+        return jsonify({ "papers": filtered_papers, "total": total, "accuracy": accuracy })
     else:
         return jsonify({"error": "No results found"}), 404
 

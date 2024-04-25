@@ -105,7 +105,7 @@ function Filters({ searchParams }) {
     let sorting = e.target.value;
 
     if(sorting === "Most Relevant" || sorting === "No Selection") {
-      sorting = "Most Recent";
+      sorting = "Most Relevant";
     }
 
     const modified = sorting.replace(" ", "-");
@@ -164,6 +164,7 @@ export function Papers ({ searchParams, setSearchParams }) {
   const [expandedIndex, setExpandedIndex] = useState(-1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [accuracy, setAccuracy] = useState({});
 
   const navigate = useNavigate();
 
@@ -222,7 +223,8 @@ export function Papers ({ searchParams, setSearchParams }) {
       setExpandedIndex(-1);
       setPapers(data.papers);
       setTotal(data.total);
-      setPageCount(Math.floor(data.total/searchParams.per_page));
+      setAccuracy(data.accuracy);
+      setPageCount(Math.ceil(data.total/searchParams.per_page));
       if(data.total === undefined) {
         setTotal(0);
         setPapers([]);
@@ -269,6 +271,7 @@ export function Papers ({ searchParams, setSearchParams }) {
     else if(!loading) {
       return papers.map((paper, index) => (
         <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
+          {accuracy[paper.doi] !== NaN && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.doi]*100).toFixed(1)}%</div>)}
           <div onClick={() => changePaper(paper.doi)}>
               <u>
                 <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>

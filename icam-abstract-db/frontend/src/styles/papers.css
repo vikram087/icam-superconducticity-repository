@@ -10,6 +10,7 @@
   justify-content: center;
   width: 50%;
   padding-bottom: 30px;
+  user-select: none;
 }
 
 .results-per-page {

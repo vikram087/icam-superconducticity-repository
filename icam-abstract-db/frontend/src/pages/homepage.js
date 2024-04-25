@@ -35,7 +35,7 @@ export function Search({ searchParams }) {
         if(query === "") {
             query = "all";
         }
-        navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
+        navigate(`/papers?page=1&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
     };
 
     const handleChange = (event) => {

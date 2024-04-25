@@ -5,6 +5,8 @@ import json
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 import os
+from sentence_transformers import SentenceTransformer
+import time
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -16,6 +18,8 @@ API_KEY = os.getenv('API_KEY')
 # )
 
 client = Elasticsearch("http://localhost:9200")
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # print(client.info())
 
@@ -42,12 +46,6 @@ class Paper:
         
     def __str__(self):
         return f"link: {self.link}\ntitle: {self.title}\ndate: {self.date}\ncitation: {self.citation}\nabstract: {self.summary}\nauthors: {self.authors}\ndoi: {self.doi}\njournal: {self.journal}"        
-        
-def createIndex():
-    if(not client.indices.exists(index="search-papers-meta")):
-        client.indices.create(index='search-papers-meta')
-    else:
-        print("Index exists")
 
 def findInfo(page) -> list[Paper]:
     url = f"https://journals.aps.org/search/results?sort=recent&clauses=%5B%7B%22field%22:%22abstitle%22,%22value%22:%22superconductivity%22,%22operator%22:%22AND%22%7D%5D&page={page}&per_page=20"
@@ -102,6 +100,101 @@ def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
             
     return papers
 
+"""
+Below is all the stuff with embeddings for vectorized search
+"""
+
+def createNewIndex(delete):
+    if client.indices.exists(index='search-papers') and delete:
+        client.indices.delete(index='search-papers')
+    if not client.indices.exists(index="search-papers"):
+        client.indices.create(
+            index="search-papers", 
+            mappings={
+                'properties': {
+                    'embedding': {
+                        'type': 'dense_vector',
+                    },
+                    # 'elser_embedding': {
+                    #     'type': 'sparse_vector',
+                    # },
+                },
+            },
+            # settings={
+            #     'index': {
+            #         'default_pipeline': 'elser-ingest-pipeline'
+            #     }
+            # }
+        )
+    else:
+        print("Index already exists and no deletion specified")
+        
+
+def getEmbedding(text):
+    return model.encode(text)
+
+def upload_documents(start, end):
+    pages = range(start, end)
+    all_papers = []
+    
+    for page in pages:
+        papers = findInfo(page)
+        for paper in papers:
+            paper_dict = {
+                "title": paper.title,
+                "authors": paper.authors,
+                "link": paper.link,
+                "date": paper.date,
+                "citation": paper.citation,
+                "doi": paper.doi,
+                "journal": paper.journal,
+                "summary": paper.summary
+            }
+            all_papers.append(paper_dict)
+        print(page)
+        
+    return all_papers  
+
+def insert_documents(documents):
+    operations = []
+    for document in documents:
+        operations.append({'create': {'_index': 'search-papers', "_id": document["doi"]} })
+        operations.append({
+            **document,
+            "embedding": getEmbedding(document["summary"]),
+        })
+    return client.bulk(operations=operations)
+
+createNewIndex(False)
+insert_documents(upload_documents(1, 101))
+# 1-101
+
+"""
+Code for adding specific categorical searches, 
+category:superconductivity --> This uses superconductivity as a categorical search
+
+def extract_filters(query):
+    filters = []
+
+    filter_regex = r'category:([^\s]+)\s*'
+    m = re.search(filter_regex, query)
+    if m:
+        filters.append({
+            'term': {
+                'category.keyword': {
+                    'value': m.group(1)
+                }
+            }
+        })
+        query = re.sub(filter_regex, '', query).strip()
+
+    return {'filter': filters}, query
+"""
+
+
+"""
+Old code for keyword search
+
 def upload_all_papers(start, end):
     pages = range(start, end)
     all_papers = []
@@ -130,16 +223,68 @@ def upload_all_papers(start, end):
             all_papers.append(json.dumps(paper_dict))
         print(page)
         
-    client.bulk(body='\n'.join(all_papers) + '\n', pipeline="ent-search-generic-ingestion")
-    # results = client.search(index="search-papers-meta", q="supercon")
-    # hits = results['hits']['hits']
-    # papers = [hit['_source'] for hit in hits]
-    # print(papers[0]['summary'])
-    
+    docs = '\n'.join(all_papers) + '\n'
+        
+    client.bulk(body=docs, pipeline="ent-search-generic-ingestion")
+        
+    results = client.search(index="search-papers-meta", q="supercon")
+    hits = results['hits']['hits']
+    papers = [hit['_source'] for hit in hits]
+    print(papers[0]['summary'])
+ 
+This code is what is used to add papers to DB
 createIndex()
 upload_all_papers(101, 201)
-# 1-8
-# 8-21
-# 21-51
-# 51-101
-# 101-201
+1-8
+8-21
+21-51
+51-101
+101-201
+"""
+
+"""
+Do not have current capacity to use these
+
+def deploy_elser():
+    # download ELSER v2
+    client.ml.put_trained_model(model_id='.elser_model_2',
+                                    input={'field_names': ['text_field']})
+    
+    # wait until ready
+    while True:
+        status = client.ml.get_trained_models(model_id='.elser_model_2',
+                                                include='definition_status')
+        if status['trained_model_configs'][0]['fully_defined']:
+            # model is ready
+            break
+        time.sleep(1)
+
+    # deploy the model
+    client.ml.start_trained_model_deployment(model_id='.elser_model_2')
+
+    # define a pipeline
+    client.ingest.put_pipeline(
+        id='elser-ingest-pipeline',
+        processors=[
+            {
+                'inference': {
+                    'model_id': '.elser_model_2',
+                    'input_output': [
+                        {
+                            'input_field': 'summary',
+                            'output_field': 'elser_embedding',
+                        }
+                    ]
+                }
+            }
+        ]
+    )
+    
+def deploy_elser_model():
+    try:
+        deploy_elser()
+    except Exception as exc:
+        print(f'Error: {exc}')
+    else:
+        print(f'ELSER model deployed.')
+"""
