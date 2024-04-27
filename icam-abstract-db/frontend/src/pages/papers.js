@@ -271,7 +271,7 @@ export function Papers ({ searchParams, setSearchParams }) {
     else if(!loading) {
       return papers.map((paper, index) => (
         <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
-          {accuracy[paper.doi] !== NaN && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.doi]*100).toFixed(1)}%</div>)}
+          {accuracy[paper.doi] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.doi]*100).toFixed(1)}%</div>)}
           <div onClick={() => changePaper(paper.doi)}>
               <u>
                 <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>

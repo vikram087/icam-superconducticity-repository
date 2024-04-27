@@ -48,6 +48,7 @@ def make_cache_key(query, sorting, page, numResults):
     return key
 
 # cache.clear()
+# print("Cleared cache")
 
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
