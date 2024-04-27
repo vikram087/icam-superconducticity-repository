@@ -193,56 +193,6 @@ def extract_filters(query):
 
 
 """
-Old code for keyword search
-
-def upload_all_papers(start, end):
-    pages = range(start, end)
-    all_papers = []
-    ES = { "index" : { "_index" : "search-papers-meta" } }
-    
-    for page in pages:
-        papers = findInfo(page)
-        for paper in papers:
-            action = {
-                "create": {
-                    "_index": "search-papers-meta",
-                    "_id": paper.doi
-                }
-            }
-            paper_dict = {
-                "title": paper.title,
-                "authors": paper.authors,
-                "link": paper.link,
-                "date": paper.date,
-                "citation": paper.citation,
-                "doi": paper.doi,
-                "journal": paper.journal,
-                "summary": paper.summary
-            }    
-            all_papers.append(json.dumps(action))
-            all_papers.append(json.dumps(paper_dict))
-        print(page)
-        
-    docs = '\n'.join(all_papers) + '\n'
-        
-    client.bulk(body=docs, pipeline="ent-search-generic-ingestion")
-        
-    results = client.search(index="search-papers-meta", q="supercon")
-    hits = results['hits']['hits']
-    papers = [hit['_source'] for hit in hits]
-    print(papers[0]['summary'])
- 
-This code is what is used to add papers to DB
-createIndex()
-upload_all_papers(101, 201)
-1-8
-8-21
-21-51
-51-101
-101-201
-"""
-
-"""
 Do not have current capacity to use these
 
 def deploy_elser():
