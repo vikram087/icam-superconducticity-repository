@@ -3,8 +3,10 @@ from flask_cors import CORS
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 import os
+import json
 from sentence_transformers import SentenceTransformer
 from cachetools import TTLCache
+import redis
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -34,12 +36,18 @@ def get_paper(paper_id):
         return jsonify({"error": "No results found"}), 404
 
 
-cache = TTLCache(maxsize=100, ttl=3600)
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+# cache = TTLCache(maxsize=100, ttl=3600)
 def get_cached_results(cache_key):
-    return cache.get(cache_key)
+    # return cache.get(cache_key)
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        return json.loads(cached_data)
+    return None
 
 def cache_results(cache_key, data):
-    cache[cache_key] = data
+    # cache[cache_key] = data
+    redis_client.setex(cache_key, 3600, json.dumps(data))
     
 def make_cache_key(query, sorting, page, numResults):
     key = f"{query}_{sorting}_{page}_{numResults}"
@@ -47,6 +55,7 @@ def make_cache_key(query, sorting, page, numResults):
 
 # cache.clear()
 # print("Cleared cache")
+# redis-cli FLUSHALL # command on cli to clear cache
 
 # /api/papers
 @app.route("/api/papers", methods=['POST'])

@@ -207,7 +207,7 @@ export function Papers ({ searchParams, setSearchParams }) {
 
     getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting);
     window.page = page;
-    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}}`);
+    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}`);
   };
 
   const changePaper = (paperId) => {

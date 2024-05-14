@@ -3,4 +3,5 @@ Flask-Cors==4.0.0
 Flask==3.0.2
 requests==2.31.0
 sentence-transformers==2.7.0
-cachetools=5.3.3
+cachetools==5.3.3
+redis==5.0.4
