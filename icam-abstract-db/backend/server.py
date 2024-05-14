@@ -26,9 +26,7 @@ def getEmbedding(text):
 # /api/papers/${paperId}
 @app.route('/api/papers/<paper_id>', methods=['GET'])
 def get_paper(paper_id):
-    doi = paper_id.replace("-", "/")
-
-    results = client.get(index="search-papers", id=doi)
+    results = client.get(index="search-papers-meta", id=paper_id)
     paper = results['_source']
     if paper:
         return jsonify(paper)
@@ -58,14 +56,11 @@ def papers():
     numResults = int(data.get('results', 0))
     query = str(data.get('query', ""))
     sorting = str(data.get('sorting', ""))
-    journals = str(data.get('journals', ""))
     
     cache_key = make_cache_key(query, sorting, page, numResults)
     cached = get_cached_results(cache_key)
     if cached:
         return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
-    
-    journalArr = [] if journals == "None" else journals.split(',') # fails to return results
 
     if(sorting == "Most-Recent" or sorting == "Most-Relevant"):
         sort = "desc"
@@ -73,23 +68,8 @@ def papers():
         sort = "asc"
         
     knnSearch = False
-        
-    # if journalArr:
-    #     base_query["query"] = {
-    #         "bool": {
-    #             "must": base_query["query"],
-    #             "filter": { "terms":  {"journal": journalArr}}
-    #         }
-    #     }
-        
-    # base_query = {
-    #     'size': 20, 
-    #     'from': 0, 
-    #     'sort': [{'date': {'order': 'desc'}}], 
-    #     'query': {"match": {'journal': 'PRB'}} # journal needs to be of type keyword
-    # }
     
-    size = client.search(query={"match_all": {}}, index="search-papers")['hits']['total']['value']
+    size = client.search(query={"match_all": {}}, index="search-papers-meta")['hits']['total']['value']
         
     if query == "all":
         results = client.search(
@@ -97,7 +77,7 @@ def papers():
             size=numResults,
             from_=(page-1)*numResults,
             sort=[{"date": {"order": sort}}],
-            index="search-papers"
+            index="search-papers-meta"
         )
     else:
         knnSearch = True
@@ -114,7 +94,7 @@ def papers():
                 from_=0,
                 size=size,
                 sort=[{"date": {"order": sort}}, "_score"],
-                index="search-papers"
+                index="search-papers-meta"
             )
         elif sorting == "Most-Relevant":
             results = client.search(
@@ -129,7 +109,7 @@ def papers():
                 from_=0,
                 size=size,
                 sort=[{'_score': {'order': sort}}],
-                index="search-papers"
+                index="search-papers-meta"
             )
     #     results = client.search(
     #     query={
@@ -157,7 +137,7 @@ def papers():
             break
         if hit['_score'] >= 0.6:
             papers.append(hit['_source'])
-            accuracy[hit['_source']['doi']] = hit['_score']
+            accuracy[hit['_source']['id']] = hit['_score']
             
     # total = results['hits']['total']['value']
     filtered_papers = list(papers)
@@ -166,9 +146,7 @@ def papers():
         total = len(papers)
     else:
         total = results['hits']['total']['value']
-    
-    # print(f"total: {total}\nbase query: {base_query}\njournals: {journalArr}")
-        
+            
     if papers:
         # return jsonify(papers)
         cache_results(cache_key, ( filtered_papers, total, accuracy ))

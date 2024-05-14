@@ -9,7 +9,6 @@ function App() {
     page: 1,
     query: "all",
     sorting: "Most-Relevant",
-    journals: "None"
   });
 
   return (

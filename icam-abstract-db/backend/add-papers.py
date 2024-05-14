@@ -1,12 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
-import re
-import json
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 import os
 from sentence_transformers import SentenceTransformer
-import time
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -22,6 +19,220 @@ client = Elasticsearch("http://localhost:9200")
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # print(client.info())
+
+def findInfo(page):
+    start = 50 * (page-1)
+    url = f"https://arxiv.org/search/?query=superconductivity&searchtype=all&abstracts=show&order=&size=50&start={start}"
+
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    results_arr = soup.findAll('li', "arxiv-result")
+    
+    # print(results_arr)
+        
+    papers = []
+    for res in results_arr:
+        paper_dict = {}
+        results = BeautifulSoup(str(res), "html.parser")
+        
+        id_tag = results.find('p', class_="list-title is-inline-block")
+        id = id_tag.find('a').get_text(strip=True)
+        paper_dict['id'] = id # id
+        
+        title_tag = results.find('p', class_='title is-5 mathjax')
+        title = title_tag.get_text(strip=True, separator=' ') # title
+        paper_dict['title'] = title
+        
+        source = results.find('p', class_='list-title is-inline-block')
+        other = source.findAll('a', href=True)
+        links = [a['href'] for a in other]
+        paper_dict['links'] = links
+            
+        abstract = results.find('span', class_="abstract-full has-text-grey-dark mathjax")
+        summary = abstract.get_text(strip=True, separator=' ')
+        summary = summary.replace("△ Less", "") # abstract
+        paper_dict['summary'] = summary
+        
+        dates = results.find('p', class_='is-size-7')
+        date_text = dates.get_text(separator=' ', strip=True)
+        submitted = date_text.split(';')[0].replace('Submitted', '').strip()
+        split_date = submitted.split(" ")
+        if len(split_date[0]) == 1:
+            truncated_date = f"0{split_date[0]} {split_date[1][:3]}, {split_date[2]}"
+        else:
+            truncated_date = f"{split_date[0]} {split_date[1][:3]}, {split_date[2]}"
+        paper_dict['date'] = truncated_date # submission date
+        announced = date_text.split(';')[1].replace('originally announced', '').strip()
+        paper_dict['announced'] = announced # announce date
+        
+        journal_tag = results.find('div', class_="tags is-inline-block")
+        journals = [journal.get_text(strip=True) for journal in journal_tag.findAll('span')] # journals
+        paper_dict['journals'] = journals
+        
+        author_tag = results.find('p', class_="authors")
+        authors = [author.get_text(strip=True) for author in author_tag.findAll('a')]
+        paper_dict['authors'] = authors # authors
+        
+        doi_tag = results.find('span', 'tag is-light is-size-7')
+        if doi_tag:
+            doi = doi_tag.find('a', href=True)['href']
+        else:
+            doi = "N/A"
+        paper_dict['doi'] = doi
+        
+        bottom_tag = results.findAll('span', class_="comments is-size-7")
+        if bottom_tag:
+            for tag in bottom_tag:
+                type = tag.find('span', class_="has-text-black-bis has-text-weight-semibold").get_text(strip=True)
+                if type == "Journal ref:":
+                    journal_ref = tag.get_text(strip=True)
+                    paper_dict['journal_ref'] = journal_ref
+                elif type == "Comments:":
+                    comments = tag.find('span', class_="has-text-grey-dark mathjax").get_text(strip=True)
+                    paper_dict['comments'] = comments
+                elif type == "Report number:":
+                    report_number = tag.get_text(strip=True)
+                    paper_dict['report_number'] = report_number
+        else:
+            paper_dict['journal_ref'] = "N/A"
+            paper_dict['comments'] = "N/A"
+            paper_dict['report_number'] = "N/A"
+            
+        # id, title, report_number, comments, journal_ref, doi, authors, journals, announced, submitted
+        # summary, links
+                
+        # print(paper_dict)
+        # print("\n\n")
+        papers.append(paper_dict) 
+    
+    return papers  
+    
+def createNewIndex(delete, index):
+    if client.indices.exists(index=index) and delete:
+        client.indices.delete(index=index)
+    if not client.indices.exists(index=index):
+        client.indices.create(
+            index=index, 
+            mappings={
+                'properties': {
+                    'embedding': {
+                        'type': 'dense_vector'
+                    },
+                    'date': {
+                        'type': 'date',
+                        'format': 'dd MMM, yyyy'
+                    }
+                    # 'elser_embedding': {
+                    #     'type': 'sparse_vector',
+                    # },
+                },
+            },
+            # settings={
+            #     'index': {
+            #         'default_pipeline': 'elser-ingest-pipeline'
+            #     }
+            # }
+        )
+    else:
+        print("Index already exists and no deletion specified")
+        
+def getEmbedding(text):
+    return model.encode(text)
+
+def insert_documents(documents, index):
+    operations = []
+    for document in documents:
+        operations.append({'create': {'_index': index, "_id": document["id"]} })
+        operations.append({
+            **document,
+            "embedding": getEmbedding(document["summary"])
+        })
+        # print(operations[1])
+        # break
+    return client.bulk(operations=operations)
+
+createNewIndex(False, "search-papers-meta")
+for i in range(1, 21):
+    insert_documents(findInfo(i), "search-papers-meta")
+    print(i)
+# 1-20
+
+all = client.search(query={"match_all": {}}, index="search-papers-meta")
+print(all['hits']['total']['value'])
+# print(results['hits']['hits']) # prints out first 10
+
+"""
+Code for adding specific categorical searches, 
+category:superconductivity --> This uses superconductivity as a categorical search
+
+def extract_filters(query):
+    filters = []
+
+    filter_regex = r'category:([^\s]+)\s*'
+    m = re.search(filter_regex, query)
+    if m:
+        filters.append({
+            'term': {
+                'category.keyword': {
+                    'value': m.group(1)
+                }
+            }
+        })
+        query = re.sub(filter_regex, '', query).strip()
+
+    return {'filter': filters}, query
+"""
+
+
+"""
+Do not have current capacity to use these
+
+def deploy_elser():
+    # download ELSER v2
+    client.ml.put_trained_model(model_id='.elser_model_2',
+                                    input={'field_names': ['text_field']})
+    
+    # wait until ready
+    while True:
+        status = client.ml.get_trained_models(model_id='.elser_model_2',
+                                                include='definition_status')
+        if status['trained_model_configs'][0]['fully_defined']:
+            # model is ready
+            break
+        time.sleep(1)
+
+    # deploy the model
+    client.ml.start_trained_model_deployment(model_id='.elser_model_2')
+
+    # define a pipeline
+    client.ingest.put_pipeline(
+        id='elser-ingest-pipeline',
+        processors=[
+            {
+                'inference': {
+                    'model_id': '.elser_model_2',
+                    'input_output': [
+                        {
+                            'input_field': 'summary',
+                            'output_field': 'elser_embedding',
+                        }
+                    ]
+                }
+            }
+        ]
+    )
+    
+def deploy_elser_model():
+    try:
+        deploy_elser()
+    except Exception as exc:
+        print(f'Error: {exc}')
+    else:
+        print(f'ELSER model deployed.')
+"""
+
+"""
+Do not have permission to scrape from APS
 
 class Paper:
     def __init__(self, link: str, title: str, date: str, citation: str, summary: str, authors: str, doi: str, journal: str):
@@ -99,40 +310,7 @@ def assignPaperMetadata(extracted_texts: list[str]) -> list[Paper]:
             papers.append(paper)
             
     return papers
-
-"""
-Below is all the stuff with embeddings for vectorized search
-"""
-
-def createNewIndex(delete):
-    if client.indices.exists(index='search-papers') and delete:
-        client.indices.delete(index='search-papers')
-    if not client.indices.exists(index="search-papers"):
-        client.indices.create(
-            index="search-papers", 
-            mappings={
-                'properties': {
-                    'embedding': {
-                        'type': 'dense_vector',
-                    },
-                    # 'elser_embedding': {
-                    #     'type': 'sparse_vector',
-                    # },
-                },
-            },
-            # settings={
-            #     'index': {
-            #         'default_pipeline': 'elser-ingest-pipeline'
-            #     }
-            # }
-        )
-    else:
-        print("Index already exists and no deletion specified")
-        
-
-def getEmbedding(text):
-    return model.encode(text)
-
+    
 def upload_documents(start, end):
     pages = range(start, end)
     all_papers = []
@@ -154,87 +332,4 @@ def upload_documents(start, end):
         print(page)
         
     return all_papers  
-
-def insert_documents(documents):
-    operations = []
-    for document in documents:
-        operations.append({'create': {'_index': 'search-papers', "_id": document["doi"]} })
-        operations.append({
-            **document,
-            "embedding": getEmbedding(document["summary"]),
-        })
-    return client.bulk(operations=operations)
-
-createNewIndex(False)
-insert_documents(upload_documents(1, 101))
-# 1-101
-
-"""
-Code for adding specific categorical searches, 
-category:superconductivity --> This uses superconductivity as a categorical search
-
-def extract_filters(query):
-    filters = []
-
-    filter_regex = r'category:([^\s]+)\s*'
-    m = re.search(filter_regex, query)
-    if m:
-        filters.append({
-            'term': {
-                'category.keyword': {
-                    'value': m.group(1)
-                }
-            }
-        })
-        query = re.sub(filter_regex, '', query).strip()
-
-    return {'filter': filters}, query
-"""
-
-
-"""
-Do not have current capacity to use these
-
-def deploy_elser():
-    # download ELSER v2
-    client.ml.put_trained_model(model_id='.elser_model_2',
-                                    input={'field_names': ['text_field']})
-    
-    # wait until ready
-    while True:
-        status = client.ml.get_trained_models(model_id='.elser_model_2',
-                                                include='definition_status')
-        if status['trained_model_configs'][0]['fully_defined']:
-            # model is ready
-            break
-        time.sleep(1)
-
-    # deploy the model
-    client.ml.start_trained_model_deployment(model_id='.elser_model_2')
-
-    # define a pipeline
-    client.ingest.put_pipeline(
-        id='elser-ingest-pipeline',
-        processors=[
-            {
-                'inference': {
-                    'model_id': '.elser_model_2',
-                    'input_output': [
-                        {
-                            'input_field': 'summary',
-                            'output_field': 'elser_embedding',
-                        }
-                    ]
-                }
-            }
-        ]
-    )
-    
-def deploy_elser_model():
-    try:
-        deploy_elser()
-    except Exception as exc:
-        print(f'Error: {exc}')
-    else:
-        print(f'ELSER model deployed.')
 """

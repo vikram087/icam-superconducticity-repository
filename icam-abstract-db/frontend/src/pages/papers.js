@@ -21,7 +21,7 @@ export function PaperDetail({ searchParams }) {
   }, [id]);
 
   const goBack = () => {
-    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
+    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}`);
   };
 
   return (
@@ -30,15 +30,27 @@ export function PaperDetail({ searchParams }) {
         <div className='button'>
           <button className='return' onClick={goBack}>Go Back</button>
         </div>
-          <div dangerouslySetInnerHTML={{ __html: `<u>${paper.title}</u>` }}></div>
-        <p><strong>Authors:</strong> {paper.authors}</p>
-        <a href={paper.link} target='_blank' rel="noreferrer">
-          <p><strong>DOI:</strong> {paper.doi}</p>
-        </a>
-        <p><strong>Journal:</strong> {paper.journal}</p>
-        <p><strong>Date:</strong> {paper.date}</p>
-        <div dangerouslySetInnerHTML={{ __html: `<strong>Citation:</strong> ${paper.citation}` }}></div>
-        <div className='abstract' dangerouslySetInnerHTML={{ __html: `<strong>Abstract:</strong> ${paper.summary}` }}></div>
+        <u>{paper.title}</u>
+        <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
+          <span key={index}>
+            {author}{index < paper.authors.length - 1 ? ', ' : ''}
+          </span>
+        ))}</p>       
+        <p><strong>arXiv ID:</strong> {paper.id}</p>
+        <p><strong>DOI:</strong> {paper.doi}</p>
+        <strong>Links:</strong>
+        {paper.links.map(link => <a href={link} target='_blank' rel="noreferrer"><br></br>{link}</a>)}
+        <p><strong>Journals:</strong> {paper.journals.map((journal, index) => (
+          <span key={index}>
+            {journal}{index < paper.journals.length - 1 ? ', ' : ''}
+          </span>
+        ))}</p>     
+        <p><strong>Submission Date:</strong> {paper.date}</p>
+        <p><strong>Announcement Date:</strong> {paper.announced}</p>
+        <p><strong>Comments:</strong> {paper.comments}</p>
+        <p><strong>Report Number:</strong> {paper.report_number}</p>
+        <p><strong>Journal Ref:</strong> {paper.journal_ref}</p>
+        <div className='abstract'><strong>Abstract:</strong> <br></br>{paper.summary}</div>
       </div>
     :
     <div className='loader'>
@@ -49,53 +61,7 @@ export function PaperDetail({ searchParams }) {
 }
 
 function Filters({ searchParams }) {
-
-  const [selected, setSelected] = useState([]);
-
   const navigate = useNavigate();
-  
-  const journals = {
-    "Phys. Rev. B": "PRB",
-    "Phys. Rev. Lett.": "PRL",
-    "Phys. Rev.": "PR",
-    "Phys. Rev. D": "PRD",
-    "Phys. Rev. Materials": "PRMATERIALS",
-    "Phys. Rev. Research": "PRRESEARCH",
-    "Phys. Rev. X": "PRX",
-    "Rev. Mod. Phys.": "RMP",
-    "Phys. Rev. A": "PRA",
-    "Phys. Rev. C": "PRC",
-    "Phys. Rev. Applied": "PRAPPLIED",
-    "Physics": "PHYSICS",
-    "Phys. Rev. E": "PRE",
-    "Phys. Rev. Focus": "FOCUS",
-    "Phys. Rev. Accel. Beams": "PRAB",
-    "Phys. Rev. ST Accel. Beams": "PRSTAB",
-    "Physics Physique Fizika": "PPF",
-    "PRX Quantum": "PRXQUANTUM",
-    "PRX Energy": "PRXENERGY",
-    "PRX Life": "PRXLIFE",
-    "Phys. Rev. Fluids": "PRFLUIDS",
-    "Phys. Rev. Phys. Educ. Res.": "PRPER",
-    "Phys. Rev. ST Phys. Educ. Res.": "PRSTPER",
-    "Phys. Rev. (Series I)": "PRI"
-  };
-
-  //FIXME: Add support to searchParams for journals selection
-  const handleJournals = (value, isChecked) => {
-    setSelected(prevParams => {
-      const newSelected = isChecked ? [...prevParams, value] : prevParams.filter(item => item !== value);
-      const journalsParam = newSelected.join(',');
-
-      const newUrl = newSelected.length > 0
-        ? `?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${journalsParam}`
-        : `?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=None`;
-
-      navigate(newUrl);
-
-      return newSelected;
-    });
-  };
 
   const results = ["No Selection", "20", '10', "50", "100"];
 
@@ -110,7 +76,7 @@ function Filters({ searchParams }) {
 
     const modified = sorting.replace(" ", "-");
 
-    navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}&journals=${searchParams.journals}`);
+    navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}`);
   };
 
   const changeResultsPerPage = async (e) => {
@@ -119,7 +85,7 @@ function Filters({ searchParams }) {
       resultsPerPage = "20";
     }
 
-    navigate(`?page=${searchParams.page}&per_page=${resultsPerPage}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
+    navigate(`?page=${searchParams.page}&per_page=${resultsPerPage}&query=${searchParams.query}&sort=${searchParams.sorting}`);
   };
 
   return (
@@ -143,14 +109,6 @@ function Filters({ searchParams }) {
           ))}
         </select>
       </div>
-      <br></br>
-      <u>Journal</u>
-      {Object.entries(journals).map(([key, value], index) => (
-        <div key={index} className='journals'>
-          <input onClick={(e) => handleJournals(value, e.target.checked)} type="checkbox"></input>
-          {key}
-        </div>
-      ))}
     </div>
   );
 }
@@ -182,7 +140,6 @@ export function Papers ({ searchParams, setSearchParams }) {
     let perPage = query.get('per_page') || searchParams.per_page;
     let search = query.get('query') || searchParams.query;
     let sorting = query.get('sort') || searchParams.sorting;
-    let journals = query.get('journals') || searchParams.journals;
 
     if(perPage >= 100) { perPage = 100 }
     else if(perPage >= 50) { perPage = 50; }
@@ -202,21 +159,20 @@ export function Papers ({ searchParams, setSearchParams }) {
       page: page,
       query: search,
       sorting: sorting,
-      journals: journals
     });
 
     setLoading(true);
 
-    getPapers(page, perPage, search, sorting, journals);
+    getPapers(page, perPage, search, sorting);
   }, [location.search]);
 
-  const getPapers = (page, results, query, sorting, journals) => {
+  const getPapers = (page, results, query, sorting) => {
     fetch("http://localhost:8080/api/papers", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting, "journals": journals }),
+      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting }),
     })
     .then(response => response.json())
     .then(data => {
@@ -249,14 +205,13 @@ export function Papers ({ searchParams, setSearchParams }) {
       page: page
     }));
 
-    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, searchParams.journals);
+    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting);
     window.page = page;
-    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&journals=${searchParams.journals}`);
+    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}}`);
   };
 
   const changePaper = (paperId) => {
-    let doi = paperId.replace(/\//g, "-");
-    navigate(`/papers/${doi}`);
+    navigate(`/papers/${paperId}`);
   }
 
   const handlePageClick = (pageNumber) => {
@@ -271,13 +226,15 @@ export function Papers ({ searchParams, setSearchParams }) {
     else if(!loading) {
       return papers.map((paper, index) => (
         <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
-          {accuracy[paper.doi] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.doi]*100).toFixed(1)}%</div>)}
-          <div onClick={() => changePaper(paper.doi)}>
-              <u>
-                <div dangerouslySetInnerHTML={{ __html: paper.title }}></div>
-              </u>
-              <p>Authors: {paper.authors}</p>
-              <div>Abstract: </div>
+          {accuracy[paper.id] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.id]*100).toFixed(1)}%</div>)}
+          <div onClick={() => changePaper(paper.id)}>
+              <u><div>{paper.title}</div></u>
+              <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
+                <span key={index}>
+                  {author}{index < paper.authors.length - 1 ? ', ' : ''}
+                </span>
+              ))}</p> 
+          <strong>Abstract: </strong>
           </div>
           <div className='expand-button'>
             <button onClick={() => toggleExpand(index)}>
@@ -285,13 +242,9 @@ export function Papers ({ searchParams, setSearchParams }) {
             </button>
           </div>
           {expandedIndex === index ?
-            <div onClick={() => changePaper(paper.doi)}>
-              <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
-            </div>
+            <div onClick={() => changePaper(paper.id)} className={expandedIndex === index ? 'text expanded' : 'text'}>{paper.summary}</div>
             :
-            <div>
-              <div dangerouslySetInnerHTML={{ __html: `${paper.summary}` }} className={expandedIndex === index ? 'text expanded' : 'text'}></div>
-            </div>
+            <div className={expandedIndex === index ? 'text expanded' : 'text'}>{paper.summary}</div>
           }
         </div>
         ))
