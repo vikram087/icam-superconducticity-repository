@@ -22,6 +22,7 @@ export function HomePage({ searchParams }) {
             <br></br>
             <Search searchParams={searchParams} />
             <p>Funded by the Institute for Complex Adaptive Matter</p>
+            <p>Powered with Elasticsearch</p>
         </div>
     );
 }

@@ -156,10 +156,10 @@ def insert_documents(documents, index):
     return client.bulk(operations=operations)
 
 createNewIndex(False, "search-papers-meta")
-for i in range(1, 11):
+for i in range(1, 101):
     insert_documents(findInfo(i), "search-papers-meta")
     print(i)
-# 1-20
+# 1-101
 
 all = client.search(query={"match_all": {}}, index="search-papers-meta")
 print(all['hits']['total']['value'])
