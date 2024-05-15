@@ -1,8 +1,9 @@
 import '../styles/papers.css';
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { TailSpin } from 'react-loader-spinner';
 import { Search } from './homepage';
+import { MathJax, MathJaxContext } from "better-react-mathjax";
 
 window.page = 0;
 
@@ -30,7 +31,7 @@ export function PaperDetail({ searchParams }) {
         <div className='button'>
           <button className='return' onClick={goBack}>Go Back</button>
         </div>
-        <u>{paper.title}</u>
+        <u><Content content={paper.title}/></u>
         <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
           <span key={index}>
             {author}{index < paper.authors.length - 1 ? ', ' : ''}
@@ -50,7 +51,7 @@ export function PaperDetail({ searchParams }) {
         <p><strong>Comments:</strong> {paper.comments}</p>
         <p><strong>Report Number:</strong> {paper.report_number}</p>
         <p><strong>Journal Ref:</strong> {paper.journal_ref}</p>
-        <div className='abstract'><strong>Abstract:</strong> <br></br>{paper.summary}</div>
+        <div className='abstract'><strong>Abstract:</strong> <br></br><Content content={paper.summary}/></div>
       </div>
     :
     <div className='loader'>
@@ -186,11 +187,11 @@ export function Papers ({ searchParams, setSearchParams }) {
         setPapers([]);
       }
 
-      if (window.MathJax) {
-        window.MathJax.typesetPromise().then(() => {
-          console.log("MathJax typesetting complete");
-        }).catch((err) => console.error('MathJax typesetting failed: ', err));
-      }
+      // if (window.MathJax) {
+      //   window.MathJax.typesetPromise().then(() => {
+      //     console.log("MathJax typesetting complete");
+      //   }).catch((err) => console.error('MathJax typesetting failed: ', err));
+      // }
 
       setLoading(false);
     })
@@ -228,7 +229,7 @@ export function Papers ({ searchParams, setSearchParams }) {
         <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
           {accuracy[paper.id] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.id]*100).toFixed(1)}%</div>)}
           <div onClick={() => changePaper(paper.id)}>
-              <u><div>{paper.title}</div></u>
+              <u><div><Content content={paper.title}/></div></u>
               <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
                 <span key={index}>
                   {author}{index < paper.authors.length - 1 ? ', ' : ''}
@@ -242,9 +243,9 @@ export function Papers ({ searchParams, setSearchParams }) {
             </button>
           </div>
           {expandedIndex === index ?
-            <div onClick={() => changePaper(paper.id)} className={expandedIndex === index ? 'text expanded' : 'text'}>{paper.summary}</div>
+            <div onClick={() => changePaper(paper.id)} className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
             :
-            <div className={expandedIndex === index ? 'text expanded' : 'text'}>{paper.summary}</div>
+            <div className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
           }
         </div>
         ))
@@ -331,3 +332,28 @@ function Pagination({ handlePageClick, page, totalPages }) {
     </div>
   );
 }
+
+const Content = ({ content }) => {
+  const config = {
+    loader: { load: ["[tex]/html"] },
+    tex: {
+      packages: { "[+]": ["html"] },
+      inlineMath: [
+        ["$", "$"],
+        ["\\(", "\\)"]
+      ],
+      displayMath: [
+        ["$$", "$$"],
+        ["\\[", "\\]"]
+      ]
+    }
+  };
+
+  return (
+    <MathJaxContext version={3} config={config}>
+      <MathJax hideUntilTypeset={"first"}>
+          {`${content}`}
+      </MathJax>
+    </MathJaxContext>
+  );
+};

@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import os
 import json
 from sentence_transformers import SentenceTransformer
-from cachetools import TTLCache
 import redis
 
 load_dotenv()
