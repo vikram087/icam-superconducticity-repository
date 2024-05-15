@@ -1,5 +1,5 @@
 import '../styles/papers.css';
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { TailSpin } from 'react-loader-spinner';
 import { Search } from './homepage';
@@ -144,39 +144,7 @@ export function Papers ({ searchParams, setSearchParams }) {
     }
   }
 
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    let page = query.get('page') || searchParams.page;
-    let perPage = query.get('per_page') || searchParams.per_page;
-    let search = query.get('query') || searchParams.query;
-    let sorting = query.get('sort') || searchParams.sorting;
-
-    if(perPage >= 100) { perPage = 100 }
-    else if(perPage >= 50) { perPage = 50; }
-    else if(perPage >= 20) { perPage = 20; }
-    else { perPage = 10; }
-
-    if(sorting !== "Most-Recent" && sorting !== "Oldest-First" && sorting !== "Most-Relevant") {
-      sorting = "Most-Recent";
-    }
-
-    // if(page > total/perPage) {
-    //   page = total/perPage;
-    // }
-
-    setSearchParams({
-      per_page: perPage,
-      page: page,
-      query: search,
-      sorting: sorting,
-    });
-
-    setLoading(true);
-
-    getPapers(page, perPage, search, sorting);
-  }, [location.search]);
-
-  const getPapers = (page, results, query, sorting) => {
+  const getPapers = useCallback((page, results, query, sorting) => {
     fetch("http://localhost:8080/api/papers", {
       method: 'POST',
       headers: {
@@ -207,7 +175,39 @@ export function Papers ({ searchParams, setSearchParams }) {
     .catch(error => {
       console.error('Error fetching papers:', error);
     });
-  }
+  }, [searchParams.per_page]);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    let page = query.get('page') || searchParams.page;
+    let perPage = query.get('per_page') || searchParams.per_page;
+    let search = query.get('query') || searchParams.query;
+    let sorting = query.get('sort') || searchParams.sorting;
+
+    if(perPage >= 100) { perPage = 100 }
+    else if(perPage >= 50) { perPage = 50; }
+    else if(perPage >= 20) { perPage = 20; }
+    else { perPage = 10; }
+
+    if(sorting !== "Most-Recent" && sorting !== "Oldest-First" && sorting !== "Most-Relevant") {
+      sorting = "Most-Recent";
+    }
+
+    // if(page > total/perPage) {
+    //   page = total/perPage;
+    // }
+
+    setSearchParams({
+      per_page: perPage,
+      page: page,
+      query: search,
+      sorting: sorting,
+    });
+
+    setLoading(true);
+
+    getPapers(page, perPage, search, sorting);
+  }, [location.search, getPapers, searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, setSearchParams]);
 
   const changePage = (page) => {
     setSearchParams(prevParams => ({
