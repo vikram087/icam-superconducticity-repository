@@ -7,6 +7,15 @@ import { MathJax, MathJaxContext } from "better-react-mathjax";
 
 window.page = 0;
 
+const numToDate = (date) => { // 20240501
+  const monthsReversed = {"01": "January,", "02": "February,", "03": "March,", "04": "April,", "05": "May,", "06": "June,", "07": "July,", "08": "August,", "09": "September,", "10": "October,", "11": "November,", "12": "December,"};
+  const year = date.substring(0, 4);
+  const month = monthsReversed[date.substring(4, 6)];
+  const day = date.substring(6);
+
+  return day + " " + month + " " + year;
+};
+
 export function PaperDetail({ searchParams }) {
   const [paper, setPaper] = useState(null);
 
@@ -46,7 +55,7 @@ export function PaperDetail({ searchParams }) {
             {journal}{index < paper.journals.length - 1 ? ', ' : ''}
           </span>
         ))}</p>     
-        <p><strong>Submission Date:</strong> {paper.date}</p>
+        <p><strong>Submission Date:</strong> {numToDate((String) (paper.date))}</p>
         <p><strong>Announcement Date:</strong> {paper.announced}</p>
         <p><strong>Comments:</strong> {paper.comments}</p>
         <p><strong>Report Number:</strong> {paper.report_number}</p>

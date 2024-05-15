@@ -8,17 +8,18 @@ from sentence_transformers import SentenceTransformer
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
 
-# client = Elasticsearch(
-#   "https://localhost:9200",
-#   api_key=API_KEY,
-#   ssl_context=context,
-# )
-
-client = Elasticsearch("http://localhost:9200")
-
-model = SentenceTransformer('all-MiniLM-L6-v2')
+client = Elasticsearch(
+  "https://localhost:9200",
+  api_key=API_KEY,
+  ca_certs="./ca.crt"
+)
 
 # print(client.info())
+# exit()
+
+# client = Elasticsearch("http://localhost:9200")
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def findInfo(page):
     start = 50 * (page-1)
@@ -56,12 +57,14 @@ def findInfo(page):
         dates = results.find('p', class_='is-size-7')
         date_text = dates.get_text(separator=' ', strip=True)
         submitted = date_text.split(';')[0].replace('Submitted', '').strip()
-        split_date = submitted.split(" ")
+        split_date = submitted.split(" ") # 1 May 2024
+        months = {"January,": "01", "February,": "02", "March,": "03", "April,": "04", "May,": "05", "June,": "06", "July,": "07", "August,": "08", "September,": "09", "October,": "10", "November,": "11", "December,": "12"}
         if len(split_date[0]) == 1:
-            truncated_date = f"0{split_date[0]} {split_date[1][:3]}, {split_date[2]}"
+            truncated_date = f"{split_date[2]}{months[split_date[1]]}0{split_date[0]}"
         else:
-            truncated_date = f"{split_date[0]} {split_date[1][:3]}, {split_date[2]}"
-        paper_dict['date'] = truncated_date # submission date
+            truncated_date = f"{split_date[2]}{months[split_date[1]]}{split_date[0]}"
+        date_num = int(truncated_date)
+        paper_dict['date'] = date_num # submission date
         announced = date_text.split(';')[1].replace('originally announced', '').strip()
         paper_dict['announced'] = announced # announce date
         
@@ -118,10 +121,11 @@ def createNewIndex(delete, index):
                     'embedding': {
                         'type': 'dense_vector'
                     },
-                    'date': {
-                        'type': 'date',
-                        'format': 'dd MMM, yyyy'
-                    }
+                    # 'date': {
+                    #     'type': 'date',
+                    #     'format': 'dd MMM, yyyy',
+                    #     'fielddata': True
+                    # }
                     # 'elser_embedding': {
                     #     'type': 'sparse_vector',
                     # },
@@ -152,7 +156,7 @@ def insert_documents(documents, index):
     return client.bulk(operations=operations)
 
 createNewIndex(False, "search-papers-meta")
-for i in range(1, 21):
+for i in range(1, 11):
     insert_documents(findInfo(i), "search-papers-meta")
     print(i)
 # 1-20

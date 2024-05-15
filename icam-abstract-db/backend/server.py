@@ -10,12 +10,13 @@ import redis
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
 
-# client = Elasticsearch(
-#   "https://d3e6ab8052bf4bc79ddc6e6682153d0e.us-central1.gcp.cloud.es.io:443",
-#   api_key=API_KEY
-# )
+client = Elasticsearch(
+  "https://localhost:9200",
+  api_key=API_KEY,
+  ca_certs="./ca.crt"
+)
 
-client = Elasticsearch("http://localhost:9200")
+# client = Elasticsearch("http://localhost:9200")
 
 app = Flask(__name__)
 CORS(app)
