@@ -133,6 +133,7 @@ export function Papers ({ searchParams, setSearchParams }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [accuracy, setAccuracy] = useState({});
+  const [time, setTime] = useState("");
 
   const navigate = useNavigate();
 
@@ -144,7 +145,7 @@ export function Papers ({ searchParams, setSearchParams }) {
     }
   }
 
-  const getPapers = useCallback((page, results, query, sorting) => {
+  const getPapers = useCallback((page, results, query, sorting, startTime) => {
     fetch("http://localhost:8080/api/papers", {
       method: 'POST',
       headers: {
@@ -171,6 +172,12 @@ export function Papers ({ searchParams, setSearchParams }) {
       // }
 
       setLoading(false);
+
+      const endTime = performance.now();
+
+      const totalTimeS = (endTime - startTime)/1000;
+      const totalTime = totalTimeS.toFixed(2);
+      setTime(totalTime);
     })
     .catch(error => {
       console.error('Error fetching papers:', error);
@@ -204,9 +211,11 @@ export function Papers ({ searchParams, setSearchParams }) {
       sorting: sorting,
     });
 
+    const startTime = performance.now();
+
     setLoading(true);
 
-    getPapers(page, perPage, search, sorting);
+    getPapers(page, perPage, search, sorting, startTime);
   }, [location.search, getPapers, searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, setSearchParams]);
 
   const changePage = (page) => {
@@ -215,7 +224,9 @@ export function Papers ({ searchParams, setSearchParams }) {
       page: page
     }));
 
-    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting);
+    const startTime = performance.now();
+
+    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, startTime);
     window.page = page;
     navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}`);
   };
@@ -277,7 +288,7 @@ export function Papers ({ searchParams, setSearchParams }) {
         </div>
         <div className='content-area'>
           <Pagination handlePageClick={handlePageClick} page={searchParams.page} totalPages={pageCount} />
-          {!loading && (<p>{total} Results</p>)}
+          {!loading && (<p>{total} Results in {time} seconds</p>)}
           <ul className="list">
             {chooseBody()}
           </ul>

@@ -39,14 +39,12 @@ def get_paper(paper_id):
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 # cache = TTLCache(maxsize=100, ttl=3600)
 def get_cached_results(cache_key):
-    # return cache.get(cache_key)
     cached_data = redis_client.get(cache_key)
     if cached_data:
         return json.loads(cached_data)
     return None
 
 def cache_results(cache_key, data):
-    # cache[cache_key] = data
     redis_client.setex(cache_key, 3600, json.dumps(data))
     
 def make_cache_key(query, sorting, page, numResults):
@@ -139,14 +137,15 @@ def papers():
     accuracy = {}
     
     if not knnSearch:
-        papers = [hit['_source'] for hit in hits]
+        for i in range(len(hits)):
+            papers.append(hits[i]['_source'])
     
-    for hit in hits:
-        if not knnSearch or not hit['_score']:
+    for i in range(len(hits)):
+        if not knnSearch or not hits[i]['_score']:
             break
-        if hit['_score'] >= 0.6:
-            papers.append(hit['_source'])
-            accuracy[hit['_source']['id']] = hit['_score']
+        if hits[i]['_score'] >= 0.6:
+            papers.append(hits[i]['_source'])
+            accuracy[hits[i]['_source']['id']] = hits[i]['_score']
             
     # total = results['hits']['total']['value']
     filtered_papers = list(papers)
@@ -157,8 +156,8 @@ def papers():
         total = results['hits']['total']['value']
             
     if papers:
-        # return jsonify(papers)
         cache_results(cache_key, ( filtered_papers, total, accuracy ))
+
         return jsonify({ "papers": filtered_papers, "total": total, "accuracy": accuracy })
     else:
         return jsonify({"error": "No results found"}), 404
