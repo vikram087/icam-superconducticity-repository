@@ -6,6 +6,8 @@ import os
 import json
 from sentence_transformers import SentenceTransformer
 import redis
+import math
+import faiss
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -47,8 +49,8 @@ def get_cached_results(cache_key):
 def cache_results(cache_key, data):
     redis_client.setex(cache_key, 3600, json.dumps(data))
     
-def make_cache_key(query, sorting, page, numResults):
-    key = f"{query}_{sorting}_{page}_{numResults}"
+def make_cache_key(query, sorting, page, numResults, pages):
+    key = f"{query}_{sorting}_{page}_{numResults}_{pages}"
     return key
 
 # cache.clear()
@@ -63,8 +65,9 @@ def papers():
     numResults = int(data.get('results', 0))
     query = str(data.get('query', ""))
     sorting = str(data.get('sorting', ""))
+    pages = int(data.get('pages', 30))
     
-    cache_key = make_cache_key(query, sorting, page, numResults)
+    cache_key = make_cache_key(query, sorting, page, numResults, pages)
     cached = get_cached_results(cache_key)
     if cached:
         return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
@@ -77,6 +80,20 @@ def papers():
     knnSearch = False
     
     size = client.search(query={"match_all": {}}, index="search-papers-meta")['hits']['total']['value']
+    
+    if pages < 1:
+        pages = 1
+    elif pages*numResults > size:
+        pages = math.ceil(size/numResults)
+        
+    k = page*numResults
+    if k > size:
+        k = size
+    
+    if sorting == "Most-Recent" or sorting == "Oldest-First":
+        pSort = [{"date": {"order": sort}}, "_score"]
+    elif sorting == "Most-Relevant":
+        pSort = [{'_score': {'order': sort}}]
         
     if query == "all":
         results = client.search(
@@ -88,36 +105,20 @@ def papers():
         )
     else:
         knnSearch = True
-        if (sorting == "Most-Recent") or (sorting == "Oldest-First"):
-            results = client.search(
-                knn={
-                    'field': 'embedding',
-                    'query_vector': getEmbedding(query),
-                    'num_candidates': size,
-                    'k': size,
-                },
-                # size=numResults,
-                # from_=(page-1)*numResults,
-                from_=0,
-                size=size,
-                sort=[{"date": {"order": sort}}, "_score"],
-                index="search-papers-meta"
-            )
-        elif sorting == "Most-Relevant":
-            results = client.search(
-                knn={
-                    'field': 'embedding',
-                    'query_vector': getEmbedding(query),
-                    'num_candidates': size,
-                    'k': size,
-                },
-                # size=numResults,
-                # from_=(page-1)*numResults,
-                from_=0,
-                size=size,
-                sort=[{'_score': {'order': sort}}],
-                index="search-papers-meta"
-            )
+        results = client.search(
+            knn={
+                'field': 'embedding',
+                'query_vector': getEmbedding(query),
+                'num_candidates': size,
+                'k': k,
+            },
+            # size=numResults,
+            # from_=(page-1)*numResults,
+            from_=0,
+            size=page*numResults,
+            sort=pSort,
+            index="search-papers-meta"
+        )
     #     results = client.search(
     #     query={
     #         'text_expansion': {
@@ -140,22 +141,21 @@ def papers():
         for i in range(len(hits)):
             papers.append(hits[i]['_source'])
     
-    for i in range(len(hits)):
-        if not knnSearch or not hits[i]['_score']:
-            break
-        if hits[i]['_score'] >= 0.6:
-            papers.append(hits[i]['_source'])
-            accuracy[hits[i]['_source']['id']] = hits[i]['_score']
-            
-    # total = results['hits']['total']['value']
-    filtered_papers = list(papers)
+    total = numResults*pages
+    if total > size:
+        total = size
+    
     if knnSearch:
-        filtered_papers = papers[numResults*(page-1):numResults*page]
-        total = len(papers)
+        papers = hits[(page-1)*numResults:]
+        filtered_papers = [hit['_source'] for hit in papers]
+        for i in range(len(hits)):
+            if not hits[i]['_score']:
+                break
+            accuracy[hits[i]['_source']['id']] = hits[i]['_score']
     else:
-        total = results['hits']['total']['value']
+        filtered_papers = list(papers)
             
-    if papers:
+    if filtered_papers:
         cache_results(cache_key, ( filtered_papers, total, accuracy ))
 
         return jsonify({ "papers": filtered_papers, "total": total, "accuracy": accuracy })

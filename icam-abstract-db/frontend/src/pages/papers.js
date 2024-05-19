@@ -5,9 +5,7 @@ import { TailSpin } from 'react-loader-spinner';
 import { Search } from './homepage';
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 
-window.page = 0;
-
-const numToDate = (date) => { // 20240501
+const numToDate = (date) => {
   const monthsReversed = {"01": "January,", "02": "February,", "03": "March,", "04": "April,", "05": "May,", "06": "June,", "07": "July,", "08": "August,", "09": "September,", "10": "October,", "11": "November,", "12": "December,"};
   const year = date.substring(0, 4);
   const month = monthsReversed[date.substring(4, 6)];
@@ -31,7 +29,7 @@ export function PaperDetail({ searchParams }) {
   }, [id]);
 
   const goBack = () => {
-    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}`);
+    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
   };
 
   return (
@@ -72,9 +70,19 @@ export function PaperDetail({ searchParams }) {
 
 function Filters({ searchParams }) {
   const navigate = useNavigate();
+  const [pageNumber, setPageNumber] = useState(30);
+
+  const handleInputChange = (event) => {
+    setPageNumber(event.target.value);
+  };
+
+  const handleSubmit = (event) => {
+    if(event.key === "Enter") {
+      navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${pageNumber}`);
+    }
+  };
 
   const results = ["No Selection", "20", '10', "50", "100"];
-
   const order = ["No Selection", "Most Recent", "Oldest First", "Most Relevant"];
 
   const sort = (e) => {
@@ -86,7 +94,7 @@ function Filters({ searchParams }) {
 
     const modified = sorting.replace(" ", "-");
 
-    navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}`);
+    navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}&pages=${searchParams.pages}`);
   };
 
   const changeResultsPerPage = async (e) => {
@@ -95,7 +103,7 @@ function Filters({ searchParams }) {
       resultsPerPage = "20";
     }
 
-    navigate(`?page=${searchParams.page}&per_page=${resultsPerPage}&query=${searchParams.query}&sort=${searchParams.sorting}`);
+    navigate(`?page=${searchParams.page}&per_page=${resultsPerPage}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
   };
 
   return (
@@ -119,6 +127,16 @@ function Filters({ searchParams }) {
           ))}
         </select>
       </div>
+      <br></br>
+      <u>Total Pages (Default 30)</u>
+      <br></br>
+      <br></br>
+      <input 
+        type="number"
+        onKeyDown={handleSubmit}
+        value={pageNumber}
+        onChange={handleInputChange}
+      ></input>
     </div>
   );
 }
@@ -145,13 +163,13 @@ export function Papers ({ searchParams, setSearchParams }) {
     }
   }
 
-  const getPapers = useCallback((page, results, query, sorting, startTime) => {
+  const getPapers = useCallback((page, results, query, sorting, startTime, pages) => {
     fetch("http://localhost:8080/api/papers", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting }),
+      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting, "pages": pages }),
     })
     .then(response => response.json())
     .then(data => {
@@ -190,6 +208,7 @@ export function Papers ({ searchParams, setSearchParams }) {
     let perPage = query.get('per_page') || searchParams.per_page;
     let search = query.get('query') || searchParams.query;
     let sorting = query.get('sort') || searchParams.sorting;
+    let pages = query.get('pages') || searchParams.pages;
 
     if(perPage >= 100) { perPage = 100 }
     else if(perPage >= 50) { perPage = 50; }
@@ -209,14 +228,15 @@ export function Papers ({ searchParams, setSearchParams }) {
       page: page,
       query: search,
       sorting: sorting,
+      pages,
     });
 
     const startTime = performance.now();
 
     setLoading(true);
 
-    getPapers(page, perPage, search, sorting, startTime);
-  }, [location.search, getPapers, searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, setSearchParams]);
+    getPapers(page, perPage, search, sorting, startTime, pages);
+  }, [location.search, getPapers, searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, searchParams.pages, setSearchParams]);
 
   const changePage = (page) => {
     setSearchParams(prevParams => ({
@@ -226,9 +246,8 @@ export function Papers ({ searchParams, setSearchParams }) {
 
     const startTime = performance.now();
 
-    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, startTime);
-    window.page = page;
-    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}`);
+    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, startTime, searchParams.pages);
+    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
   };
 
   const changePaper = (paperId) => {
@@ -303,33 +322,34 @@ function Pagination({ handlePageClick, page, totalPages }) {
   const [pageNumber, setPageNumber] = useState(page);
 
   const handleBack = () => {
-    if(page < 2) {
-      handlePageClick(1);
-      return;
+    if(page >= 2) {
+      handlePageClick(page-1);
     }
-    handlePageClick(page-1);
   };
 
   const handleFront = () => {
-    if(page > totalPages-1) {
-      handlePageClick(totalPages);
-      return;
+    if(page <= totalPages-1) {
+      handlePageClick((Number)(page)+1);
     }
-    handlePageClick((Number)(page)+1);
+  };
+
+  const handleNumber = (pageNumber) => {
+    if((Number)(page) !== pageNumber) {
+      handlePageClick(pageNumber);
+    }
   };
 
   const handleSubmit = (event) => {
-    if(event.key === "Enter") {
-      if(pageNumber < 2) {
+    if(event.key === "Enter" && page !== pageNumber) {
+      if(pageNumber < 2 && page > 1) {
         handlePageClick(1);
-        return;
       }
-      else if(pageNumber > totalPages-1) {
+      else if(pageNumber > totalPages-1 && page < totalPages) {
         handlePageClick(totalPages);
-        return;
       }
-
-      handlePageClick(pageNumber);
+      else if(pageNumber <= totalPages-1 && pageNumber >= 2) {
+        handlePageClick(pageNumber);   
+      }   
     }
   };
 
@@ -339,7 +359,7 @@ function Pagination({ handlePageClick, page, totalPages }) {
 
   return (
     <div className='pagination-container'>
-      <span style={{cursor: "pointer" }} onClick={() => handlePageClick(1)}>&lt;&lt;&nbsp;</span>
+      <span style={{cursor: "pointer" }} onClick={() => handleNumber(1)}>&lt;&lt;&nbsp;</span>
       <span style={{cursor: "pointer" }} onClick={handleBack}>&nbsp;&lt;&nbsp;</span>
       <input 
         type="number"
@@ -348,7 +368,7 @@ function Pagination({ handlePageClick, page, totalPages }) {
         onChange={handleInputChange}
       ></input>
       <span style={{cursor: "pointer" }} onClick={handleFront}>&nbsp;&gt;&nbsp;</span>
-      <span style={{cursor: "pointer" }} onClick={() => handlePageClick(totalPages)}>&nbsp;&gt;&gt;&nbsp;</span>
+      <span style={{cursor: "pointer" }} onClick={() => handleNumber(totalPages)}>&nbsp;&gt;&gt;&nbsp;</span>
     </div>
   );
 }

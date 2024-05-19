@@ -5,3 +5,4 @@ requests==2.31.0
 sentence-transformers==2.7.0
 redis==5.0.4
 elasticsearch==8.12.1
+faiss-cpu==1.80

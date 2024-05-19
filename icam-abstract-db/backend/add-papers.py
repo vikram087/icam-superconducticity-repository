@@ -155,8 +155,8 @@ def insert_documents(documents, index):
         # break
     return client.bulk(operations=operations)
 
-createNewIndex(False, "search-papers-meta")
-for i in range(1, 101):
+# createNewIndex(False, "search-papers-meta")
+for i in range(101, 201):
     insert_documents(findInfo(i), "search-papers-meta")
     print(i)
 # 1-101
