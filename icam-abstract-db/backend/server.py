@@ -147,7 +147,8 @@ def papers():
     
     if knnSearch:
         papers = hits[(page-1)*numResults:]
-        filtered_papers = [hit['_source'] for hit in papers]
+        # filtered_papers = [hit['_source'] for hit in papers]
+        filtered_papers = [papers[i]['_source'] for i in range(len(papers))]
         for i in range(len(hits)):
             if not hits[i]['_score']:
                 break

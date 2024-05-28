@@ -1,9 +1,12 @@
-from bs4 import BeautifulSoup
-import requests
+# from bs4 import BeautifulSoup
+# import requests
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 import os
 from sentence_transformers import SentenceTransformer
+import urllib.request as libreq
+import feedparser
+import time
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -20,6 +23,111 @@ client = Elasticsearch(
 # client = Elasticsearch("http://localhost:9200")
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def findInfo(start, amount):
+  search_query = 'all:superconductivity'
+  wait_time = 3
+
+  url = f'http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}'
+    
+#   print(f'Searching arXiv for {search_query}')
+    
+  with libreq.urlopen(url) as url:
+    content = url.read()
+
+  feed = feedparser.parse(content)
+  
+  paper_list = []
+  i = start
+  for entry in feed.entries:          
+    paper_dict = {
+      'id': entry.id.split('/abs/')[-1].replace("/", "-"),
+      'title': entry.title,
+      'links': [link['href']for link in entry.get('links')],
+      'summary': entry.get('summary'),
+      'date': int(time.strftime("%Y%m%d", entry.get('published_parsed'))),
+      'updated': int(time.strftime("%Y%m%d", entry.get('updated_parsed'))),
+      'categories': [category['term'] for category in entry.get('tags')],
+      'authors': [author['name'] for author in entry.get('authors')],
+      'doi': entry.get('arxiv_doi'),
+      'journal_ref': entry.get('arxiv_journal_ref'),
+      'comments': entry.get('arxiv_comment'),
+      'primary_category': entry.get('arxiv_primary_category').get('term'),
+    }
+    
+    paper_list.append(paper_dict)
+    i += 1
+    if i % 50 == 0: 
+        print(i)
+    
+    # print(f'Sleeping for {wait_time} seconds')
+    # time.sleep(wait_time)
+    
+  return replaceNullValues(paper_list)
+
+def replaceNullValues(papers_list):
+  for i in range(len(papers_list)):
+    for key, val in papers_list[i].items():
+      if not val:
+        papers_list[i][key] = "N/A"
+  
+  return papers_list 
+    
+def createNewIndex(delete, index):
+    if client.indices.exists(index=index) and delete:
+        client.indices.delete(index=index)
+    if not client.indices.exists(index=index):
+        client.indices.create(
+            index=index, 
+            mappings={
+                'properties': {
+                    'embedding': {
+                        'type': 'dense_vector'
+                    },
+                    # 'elser_embedding': {
+                    #     'type': 'sparse_vector',
+                    # },
+                },
+            },
+            # settings={
+            #     'index': {
+            #         'default_pipeline': 'elser-ingest-pipeline'
+            #     }
+            # }
+        )
+    else:
+        print("Index already exists and no deletion specified")
+        
+def getEmbedding(text):
+    return model.encode(text)
+
+def insert_documents(documents, index):
+    operations = []
+    for document in documents:
+        operations.append({'create': {'_index': index, "_id": document["id"]} })
+        operations.append({
+            **document,
+            "embedding": getEmbedding(document["summary"])
+        })
+        # print(operations[1])
+        # break
+    return client.bulk(operations=operations)
+
+# createNewIndex(False, "search-papers-meta")
+start = 4000
+amount = 1000
+insert_documents(findInfo(start, amount), "search-papers-meta")
+# 0-3999
+
+# size = client.search(query={"match_all": {}}, index="search-papers-meta")['hits']['total']['value']
+# all = client.search(query={"match_all": {}}, index="search-papers-meta", size=size)
+all = client.search(query={"match_all": {}}, index="search-papers-meta")
+        
+# print(results['hits']['hits'])
+
+'''
+# FIXME: comments, journal_ref, report_number
+There is an Api
 
 def findInfo(page):
     start = 50 * (page-1)
@@ -109,61 +217,7 @@ def findInfo(page):
         papers.append(paper_dict) 
     
     return papers  
-    
-def createNewIndex(delete, index):
-    if client.indices.exists(index=index) and delete:
-        client.indices.delete(index=index)
-    if not client.indices.exists(index=index):
-        client.indices.create(
-            index=index, 
-            mappings={
-                'properties': {
-                    'embedding': {
-                        'type': 'dense_vector'
-                    },
-                    # 'date': {
-                    #     'type': 'date',
-                    #     'format': 'dd MMM, yyyy',
-                    #     'fielddata': True
-                    # }
-                    # 'elser_embedding': {
-                    #     'type': 'sparse_vector',
-                    # },
-                },
-            },
-            # settings={
-            #     'index': {
-            #         'default_pipeline': 'elser-ingest-pipeline'
-            #     }
-            # }
-        )
-    else:
-        print("Index already exists and no deletion specified")
-        
-def getEmbedding(text):
-    return model.encode(text)
-
-def insert_documents(documents, index):
-    operations = []
-    for document in documents:
-        operations.append({'create': {'_index': index, "_id": document["id"]} })
-        operations.append({
-            **document,
-            "embedding": getEmbedding(document["summary"])
-        })
-        # print(operations[1])
-        # break
-    return client.bulk(operations=operations)
-
-# createNewIndex(False, "search-papers-meta")
-for i in range(101, 201):
-    insert_documents(findInfo(i), "search-papers-meta")
-    print(i)
-# 1-101
-
-all = client.search(query={"match_all": {}}, index="search-papers-meta")
-print(all['hits']['total']['value'])
-# print(results['hits']['hits']) # prints out first 10
+'''
 
 """
 Code for adding specific categorical searches, 

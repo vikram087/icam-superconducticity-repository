@@ -32,6 +32,17 @@ export function PaperDetail({ searchParams }) {
     navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
   };
 
+  const replaceID = (id) => {
+    let lastIndex = id.lastIndexOf('-');
+    
+    if (lastIndex !== -1) {
+        return id.substring(0, lastIndex) + '/' + id.substring(lastIndex + 1);
+    }
+    else {
+      return id;
+    }
+  };
+
   return (
     paper ? 
       <div className='paper'>
@@ -44,19 +55,19 @@ export function PaperDetail({ searchParams }) {
             {author}{index < paper.authors.length - 1 ? ', ' : ''}
           </span>
         ))}</p>       
-        <p><strong>arXiv ID:</strong> {paper.id}</p>
+        <p><strong>arXiv ID:</strong> {replaceID(paper.id)}</p>
         <p><strong>DOI:</strong> {paper.doi}</p>
         <strong>Links:</strong>
         {paper.links.map(link => <a href={link} target='_blank' rel="noreferrer"><br></br>{link}</a>)}
-        <p><strong>Journals:</strong> {paper.journals.map((journal, index) => (
+        <p><strong>Categories:</strong> {paper.categories.map((category, index) => (
           <span key={index}>
-            {journal}{index < paper.journals.length - 1 ? ', ' : ''}
+            {category}{index < paper.categories.length - 1 ? ', ' : ''}
           </span>
         ))}</p>     
         <p><strong>Submission Date:</strong> {numToDate((String) (paper.date))}</p>
-        <p><strong>Announcement Date:</strong> {paper.announced}</p>
+        <p><strong>Update Date:</strong> {numToDate((String) (paper.updated))}</p>
         <p><strong>Comments:</strong> {paper.comments}</p>
-        <p><strong>Report Number:</strong> {paper.report_number}</p>
+        <p><strong>Primary Category:</strong> {paper.primary_category}</p>
         <p><strong>Journal Ref:</strong> {paper.journal_ref}</p>
         <div className='abstract'><strong>Abstract:</strong> <br></br><Content content={paper.summary}/></div>
       </div>
@@ -70,73 +81,89 @@ export function PaperDetail({ searchParams }) {
 
 function Filters({ searchParams }) {
   const navigate = useNavigate();
-  const [pageNumber, setPageNumber] = useState(30);
+  const location = useLocation();
+
+  const [pageNumber, setPageNumber] = useState(searchParams.pages || 30);
+  const [sortVal, setSortVal] = useState(searchParams.sorting || 'Most-Relevant');
+  const [numResults, setNumResults] = useState(searchParams.per_page || 20);
+
+  const [results, setResults] = useState([20, 10, 50, 100]);
+  const [order, setOrder] = useState(["Most-Relevant", "Most-Recent", "Oldest-First"]);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    let perPage = (Number) (query.get('per_page')) || numResults;
+    let sorting = query.get('sort') || sortVal;
+    let pages = (Number) (query.get('pages')) || pageNumber;
+
+    const updatedResults = results.filter(r => r !== perPage);
+    updatedResults.unshift(perPage);
+
+    if(sorting !== "Most-Recent" && sorting !== "Oldest-First" && sorting !== "Most-Relevant") {
+      sorting = "Most-Relevant";
+    }
+
+    const updatedOrder = order.filter(r => r !== sorting);
+    updatedOrder.unshift(sorting);
+
+    setNumResults(perPage);
+    setSortVal(sorting);
+    setPageNumber(pages);
+
+    setResults(updatedResults);
+    setOrder(updatedOrder);
+  }, []);
+
+  const handleButton = () => {
+    let pageValue = pageNumber;
+    if(pageNumber === "") {
+      setPageNumber(30);
+      pageValue = 30;
+    }
+    navigate(`?page=${searchParams.page}&per_page=${numResults}&query=${searchParams.query}&sort=${sortVal}&pages=${pageValue}`);
+  };
 
   const handleInputChange = (event) => {
-    setPageNumber(event.target.value);
-  };
-
-  const handleSubmit = (event) => {
-    if(event.key === "Enter") {
-      navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${pageNumber}`);
+    const val = event.target.value;
+    if(val > 0 || val === "") {
+      setPageNumber(val);
     }
-  };
-
-  const results = ["No Selection", "20", '10', "50", "100"];
-  const order = ["No Selection", "Most Recent", "Oldest First", "Most Relevant"];
-
-  const sort = (e) => {
-    let sorting = e.target.value;
-
-    if(sorting === "Most Relevant" || sorting === "No Selection") {
-      sorting = "Most Relevant";
-    }
-
-    const modified = sorting.replace(" ", "-");
-
-    navigate(`?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${modified}&pages=${searchParams.pages}`);
-  };
-
-  const changeResultsPerPage = async (e) => {
-    let resultsPerPage = e.target.value;
-    if(resultsPerPage === "No Selection") {
-      resultsPerPage = "20";
-    }
-
-    navigate(`?page=${searchParams.page}&per_page=${resultsPerPage}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
   };
 
   return (
     <div>
-      <u>Sort</u>
+      <b>Sort</b>
       <br></br>
       <div className='results-per-page'>
-        <select onChange={sort}>
+        <select onChange={(e) => setSortVal(e.target.value.replace(" ", "-"))}>
           {order.map((option, index) => (
-              <option key={index} value={option}>{option}</option>
+              <option key={index} value={option}>{option.replace("-", " ")}</option>
           ))}
         </select>
       </div>
       <br></br>
-      <u>Results Per Page</u>
+      <b>Results Per Page</b>
       <br></br>
       <div className='results-per-page'>
-        <select onChange={changeResultsPerPage}>
+        <select onChange={(e) => setNumResults(e.target.value)}>
           {results.map((option, index) => (
               <option key={index} value={option}>{option}</option>
           ))}
         </select>
       </div>
       <br></br>
-      <u>Total Pages (Default 30)</u>
+      <b>Page Limit</b>
       <br></br>
       <br></br>
       <input 
         type="number"
-        onKeyDown={handleSubmit}
+        min={1}
         value={pageNumber}
         onChange={handleInputChange}
       ></input>
+      <br></br>
+      <br></br>
+      <button onClick={handleButton} style={{ cursor: "pointer" }}>Submit</button>
     </div>
   );
 }
@@ -204,11 +231,11 @@ export function Papers ({ searchParams, setSearchParams }) {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    let page = query.get('page') || searchParams.page;
-    let perPage = query.get('per_page') || searchParams.per_page;
+    let page = (Number) (query.get('page')) || searchParams.page;
+    let perPage = (Number) (query.get('per_page')) || searchParams.per_page;
     let search = query.get('query') || searchParams.query;
     let sorting = query.get('sort') || searchParams.sorting;
-    let pages = query.get('pages') || searchParams.pages;
+    let pages = (Number) (query.get('pages')) || searchParams.pages;
 
     if(perPage >= 100) { perPage = 100 }
     else if(perPage >= 50) { perPage = 50; }
@@ -216,8 +243,18 @@ export function Papers ({ searchParams, setSearchParams }) {
     else { perPage = 10; }
 
     if(sorting !== "Most-Recent" && sorting !== "Oldest-First" && sorting !== "Most-Relevant") {
-      sorting = "Most-Recent";
+      sorting = "Most-Relevant";
     }
+
+    if(!Number.isInteger(page) || page <= 0) {
+      page = 1;
+    }
+
+    if(!Number.isInteger(pages) || pages <= 0) {
+      pages = 30;
+    }
+
+    navigate(`?page=${page}&per_page=${perPage}&query=${search}&sort=${sorting}&pages=${pages}`);
 
     // if(page > total/perPage) {
     //   page = total/perPage;
@@ -267,7 +304,7 @@ export function Papers ({ searchParams, setSearchParams }) {
       return papers.map((paper, index) => (
         <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
           {accuracy[paper.id] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.id]*100).toFixed(1)}%</div>)}
-          <div onClick={() => changePaper(paper.id)}>
+          <div onClick={() => changePaper(paper.id.replace("/-/g", '/'))}>
               <u><div><Content content={paper.title}/></div></u>
               <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
                 <span key={index}>
@@ -324,18 +361,21 @@ function Pagination({ handlePageClick, page, totalPages }) {
   const handleBack = () => {
     if(page >= 2) {
       handlePageClick(page-1);
+      setPageNumber(page-1);
     }
   };
 
   const handleFront = () => {
     if(page <= totalPages-1) {
       handlePageClick((Number)(page)+1);
+      setPageNumber((Number)(page)+1);
     }
   };
 
   const handleNumber = (pageNumber) => {
     if((Number)(page) !== pageNumber) {
       handlePageClick(pageNumber);
+      setPageNumber(pageNumber);
     }
   };
 
@@ -343,12 +383,15 @@ function Pagination({ handlePageClick, page, totalPages }) {
     if(event.key === "Enter" && page !== pageNumber) {
       if(pageNumber < 2 && page > 1) {
         handlePageClick(1);
+        setPageNumber(1);
       }
       else if(pageNumber > totalPages-1 && page < totalPages) {
         handlePageClick(totalPages);
+        setPageNumber(totalPages);
       }
       else if(pageNumber <= totalPages-1 && pageNumber >= 2) {
         handlePageClick(pageNumber);   
+        setPageNumber(pageNumber);
       }   
     }
   };
