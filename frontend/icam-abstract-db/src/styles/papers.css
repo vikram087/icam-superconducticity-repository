@@ -35,22 +35,19 @@
 }
 
 .container {
-  border: 1px solid black;
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
   margin-right: 5%;
-  cursor: pointer;
-  /* height: 200px; */
+  width: 90%;
 }
 
 .expanded-container {
-  border: 1px solid black;
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
   margin-right: 5%;
-  cursor: pointer;
+  width: 90%;
 }
 
 .paper {
@@ -69,13 +66,14 @@
   padding-top: 10px;
 }
 
-.container:hover {
+/* .container:hover {
   box-shadow: 1px 1px 5px grey;
-}
+} */
 
 .list {
   padding: 10px;
   padding-right: 5%;
+  width: 90%;
 }
 
 .abstract {
@@ -97,26 +95,42 @@
 }
 
 .text {
-  white-space: nowrap;
+  white-space: wrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 0px;
+  text-overflow: clip;
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  position: relative;
+}
+
+.text .expand-button,
+.expanded .expand-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: white; /* Match background color */
+  cursor: pointer;
+  color: #f09f9c;
 }
 
 .expanded {
   white-space: normal;
   overflow: visible;
-  text-overflow: clip;
   max-width: none;
-}
-
-.expand-button {
-  padding-top: 10px;
+  display: block;
 }
 
 .title {
   font-size: xx-large;
   margin-top: 20px;
   padding-left: 5%;
+  cursor: pointer;
+}
+
+.paper-title {
+  color: #45b3e0;
+  font-size: large;
   cursor: pointer;
 }

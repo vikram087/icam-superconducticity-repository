@@ -310,24 +310,22 @@ export function Papers ({ searchParams, setSearchParams }) {
             <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
               {accuracy[paper.id] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.id]*100).toFixed(1)}%</div>)}
               <div onClick={() => changePaper(paper.id.replace("/-/g", '/'))}>
-                  <u><div><Content content={paper.title}/></div></u>
-                  <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
-                    <span key={index}>
-                      {author}{index < paper.authors.length - 1 ? ', ' : ''}
-                    </span>
-                  ))}</p> 
-              <strong>Abstract: </strong>
+                  <u className='paper-title'><Content content={paper.title}/></u> 
               </div>
-              <div className='expand-button'>
-                <button onClick={() => toggleExpand(index)}>
-                  {expandedIndex === index ? '-' : '+'}
-                </button>
-              </div>
-              {expandedIndex === index ?
-                <div onClick={() => changePaper(paper.id)} className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
-                :
-                <div className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
-              }
+              <p>
+                by&nbsp;
+                {paper.authors.map((author, index) => (
+                  <span key={index}><em>
+                    {author}{index < paper.authors.length - 1 ? ', ' : ''}
+                  </em></span>
+                ))}
+              </p>
+              <div className={expandedIndex === index ? 'text expanded' : 'text'}>
+            <Content content={paper.summary} />
+            <div className="expand-button" onClick={() => toggleExpand(index)}>
+              {expandedIndex === index ? '⌃' : '⌄'}
+            </div>
+          </div>
             </div>
             ))}
           </ul>
