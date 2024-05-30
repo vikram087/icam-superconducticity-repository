@@ -301,30 +301,38 @@ export function Papers ({ searchParams, setSearchParams }) {
       return <></>;
     }
     else if(!loading) {
-      return papers.map((paper, index) => (
-        <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
-          {accuracy[paper.id] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.id]*100).toFixed(1)}%</div>)}
-          <div onClick={() => changePaper(paper.id.replace("/-/g", '/'))}>
-              <u><div><Content content={paper.title}/></div></u>
-              <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
-                <span key={index}>
-                  {author}{index < paper.authors.length - 1 ? ', ' : ''}
-                </span>
-              ))}</p> 
-          <strong>Abstract: </strong>
-          </div>
-          <div className='expand-button'>
-            <button onClick={() => toggleExpand(index)}>
-              {expandedIndex === index ? '-' : '+'}
-            </button>
-          </div>
-          {expandedIndex === index ?
-            <div onClick={() => changePaper(paper.id)} className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
-            :
-            <div className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
-          }
+      return (
+        <div className='content-area'>
+          <Pagination handlePageClick={handlePageClick} page={searchParams.page} totalPages={pageCount} />
+          <p className='pagination-container results'>{!loading && (<p>{total} Results in {time} seconds</p>)}</p>
+          <ul className='list'>
+            {papers.map((paper, index) => (
+            <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
+              {accuracy[paper.id] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.id]*100).toFixed(1)}%</div>)}
+              <div onClick={() => changePaper(paper.id.replace("/-/g", '/'))}>
+                  <u><div><Content content={paper.title}/></div></u>
+                  <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
+                    <span key={index}>
+                      {author}{index < paper.authors.length - 1 ? ', ' : ''}
+                    </span>
+                  ))}</p> 
+              <strong>Abstract: </strong>
+              </div>
+              <div className='expand-button'>
+                <button onClick={() => toggleExpand(index)}>
+                  {expandedIndex === index ? '-' : '+'}
+                </button>
+              </div>
+              {expandedIndex === index ?
+                <div onClick={() => changePaper(paper.id)} className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
+                :
+                <div className={expandedIndex === index ? 'text expanded' : 'text'}><Content content={paper.summary}/></div>
+              }
+            </div>
+            ))}
+          </ul>
         </div>
-        ))
+      )
     }
     else if(loading) {
       return <div className='loader'>
@@ -342,13 +350,7 @@ export function Papers ({ searchParams, setSearchParams }) {
         <div className='filters'>
           <Filters searchParams={searchParams} />
         </div>
-        <div className='content-area'>
-          <Pagination handlePageClick={handlePageClick} page={searchParams.page} totalPages={pageCount} />
-          {!loading && (<p>{total} Results in {time} seconds</p>)}
-          <ul className="list">
-            {chooseBody()}
-          </ul>
-        </div>
+          {chooseBody()}
       </div>
     </div>
   );

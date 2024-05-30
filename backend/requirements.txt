@@ -1,0 +1,10 @@
+Flask-Cors==4.0.1
+Flask==3.0.3
+sentence-transformers==3.0.0
+redis==5.0.4
+elasticsearch==8.13.2
+python-dotenv==1.0.1
+feedparser==6.0.11
+# faiss-cpu==1.80
+# requests==2.31.0
+# beautifulsoup4==4.12.3

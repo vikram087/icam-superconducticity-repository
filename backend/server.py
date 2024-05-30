@@ -7,7 +7,7 @@ import json
 from sentence_transformers import SentenceTransformer
 import redis
 import math
-import faiss
+# import faiss
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
@@ -57,6 +57,8 @@ def make_cache_key(query, sorting, page, numResults, pages):
 # print("Cleared cache")
 # redis-cli FLUSHALL # command on cli to clear cache
 
+# fuzzy search for category, authors
+# vector-based search for title, summary
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
 def papers():
@@ -119,19 +121,6 @@ def papers():
             sort=pSort,
             index="search-papers-meta"
         )
-    #     results = client.search(
-    #     query={
-    #         'text_expansion': {
-    #             'elser_embedding': {
-    #                 'model_id': '.elser_model_2',
-    #                 'model_text': query,
-    #             }
-    #         },
-    #     },
-    #     size=numResults,
-    #     from_=(page-1)*numResults,
-    #     index="search-papers"
-    # )
         
     hits = results['hits']['hits']
     papers = []

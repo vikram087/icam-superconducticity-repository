@@ -6,11 +6,14 @@
 }
 
 .pagination-container {
-  display: flex;
   justify-content: center;
   width: 50%;
-  padding-bottom: 30px;
   user-select: none;
+}
+
+.results {
+  padding-left: 30px;
+  user-select: auto;
 }
 
 .results-per-page {
@@ -23,15 +26,12 @@
 }
 
 .filters {
-  flex: 1;
+  flex: 0 1 auto;
   border-right: 2px solid #eee;
   padding-top: 5%;
   margin-left: 5%;
-}
-
-.content-area {
-  padding-left: 5%;
-  flex: 3; 
+  padding-right: 40px;
+  margin-right: 5%;
 }
 
 .container {
@@ -74,9 +74,7 @@
 }
 
 .list {
-  flex: 3;
   padding: 10px;
-  /* padding-left: 22%; */
   padding-right: 5%;
 }
 
@@ -85,12 +83,14 @@
   padding-bottom: 40px;
 }
 
-.loader {
+.content-area, .loader {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
+
 
 .loader p {
   font-size: x-large;
