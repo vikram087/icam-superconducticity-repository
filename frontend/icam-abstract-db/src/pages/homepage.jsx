@@ -9,7 +9,7 @@ export function HomePage({ searchParams }) {
         if(query === "") {
             query = "all";
         }
-        navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
+        navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&pages=${searchParams.pages}&term=${searchParams.term}`);
     };
 
     return (
@@ -36,7 +36,7 @@ export function Search({ searchParams }) {
         if(query === "") {
             query = "all";
         }
-        navigate(`/papers?page=1&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
+        navigate(`/papers?page=1&per_page=${searchParams.per_page}&query=${query}&sort=${searchParams.sorting}&pages=${searchParams.pages}&term=${searchParams.term}`);
     };
 
     const handleChange = (event) => {

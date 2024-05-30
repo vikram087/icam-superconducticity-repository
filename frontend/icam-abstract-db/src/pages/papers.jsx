@@ -29,7 +29,7 @@ export function PaperDetail({ searchParams }) {
   }, [id]);
 
   const goBack = () => {
-    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
+    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}&term=${searchParams.term}`);
   };
 
   const replaceID = (id) => {
@@ -86,15 +86,18 @@ function Filters({ searchParams }) {
   const [pageNumber, setPageNumber] = useState(searchParams.pages || 30);
   const [sortVal, setSortVal] = useState(searchParams.sorting || 'Most-Relevant');
   const [numResults, setNumResults] = useState(searchParams.per_page || 20);
+  const [term, setTerm] = useState(searchParams.term || "Abstract");
 
   const [results, setResults] = useState([20, 10, 50, 100]);
   const [order, setOrder] = useState(["Most-Relevant", "Most-Recent", "Oldest-First"]);
+  const [terms, setTerms] = useState(["Abstract", "Title", "Authors", "Category"]);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     let perPage = (Number) (query.get('per_page')) || numResults;
     let sorting = query.get('sort') || sortVal;
     let pages = (Number) (query.get('pages')) || pageNumber;
+    let searchTerm = query.get('term') || term;
 
     const updatedResults = results.filter(r => r !== perPage);
     updatedResults.unshift(perPage);
@@ -103,15 +106,24 @@ function Filters({ searchParams }) {
       sorting = "Most-Relevant";
     }
 
+    if(searchTerm !== "Abstract" && searchTerm !== "Title" && searchTerm !== "Category" && searchTerm !== "Authors") {
+      searchTerm = "Abstract";
+    }
+
     const updatedOrder = order.filter(r => r !== sorting);
     updatedOrder.unshift(sorting);
+
+    const updatedTerms = terms.filter(r => r !== searchTerm);
+    updatedTerms.unshift(searchTerm);
 
     setNumResults(perPage);
     setSortVal(sorting);
     setPageNumber(pages);
+    setTerm(searchTerm);
 
     setResults(updatedResults);
     setOrder(updatedOrder);
+    setTerms(updatedTerms);
   }, []);
 
   const handleButton = () => {
@@ -120,7 +132,7 @@ function Filters({ searchParams }) {
       setPageNumber(30);
       pageValue = 30;
     }
-    navigate(`?page=${searchParams.page}&per_page=${numResults}&query=${searchParams.query}&sort=${sortVal}&pages=${pageValue}`);
+    navigate(`?page=${searchParams.page}&per_page=${numResults}&query=${searchParams.query}&sort=${sortVal}&pages=${pageNumber}&term=${term}`);
   };
 
   const handleInputChange = (event) => {
@@ -132,6 +144,16 @@ function Filters({ searchParams }) {
 
   return (
     <div>
+      <b>Search Term</b>
+      <br></br>
+      <br></br>
+      <select onChange={(e) => setTerm(e.target.value)}>
+        {terms.map((option, index) => (
+          <option key={index} value={option}>{option}</option>
+        ))}
+      </select>
+      <br></br>
+      <br></br>
       <b>Sort</b>
       <br></br>
       <div className='results-per-page'>
@@ -190,13 +212,13 @@ export function Papers ({ searchParams, setSearchParams }) {
     }
   }
 
-  const getPapers = useCallback((page, results, query, sorting, startTime, pages) => {
+  const getPapers = useCallback((page, results, query, sorting, startTime, pages, term) => {
     fetch("http://localhost:8080/api/papers", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting, "pages": pages }),
+      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting, "pages": pages, "term": term }),
     })
     .then(response => response.json())
     .then(data => {
@@ -236,6 +258,7 @@ export function Papers ({ searchParams, setSearchParams }) {
     let search = query.get('query') || searchParams.query;
     let sorting = query.get('sort') || searchParams.sorting;
     let pages = (Number) (query.get('pages')) || searchParams.pages;
+    let term = query.get('term') || searchParams.term;
 
     if(perPage >= 100) { perPage = 100 }
     else if(perPage >= 50) { perPage = 50; }
@@ -246,6 +269,10 @@ export function Papers ({ searchParams, setSearchParams }) {
       sorting = "Most-Relevant";
     }
 
+    if(term !== "Abstract" && term !== "Title" && term !== "Category" && term !== "Authors") {
+      term = "Abstract";
+    }
+
     if(!Number.isInteger(page) || page <= 0) {
       page = 1;
     }
@@ -254,7 +281,7 @@ export function Papers ({ searchParams, setSearchParams }) {
       pages = 30;
     }
 
-    navigate(`?page=${page}&per_page=${perPage}&query=${search}&sort=${sorting}&pages=${pages}`);
+    navigate(`?page=${page}&per_page=${perPage}&query=${search}&sort=${sorting}&pages=${pages}&term=${term}`);
 
     // if(page > total/perPage) {
     //   page = total/perPage;
@@ -272,7 +299,7 @@ export function Papers ({ searchParams, setSearchParams }) {
 
     setLoading(true);
 
-    getPapers(page, perPage, search, sorting, startTime, pages);
+    getPapers(page, perPage, search, sorting, startTime, pages, term);
   }, [location.search, getPapers, searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, searchParams.pages, setSearchParams]);
 
   const changePage = (page) => {
@@ -283,8 +310,8 @@ export function Papers ({ searchParams, setSearchParams }) {
 
     const startTime = performance.now();
 
-    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, startTime, searchParams.pages);
-    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}`);
+    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, startTime, searchParams.pages, searchParams.term);
+    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}&term=${searchParams.term}`);
   };
 
   const changePaper = (paperId) => {
@@ -304,7 +331,7 @@ export function Papers ({ searchParams, setSearchParams }) {
       return (
         <div className='content-area'>
           <Pagination handlePageClick={handlePageClick} page={searchParams.page} totalPages={pageCount} />
-          <p className='pagination-container results'>{!loading && (<p>{total} Results in {time} seconds</p>)}</p>
+          <p className='pagination-container results'>{!loading && `${total} Results in ${time} seconds`}</p>
           <ul className='list'>
             {papers.map((paper, index) => (
             <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
@@ -321,11 +348,11 @@ export function Papers ({ searchParams, setSearchParams }) {
                 ))}
               </p>
               <div className={expandedIndex === index ? 'text expanded' : 'text'}>
-            <Content content={paper.summary} />
-            <div className="expand-button" onClick={() => toggleExpand(index)}>
-              {expandedIndex === index ? '⌃' : '⌄'}
-            </div>
-          </div>
+                <Content content={paper.summary} />
+                <div className="expand-button" onClick={() => toggleExpand(index)}>
+                  {expandedIndex === index ? '⌃' : '⌄'}
+                </div>
+              </div>
             </div>
             ))}
           </ul>

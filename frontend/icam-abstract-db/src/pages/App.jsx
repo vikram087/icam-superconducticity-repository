@@ -10,6 +10,7 @@ function App() {
     query: "all",
     sorting: "Most-Relevant",
     pages: 30,
+    term: "Abstract",
   });
 
   return (

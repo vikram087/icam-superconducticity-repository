@@ -68,6 +68,21 @@ def papers():
     query = str(data.get('query', ""))
     sorting = str(data.get('sorting', ""))
     pages = int(data.get('pages', 30))
+    term = str(data.get('term', ""))
+    
+    fuzzy = False
+    # if term == "Abstract":
+    #     field = "summary_embedding"
+    #     fuzzy = False
+    # elif term == "Title":
+    #     field = "title_embedding"
+    #     fuzzy = False
+    # elif term == "Category":
+    #     field = "category"
+    #     fuzzy = True
+    # elif term == "Authors":
+    #     field = "authors"
+    #     fuzzy = True
     
     cache_key = make_cache_key(query, sorting, page, numResults, pages)
     cached = get_cached_results(cache_key)
@@ -105,11 +120,12 @@ def papers():
             sort=[{"date": {"order": sort}}],
             index="search-papers-meta"
         )
-    else:
+    elif not fuzzy:
         knnSearch = True
         results = client.search(
             knn={
                 'field': 'embedding',
+                # 'field': field
                 'query_vector': getEmbedding(query),
                 'num_candidates': size,
                 'k': k,
@@ -120,6 +136,21 @@ def papers():
             size=page*numResults,
             sort=pSort,
             index="search-papers-meta"
+        )
+    else:
+        knnSearch = False
+        results = client.search(
+            query = {
+                "query": {
+                    "match": {
+                        field: {
+                            "query": query,
+                            "fuzziness": "AUTO"
+                        }
+                    }
+                }
+            },
+            index="search-papers-meta",
         )
         
     hits = results['hits']['hits']
