@@ -132,7 +132,7 @@ function Filters({ searchParams }) {
       setPageNumber(30);
       pageValue = 30;
     }
-    navigate(`?page=${searchParams.page}&per_page=${numResults}&query=${searchParams.query}&sort=${sortVal}&pages=${pageNumber}&term=${term}`);
+    navigate(`?page=${searchParams.page}&per_page=${numResults}&query=${searchParams.query}&sort=${sortVal}&pages=${pageValue}&term=${term}`);
   };
 
   const handleInputChange = (event) => {
@@ -292,7 +292,8 @@ export function Papers ({ searchParams, setSearchParams }) {
       page: page,
       query: search,
       sorting: sorting,
-      pages,
+      pages: pages,
+      term: term,
     });
 
     const startTime = performance.now();
@@ -332,6 +333,7 @@ export function Papers ({ searchParams, setSearchParams }) {
         <div className='content-area'>
           <Pagination handlePageClick={handlePageClick} page={searchParams.page} totalPages={pageCount} />
           <p className='pagination-container results'>{!loading && `${total} Results in ${time} seconds`}</p>
+          <p className='pagination-container results' style={{ paddingRight: "200px"}}>{total === 10000 ? "Results are Limited to the first 10,000 matching documents" : ""}</p>
           <ul className='list'>
             {papers.map((paper, index) => (
             <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>

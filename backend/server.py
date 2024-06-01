@@ -49,8 +49,8 @@ def get_cached_results(cache_key):
 def cache_results(cache_key, data):
     redis_client.setex(cache_key, 3600, json.dumps(data))
     
-def make_cache_key(query, sorting, page, numResults, pages):
-    key = f"{query}_{sorting}_{page}_{numResults}_{pages}"
+def make_cache_key(query, sorting, page, numResults, pages, term):
+    key = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}"
     return key
 
 # cache.clear()
@@ -70,21 +70,16 @@ def papers():
     pages = int(data.get('pages', 30))
     term = str(data.get('term', ""))
     
-    fuzzy = False
-    # if term == "Abstract":
-    #     field = "summary_embedding"
-    #     fuzzy = False
-    # elif term == "Title":
-    #     field = "title_embedding"
-    #     fuzzy = False
-    # elif term == "Category":
-    #     field = "category"
-    #     fuzzy = True
-    # elif term == "Authors":
-    #     field = "authors"
-    #     fuzzy = True
-    
-    cache_key = make_cache_key(query, sorting, page, numResults, pages)
+    if term == "Abstract":
+        field = "summary_embedding"
+    elif term == "Title":
+        field = "title_embedding"
+    elif term == "Category":
+        field = "categories"
+    elif term == "Authors":
+        field = "authors"
+        
+    cache_key = make_cache_key(query, sorting, page, numResults, pages, term)
     cached = get_cached_results(cache_key)
     if cached:
         return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
@@ -120,12 +115,11 @@ def papers():
             sort=[{"date": {"order": sort}}],
             index="search-papers-meta"
         )
-    elif not fuzzy:
+    elif field == "summary_embedding" or field == "title_embedding":
         knnSearch = True
         results = client.search(
             knn={
-                'field': 'embedding',
-                # 'field': field
+                'field': field,
                 'query_vector': getEmbedding(query),
                 'num_candidates': size,
                 'k': k,
@@ -137,16 +131,14 @@ def papers():
             sort=pSort,
             index="search-papers-meta"
         )
-    else:
+    elif field == "authors" or field == "categories":
         knnSearch = False
         results = client.search(
             query = {
-                "query": {
-                    "match": {
-                        field: {
-                            "query": query,
-                            "fuzziness": "AUTO"
-                        }
+                "match": {
+                    field: {
+                        "query": query,
+                        "fuzziness": "AUTO"
                     }
                 }
             },
@@ -175,6 +167,8 @@ def papers():
             accuracy[hits[i]['_source']['id']] = hits[i]['_score']
     else:
         filtered_papers = list(papers)
+        if results['hits']['total']['value'] < total:
+            total = results['hits']['total']['value']
             
     if filtered_papers:
         cache_results(cache_key, ( filtered_papers, total, accuracy ))
