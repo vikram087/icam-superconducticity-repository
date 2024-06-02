@@ -7,6 +7,7 @@ import json
 from sentence_transformers import SentenceTransformer
 import redis
 import math
+from datetime import datetime
 # import faiss
 
 load_dotenv()
@@ -49,8 +50,8 @@ def get_cached_results(cache_key):
 def cache_results(cache_key, data):
     redis_client.setex(cache_key, 3600, json.dumps(data))
     
-def make_cache_key(query, sorting, page, numResults, pages, term):
-    key = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}"
+def make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate):
+    key = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}_{startDate}_{endDate}"
     return key
 
 # cache.clear()
@@ -69,6 +70,8 @@ def papers():
     sorting = str(data.get('sorting', ""))
     pages = int(data.get('pages', 30))
     term = str(data.get('term', ""))
+    startDate = 00000000
+    endDate = int(datetime.now().strftime("%Y%m%d"))
     
     if term == "Abstract":
         field = "summary_embedding"
@@ -79,7 +82,7 @@ def papers():
     elif term == "Authors":
         field = "authors"
         
-    cache_key = make_cache_key(query, sorting, page, numResults, pages, term)
+    cache_key = make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate)
     cached = get_cached_results(cache_key)
     if cached:
         return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
@@ -107,9 +110,48 @@ def papers():
     elif sorting == "Most-Relevant":
         pSort = [{'_score': {'order': sort}}]
         
-    if query == "all":
+    if query == "all" or field == "summary_embedding" or field == "title_embedding":
+        quer={
+            "bool": {
+                "must": {
+                    "match_all": {}
+                },
+                "filter": {
+                    "range": {
+                        "date": {
+                            "gte": startDate,
+                            "lte": endDate,
+                        }
+                    }
+                }
+            }
+        }
+    else:
+        quer={
+            "bool": {
+                "must": {
+                    "match": {
+                        field: {
+                            "query": query,
+                            "fuzziness": "AUTO"
+                        }
+                    }
+                },
+                "filter": {
+                    "range": {
+                        "date": {
+                            "gte": startDate,
+                            "lte": endDate,
+                        }
+                    }
+                }
+            }
+        }
+        
+    if query == "all" or field == "authors" or field == "categories":
+        knnSearch = False
         results = client.search(
-            query={"match_all": {}},
+            query=quer,
             size=numResults,
             from_=(page-1)*numResults,
             sort=[{"date": {"order": sort}}],
@@ -124,25 +166,13 @@ def papers():
                 'num_candidates': size,
                 'k': k,
             },
+            query=quer,
             # size=numResults,
             # from_=(page-1)*numResults,
             from_=0,
             size=page*numResults,
             sort=pSort,
             index="search-papers-meta"
-        )
-    elif field == "authors" or field == "categories":
-        knnSearch = False
-        results = client.search(
-            query = {
-                "match": {
-                    field: {
-                        "query": query,
-                        "fuzziness": "AUTO"
-                    }
-                }
-            },
-            index="search-papers-meta",
         )
         
     hits = results['hits']['hits']
@@ -153,22 +183,26 @@ def papers():
         for i in range(len(hits)):
             papers.append(hits[i]['_source'])
     
-    total = numResults*pages
-    if total > size:
-        total = size
+    total = client.search(
+            query=quer,
+            size=numResults,
+            from_=(page-1)*numResults,
+            sort=[{"date": {"order": sort}}],
+            index="search-papers-meta"
+        )['hits']['total']['value']
+    
+    if total > numResults*pages:
+        total = numResults*pages
     
     if knnSearch:
         papers = hits[(page-1)*numResults:]
-        # filtered_papers = [hit['_source'] for hit in papers]
-        filtered_papers = [papers[i]['_source'] for i in range(len(papers))]
+        filtered_papers = [papers[i]['_source'] for i in range(len(papers)) if papers[i]['_source']['date'] > startDate and papers[i]['_source']['date'] < endDate]
         for i in range(len(hits)):
             if not hits[i]['_score']:
                 break
-            accuracy[hits[i]['_source']['id']] = hits[i]['_score']
+            accuracy[hits[i]['_source']['id']] = float(str(hits[i]['_score'])[1:])
     else:
         filtered_papers = list(papers)
-        if results['hits']['total']['value'] < total:
-            total = results['hits']['total']['value']
             
     if filtered_papers:
         cache_results(cache_key, ( filtered_papers, total, accuracy ))
