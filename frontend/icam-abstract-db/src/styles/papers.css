@@ -105,6 +105,14 @@
   position: relative;
 }
 
+.scroll-to-top-container {
+  position: fixed;
+  bottom: 20px; 
+  right: 20px; 
+  z-index: 1000;
+}
+
+
 .text .expand-button,
 .expanded .expand-button {
   position: absolute;

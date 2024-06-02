@@ -358,6 +358,7 @@ export function Papers ({ searchParams, setSearchParams }) {
             </div>
             ))}
           </ul>
+          <ScrollToTop />
         </div>
       )
     }
@@ -469,3 +470,16 @@ const Content = ({ content }) => {
     </MathJaxContext>
   );
 };
+
+function ScrollToTop() {
+  const scrollToTopButton = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <button className='scroll-to-top-container' onClick={scrollToTopButton}>↑</button>
+  );
+}
