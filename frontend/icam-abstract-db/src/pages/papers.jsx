@@ -1,196 +1,13 @@
-import '../styles/papers.css';
-import React, { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { TailSpin } from 'react-loader-spinner';
-import { Search } from './homepage';
-import { MathJax, MathJaxContext } from "better-react-mathjax";
+import Search from '../components/search.jsx';
+import Content from '../components/mathjax.jsx';
+import Pagination from '../components/pagination.jsx';
+import Filters from '../components/filters.jsx';
+import '../styles/papers.css';
 
-const numToDate = (date) => {
-  const monthsReversed = {"01": "January,", "02": "February,", "03": "March,", "04": "April,", "05": "May,", "06": "June,", "07": "July,", "08": "August,", "09": "September,", "10": "October,", "11": "November,", "12": "December,"};
-  const year = date.substring(0, 4);
-  const month = monthsReversed[date.substring(4, 6)];
-  const day = date.substring(6);
-
-  return day + " " + month + " " + year;
-};
-
-export function PaperDetail({ searchParams }) {
-  const [paper, setPaper] = useState(null);
-
-  let navigate = useNavigate();
-  let { id } = useParams();
-
-  useEffect(() => {
-    fetch(`http://localhost:8080/api/papers/${id}`)
-    .then((response) => response.json())
-    .then(data => {
-      setPaper(data);
-    })
-  }, [id]);
-
-  const goBack = () => {
-    navigate(`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}&term=${searchParams.term}`);
-  };
-
-  const replaceID = (id) => {
-    let lastIndex = id.lastIndexOf('-');
-    
-    if (lastIndex !== -1) {
-        return id.substring(0, lastIndex) + '/' + id.substring(lastIndex + 1);
-    }
-    else {
-      return id;
-    }
-  };
-
-  return (
-    paper ? 
-      <div className='paper'>
-        <div className='button'>
-          <button className='return' onClick={goBack}>Go Back</button>
-        </div>
-        <u><Content content={paper.title}/></u>
-        <p><strong>Authors:</strong> {paper.authors.map((author, index) => (
-          <span key={index}>
-            {author}{index < paper.authors.length - 1 ? ', ' : ''}
-          </span>
-        ))}</p>       
-        <p><strong>arXiv ID:</strong> {replaceID(paper.id)}</p>
-        <p><strong>DOI:</strong> {paper.doi}</p>
-        <strong>Links:</strong>
-        {paper.links.map(link => <a href={link} target='_blank' rel="noreferrer"><br></br>{link}</a>)}
-        <p><strong>Categories:</strong> {paper.categories.map((category, index) => (
-          <span key={index}>
-            {category}{index < paper.categories.length - 1 ? ', ' : ''}
-          </span>
-        ))}</p>     
-        <p><strong>Submission Date:</strong> {numToDate((String) (paper.date))}</p>
-        <p><strong>Update Date:</strong> {numToDate((String) (paper.updated))}</p>
-        <p><strong>Comments:</strong> {paper.comments}</p>
-        <p><strong>Primary Category:</strong> {paper.primary_category}</p>
-        <p><strong>Journal Ref:</strong> {paper.journal_ref}</p>
-        <div className='abstract'><strong>Abstract:</strong> <br></br><Content content={paper.summary}/></div>
-      </div>
-    :
-    <div className='loader'>
-      <p>Loading ...</p>
-      <TailSpin color="#00BFFF" height={100} width={100} />
-    </div>
-  );
-}
-
-function Filters({ searchParams }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [pageNumber, setPageNumber] = useState(searchParams.pages || 30);
-  const [sortVal, setSortVal] = useState(searchParams.sorting || 'Most-Relevant');
-  const [numResults, setNumResults] = useState(searchParams.per_page || 20);
-  const [term, setTerm] = useState(searchParams.term || "Abstract");
-
-  const [results, setResults] = useState([20, 10, 50, 100]);
-  const [order, setOrder] = useState(["Most-Relevant", "Most-Recent", "Oldest-First"]);
-  const [terms, setTerms] = useState(["Abstract", "Title", "Authors", "Category"]);
-
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    let perPage = (Number) (query.get('per_page')) || numResults;
-    let sorting = query.get('sort') || sortVal;
-    let pages = (Number) (query.get('pages')) || pageNumber;
-    let searchTerm = query.get('term') || term;
-
-    const updatedResults = results.filter(r => r !== perPage);
-    updatedResults.unshift(perPage);
-
-    if(sorting !== "Most-Recent" && sorting !== "Oldest-First" && sorting !== "Most-Relevant") {
-      sorting = "Most-Relevant";
-    }
-
-    if(searchTerm !== "Abstract" && searchTerm !== "Title" && searchTerm !== "Category" && searchTerm !== "Authors") {
-      searchTerm = "Abstract";
-    }
-
-    const updatedOrder = order.filter(r => r !== sorting);
-    updatedOrder.unshift(sorting);
-
-    const updatedTerms = terms.filter(r => r !== searchTerm);
-    updatedTerms.unshift(searchTerm);
-
-    setNumResults(perPage);
-    setSortVal(sorting);
-    setPageNumber(pages);
-    setTerm(searchTerm);
-
-    setResults(updatedResults);
-    setOrder(updatedOrder);
-    setTerms(updatedTerms);
-  }, []);
-
-  const handleButton = () => {
-    let pageValue = pageNumber;
-    if(pageNumber === "") {
-      setPageNumber(30);
-      pageValue = 30;
-    }
-    navigate(`?page=${searchParams.page}&per_page=${numResults}&query=${searchParams.query}&sort=${sortVal}&pages=${pageValue}&term=${term}`);
-  };
-
-  const handleInputChange = (event) => {
-    const val = event.target.value;
-    if(val > 0 || val === "") {
-      setPageNumber(val);
-    }
-  };
-
-  return (
-    <div>
-      <b>Search Term</b>
-      <br></br>
-      <br></br>
-      <select onChange={(e) => setTerm(e.target.value)}>
-        {terms.map((option, index) => (
-          <option key={index} value={option}>{option}</option>
-        ))}
-      </select>
-      <br></br>
-      <br></br>
-      <b>Sort</b>
-      <br></br>
-      <div className='results-per-page'>
-        <select onChange={(e) => setSortVal(e.target.value.replace(" ", "-"))}>
-          {order.map((option, index) => (
-              <option key={index} value={option}>{option.replace("-", " ")}</option>
-          ))}
-        </select>
-      </div>
-      <br></br>
-      <b>Results Per Page</b>
-      <br></br>
-      <div className='results-per-page'>
-        <select onChange={(e) => setNumResults(e.target.value)}>
-          {results.map((option, index) => (
-              <option key={index} value={option}>{option}</option>
-          ))}
-        </select>
-      </div>
-      <br></br>
-      <b>Page Limit</b>
-      <br></br>
-      <br></br>
-      <input 
-        type="number"
-        min={1}
-        value={pageNumber}
-        onChange={handleInputChange}
-      ></input>
-      <br></br>
-      <br></br>
-      <button onClick={handleButton} style={{ cursor: "pointer" }}>Submit</button>
-    </div>
-  );
-}
-
-export function Papers ({ searchParams, setSearchParams }) {
+function Papers({ searchParams, setSearchParams }) {
   const location = useLocation();
 
   const [papers, setPapers] = useState([]);
@@ -200,7 +17,7 @@ export function Papers ({ searchParams, setSearchParams }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [accuracy, setAccuracy] = useState({});
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState('');
 
   const navigate = useNavigate();
 
@@ -210,78 +27,99 @@ export function Papers ({ searchParams, setSearchParams }) {
     } else {
       setExpandedIndex(index);
     }
-  }
+  };
 
-  const getPapers = useCallback((page, results, query, sorting, startTime, pages, term) => {
-    fetch("http://localhost:8080/api/papers", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ "page": page, "results": results, "query": query, "sorting": sorting, "pages": pages, "term": term }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      setExpandedIndex(-1);
-      setPapers(data.papers);
-      setTotal(data.total);
-      setAccuracy(data.accuracy);
-      setPageCount(Math.ceil(data.total/searchParams.per_page));
-      if(data.total === undefined) {
-        setTotal(0);
-        setPapers([]);
-      }
+  const getPapers = useCallback(
+    (page, results, query, sorting, startTime, pages, term) => {
+      fetch('http://localhost:8080/api/papers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          page: page,
+          results: results,
+          query: query,
+          sorting: sorting,
+          pages: pages,
+          term: term,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setExpandedIndex(-1);
+          setPapers(data.papers);
+          setTotal(data.total);
+          setAccuracy(data.accuracy);
+          setPageCount(Math.ceil(data.total / searchParams.per_page));
+          if (data.total === undefined) {
+            setTotal(0);
+            setPapers([]);
+          }
 
-      // if (window.MathJax) {
-      //   window.MathJax.typesetPromise().then(() => {
-      //     console.log("MathJax typesetting complete");
-      //   }).catch((err) => console.error('MathJax typesetting failed: ', err));
-      // }
+          setLoading(false);
 
-      setLoading(false);
+          const endTime = performance.now();
 
-      const endTime = performance.now();
-
-      const totalTimeS = (endTime - startTime)/1000;
-      const totalTime = totalTimeS.toFixed(2);
-      setTime(totalTime);
-    })
-    .catch(error => {
-      console.error('Error fetching papers:', error);
-    });
-  }, [searchParams.per_page]);
+          const totalTimeS = (endTime - startTime) / 1000;
+          const totalTime = totalTimeS.toFixed(2);
+          setTime(totalTime);
+        })
+        .catch((error) => {
+          console.error('Error fetching papers:', error);
+        });
+    },
+    [searchParams.per_page],
+  );
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    let page = (Number) (query.get('page')) || searchParams.page;
-    let perPage = (Number) (query.get('per_page')) || searchParams.per_page;
-    let search = query.get('query') || searchParams.query;
+    let page = Number(query.get('page')) || searchParams.page;
+    let perPage = Number(query.get('per_page')) || searchParams.per_page;
+    const search = query.get('query') || searchParams.query;
     let sorting = query.get('sort') || searchParams.sorting;
-    let pages = (Number) (query.get('pages')) || searchParams.pages;
+    let pages = Number(query.get('pages')) || searchParams.pages;
     let term = query.get('term') || searchParams.term;
 
-    if(perPage >= 100) { perPage = 100 }
-    else if(perPage >= 50) { perPage = 50; }
-    else if(perPage >= 20) { perPage = 20; }
-    else { perPage = 10; }
-
-    if(sorting !== "Most-Recent" && sorting !== "Oldest-First" && sorting !== "Most-Relevant") {
-      sorting = "Most-Relevant";
+    if (perPage >= 100) {
+      perPage = 100;
+    } else if (perPage >= 50) {
+      perPage = 50;
+    } else if (perPage >= 20) {
+      perPage = 20;
+    } else {
+      perPage = 10;
     }
 
-    if(term !== "Abstract" && term !== "Title" && term !== "Category" && term !== "Authors") {
-      term = "Abstract";
+    if (
+      sorting !== 'Most-Recent' &&
+      sorting !== 'Oldest-First' &&
+      sorting !== 'Most-Relevant'
+    ) {
+      sorting = 'Most-Relevant';
     }
 
-    if(!Number.isInteger(page) || page <= 0) {
+    if (
+      term !== 'Abstract' &&
+      term !== 'Title' &&
+      term !== 'Category' &&
+      term !== 'Authors'
+    ) {
+      term = 'Abstract';
+    }
+
+    if (!Number.isInteger(page) || page <= 0) {
       page = 1;
     }
 
-    if(!Number.isInteger(pages) || pages <= 0) {
+    if (!Number.isInteger(pages) || pages <= 0) {
       pages = 30;
     }
 
-    navigate(`?page=${page}&per_page=${perPage}&query=${search}&sort=${sorting}&pages=${pages}&term=${term}`);
+    navigate(
+      `?page=${page}&per_page=${perPage}&query=${search}` +
+        `&sort=${sorting}&pages=${pages}&term=${term}`,
+    );
 
     // if(page > total/perPage) {
     //   page = total/perPage;
@@ -301,23 +139,46 @@ export function Papers ({ searchParams, setSearchParams }) {
     setLoading(true);
 
     getPapers(page, perPage, search, sorting, startTime, pages, term);
-  }, [location.search, getPapers, searchParams.page, searchParams.per_page, searchParams.query, searchParams.sorting, searchParams.pages, setSearchParams]);
+  }, [
+    location.search,
+    getPapers,
+    navigate,
+    searchParams.page,
+    searchParams.per_page,
+    searchParams.query,
+    searchParams.sorting,
+    searchParams.pages,
+    searchParams.term,
+    setSearchParams,
+  ]);
 
   const changePage = (page) => {
-    setSearchParams(prevParams => ({
+    setSearchParams((prevParams) => ({
       ...prevParams,
-      page: page
+      page: page,
     }));
 
     const startTime = performance.now();
 
-    getPapers(page, searchParams.per_page, searchParams.query, searchParams.sorting, startTime, searchParams.pages, searchParams.term);
-    navigate(`?page=${page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}&term=${searchParams.term}`);
+    getPapers(
+      page,
+      searchParams.per_page,
+      searchParams.query,
+      searchParams.sorting,
+      startTime,
+      searchParams.pages,
+      searchParams.term,
+    );
+    navigate(
+      `?page=${page}&per_page=${searchParams.per_page}` +
+        `&query=${searchParams.query}&sort=${searchParams.sorting}` +
+        `&pages=${searchParams.pages}&term=${searchParams.term}`,
+    );
   };
 
   const changePaper = (paperId) => {
     navigate(`/papers/${paperId}`);
-  }
+  };
 
   const handlePageClick = (pageNumber) => {
     setPapers([]);
@@ -325,151 +186,100 @@ export function Papers ({ searchParams, setSearchParams }) {
   };
 
   const chooseBody = () => {
-    if(!loading && total === 0) {
+    if (!loading && total === 0) {
       return <></>;
-    }
-    else if(!loading) {
+    } else if (!loading) {
       return (
-        <div className='content-area'>
-          <Pagination handlePageClick={handlePageClick} page={searchParams.page} totalPages={pageCount} />
-          <p className='pagination-container results'>{!loading && `${total} Results in ${time} seconds`}</p>
-          <p className='pagination-container results' style={{ paddingRight: "200px"}}>{total === 10000 ? "Results are Limited to the first 10,000 matching documents" : ""}</p>
-          <ul className='list'>
+        <div className="content-area">
+          <Pagination
+            handlePageClick={handlePageClick}
+            page={searchParams.page}
+            totalPages={pageCount}
+          />
+          <p className="pagination-container results">
+            {!loading && `${total} Results in ${time} seconds`}
+          </p>
+          <p
+            className="pagination-container results"
+            style={{ paddingRight: '200px' }}
+          >
+            {total === 10000
+              ? 'Results are Limited to the first 10,000 matching documents'
+              : ''}
+          </p>
+          <ul className="list">
             {papers.map((paper, index) => (
-            <div className={index === expandedIndex ? 'expanded-container' : 'container'} key={index}>
-              {accuracy[paper.id] && (<div style={{ paddingBottom: "3px" }}>Query Match Accuracy: {(accuracy[paper.id]*100).toFixed(1)}%</div>)}
-              <div onClick={() => changePaper(paper.id.replace("/-/g", '/'))}>
-                  <u className='paper-title'><Content content={paper.title}/></u> 
-              </div>
-              <p>
-                by&nbsp;
-                {paper.authors.map((author, index) => (
-                  <span key={index}><em>
-                    {author}{index < paper.authors.length - 1 ? ', ' : ''}
-                  </em></span>
-                ))}
-              </p>
-              <div className={expandedIndex === index ? 'text expanded' : 'text'}>
-                <Content content={paper.summary} />
-                <div className="expand-button" onClick={() => toggleExpand(index)}>
-                  {expandedIndex === index ? '⌃' : '⌄'}
+              <div
+                className={
+                  index === expandedIndex ? 'expanded-container' : 'container'
+                }
+                key={index}
+              >
+                {accuracy[paper.id] && (
+                  <div style={{ paddingBottom: '3px' }}>
+                    Query Match Accuracy:{' '}
+                    {(accuracy[paper.id] * 100).toFixed(1)}%
+                  </div>
+                )}
+                <div onClick={() => changePaper(paper.id.replace('/-/g', '/'))}>
+                  <u className="paper-title">
+                    <Content content={paper.title} />
+                  </u>
+                </div>
+                <p>
+                  by&nbsp;
+                  {paper.authors.map((author, index) => (
+                    <span key={index}>
+                      <em>
+                        {author}
+                        {index < paper.authors.length - 1 ? ', ' : ''}
+                      </em>
+                    </span>
+                  ))}
+                </p>
+                <div
+                  className={expandedIndex === index ? 'text expanded' : 'text'}
+                >
+                  <Content content={paper.summary} />
+                  <div
+                    className="expand-button"
+                    onClick={() => toggleExpand(index)}
+                  >
+                    {expandedIndex === index ? '⌃' : '⌄'}
+                  </div>
                 </div>
               </div>
-            </div>
             ))}
           </ul>
           <ScrollToTop />
+          <ScrollToBottom />
         </div>
-      )
+      );
+    } else if (loading) {
+      return (
+        <div className="papers-loader">
+          <p>Loading ...</p>
+          <TailSpin color="#00BFFF" height={100} width={100} />
+        </div>
+      );
     }
-    else if(loading) {
-      return <div className='loader'>
-        <p>Loading ...</p>
-        <TailSpin color="#00BFFF" height={100} width={100} />
-      </div>
-    }
-  }
+  };
 
   return (
-    <div> 
-      <p className='title' onClick={() => navigate("/")}>ICAM Superconductivity Database</p>
-      <Search searchParams={searchParams} papers={papers}/>
-      <div className='page-container'>
-        <div className='filters'>
+    <div>
+      <p className="title" onClick={() => navigate('/')}>
+        ICAM Superconductivity Database
+      </p>
+      <Search searchParams={searchParams} papers={papers} />
+      <div className="page-container">
+        <div className="filters">
           <Filters searchParams={searchParams} />
         </div>
-          {chooseBody()}
+        {chooseBody()}
       </div>
     </div>
   );
 }
-
-function Pagination({ handlePageClick, page, totalPages }) {
-
-  const [pageNumber, setPageNumber] = useState(page);
-
-  const handleBack = () => {
-    if(page >= 2) {
-      handlePageClick(page-1);
-      setPageNumber(page-1);
-    }
-  };
-
-  const handleFront = () => {
-    if(page <= totalPages-1) {
-      handlePageClick((Number)(page)+1);
-      setPageNumber((Number)(page)+1);
-    }
-  };
-
-  const handleNumber = (pageNumber) => {
-    if((Number)(page) !== pageNumber) {
-      handlePageClick(pageNumber);
-      setPageNumber(pageNumber);
-    }
-  };
-
-  const handleSubmit = (event) => {
-    if(event.key === "Enter" && page !== pageNumber) {
-      if(pageNumber < 2 && page > 1) {
-        handlePageClick(1);
-        setPageNumber(1);
-      }
-      else if(pageNumber > totalPages-1 && page < totalPages) {
-        handlePageClick(totalPages);
-        setPageNumber(totalPages);
-      }
-      else if(pageNumber <= totalPages-1 && pageNumber >= 2) {
-        handlePageClick(pageNumber);   
-        setPageNumber(pageNumber);
-      }   
-    }
-  };
-
-  const handleInputChange = (event) => {
-    setPageNumber(event.target.value);
-  };  
-
-  return (
-    <div className='pagination-container'>
-      <span style={{cursor: "pointer" }} onClick={() => handleNumber(1)}>&lt;&lt;&nbsp;</span>
-      <span style={{cursor: "pointer" }} onClick={handleBack}>&nbsp;&lt;&nbsp;</span>
-      <input 
-        type="number"
-        onKeyDown={handleSubmit}
-        value={pageNumber}
-        onChange={handleInputChange}
-      ></input>
-      <span style={{cursor: "pointer" }} onClick={handleFront}>&nbsp;&gt;&nbsp;</span>
-      <span style={{cursor: "pointer" }} onClick={() => handleNumber(totalPages)}>&nbsp;&gt;&gt;&nbsp;</span>
-    </div>
-  );
-}
-
-const Content = ({ content }) => {
-  const config = {
-    loader: { load: ["[tex]/html"] },
-    tex: {
-      packages: { "[+]": ["html"] },
-      inlineMath: [
-        ["$", "$"],
-        ["\\(", "\\)"]
-      ],
-      displayMath: [
-        ["$$", "$$"],
-        ["\\[", "\\]"]
-      ]
-    }
-  };
-
-  return (
-    <MathJaxContext version={3} config={config}>
-      <MathJax hideUntilTypeset={"first"}>
-          {`${content}`}
-      </MathJax>
-    </MathJaxContext>
-  );
-};
 
 function ScrollToTop() {
   const scrollToTopButton = () => {
@@ -480,6 +290,28 @@ function ScrollToTop() {
   };
 
   return (
-    <button className='scroll-to-top-container' onClick={scrollToTopButton}>↑</button>
+    <button className="scroll-to-top-container" onClick={scrollToTopButton}>
+      ↑
+    </button>
   );
 }
+
+function ScrollToBottom() {
+  const scrollToBottomButton = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <button
+      className="scroll-to-bottom-container"
+      onClick={scrollToBottomButton}
+    >
+      ↓
+    </button>
+  );
+}
+
+export default Papers;

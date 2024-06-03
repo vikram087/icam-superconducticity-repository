@@ -5,20 +5,9 @@
   width: 100%; 
 }
 
-.pagination-container {
-  justify-content: center;
-  width: 50%;
-  user-select: none;
-}
-
 .results {
   padding-left: 30px;
   user-select: auto;
-}
-
-.results-per-page {
-  padding-top: 10px;
-  padding-bottom: 5px;
 }
 
 .journals {
@@ -50,22 +39,6 @@
   width: 90%;
 }
 
-.paper {
-  padding-left: 10%;
-  padding-right: 10%;
-}
-
-.return {
-  padding: 5px;
-  border-radius: 10px;
-  border: 1px solid black;
-}
-
-.button {
-  padding-bottom: 10px;
-  padding-top: 10px;
-}
-
 /* .container:hover {
   box-shadow: 1px 1px 5px grey;
 } */
@@ -76,12 +49,7 @@
   width: 90%;
 }
 
-.abstract {
-  padding-top: 10px;
-  padding-bottom: 40px;
-}
-
-.content-area, .loader {
+.content-area, .papers-loader {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -89,8 +57,7 @@
   justify-content: center;
 }
 
-
-.loader p {
+.papers-loader p {
   font-size: x-large;
 }
 
@@ -112,6 +79,12 @@
   z-index: 1000;
 }
 
+.scroll-to-bottom-container {
+  position: fixed;
+  bottom: 20px; 
+  left: 20px; 
+  z-index: 1000;
+}
 
 .text .expand-button,
 .expanded .expand-button {

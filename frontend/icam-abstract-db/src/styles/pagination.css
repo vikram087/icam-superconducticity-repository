@@ -1,0 +1,5 @@
+.pagination-container {
+    justify-content: center;
+    width: 50%;
+    user-select: none;
+}
