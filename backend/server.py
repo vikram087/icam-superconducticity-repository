@@ -7,7 +7,7 @@ import json
 from sentence_transformers import SentenceTransformer
 import redis
 import math
-from datetime import datetime
+# from datetime import datetime
 # import faiss
 
 load_dotenv()
@@ -70,8 +70,9 @@ def papers():
     sorting = str(data.get('sorting', ""))
     pages = int(data.get('pages', 30))
     term = str(data.get('term', ""))
-    startDate = 00000000
-    endDate = int(datetime.now().strftime("%Y%m%d"))
+    date = str(data.get('date', "00000000-20240604"))
+    startDate = int(date.split("-")[0])
+    endDate = int(date.split("-")[1])
     
     if term == "Abstract":
         field = "summary_embedding"
@@ -154,7 +155,7 @@ def papers():
             query=quer,
             size=numResults,
             from_=(page-1)*numResults,
-            sort=[{"date": {"order": sort}}],
+            sort=[{"date": {"order": sort}}] if (sorting == "Most-Recent" or sorting == "Oldest-First") else None,
             index="search-papers-meta"
         )
     elif field == "summary_embedding" or field == "title_embedding":
@@ -167,8 +168,6 @@ def papers():
                 'k': k,
             },
             query=quer,
-            # size=numResults,
-            # from_=(page-1)*numResults,
             from_=0,
             size=page*numResults,
             sort=pSort,

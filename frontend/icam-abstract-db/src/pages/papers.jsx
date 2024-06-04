@@ -30,7 +30,7 @@ function Papers({ searchParams, setSearchParams }) {
   };
 
   const getPapers = useCallback(
-    (page, results, query, sorting, startTime, pages, term) => {
+    (page, results, query, sorting, startTime, pages, term, dateRange) => {
       fetch('http://localhost:8080/api/papers', {
         method: 'POST',
         headers: {
@@ -43,6 +43,7 @@ function Papers({ searchParams, setSearchParams }) {
           sorting: sorting,
           pages: pages,
           term: term,
+          date: dateRange,
         }),
       })
         .then((response) => response.json())
@@ -81,6 +82,26 @@ function Papers({ searchParams, setSearchParams }) {
     let pages = Number(query.get('pages')) || searchParams.pages;
     let term = query.get('term') || searchParams.term;
 
+    let date = query.get('date') || searchParams.date;
+    let startDate = date.split("-")[0];
+    let endDate = date.split("-")[1];
+
+    const currentDate = new Date();
+    const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, '');
+
+    if(date.split("-").length !== 2) {
+      date = `00000000-${now}`;
+    }
+
+    if(isNaN(Number(startDate)) || startDate.length !== 8) {
+      startDate = `00000000`;
+      date = `${startDate}-${endDate}`;
+    }
+    if(isNaN(Number(endDate)) || endDate.length !== 8) {
+      endDate = now;
+      date = `${startDate}-${endDate}`;
+    }
+
     if (perPage >= 100) {
       perPage = 100;
     } else if (perPage >= 50) {
@@ -118,7 +139,8 @@ function Papers({ searchParams, setSearchParams }) {
 
     navigate(
       `?page=${page}&per_page=${perPage}&query=${search}` +
-        `&sort=${sorting}&pages=${pages}&term=${term}`,
+        `&sort=${sorting}&pages=${pages}&term=${term}` 
+        + `&date=${date}`,
     );
 
     // if(page > total/perPage) {
@@ -132,13 +154,23 @@ function Papers({ searchParams, setSearchParams }) {
       sorting: sorting,
       pages: pages,
       term: term,
+      date: date,
     });
 
     const startTime = performance.now();
 
     setLoading(true);
 
-    getPapers(page, perPage, search, sorting, startTime, pages, term);
+    getPapers(
+      page,
+      perPage,
+      search,
+      sorting,
+      startTime,
+      pages,
+      term,
+      date,
+    );
   }, [
     location.search,
     getPapers,
@@ -149,6 +181,7 @@ function Papers({ searchParams, setSearchParams }) {
     searchParams.sorting,
     searchParams.pages,
     searchParams.term,
+    searchParams.date,
     setSearchParams,
   ]);
 
@@ -168,11 +201,13 @@ function Papers({ searchParams, setSearchParams }) {
       startTime,
       searchParams.pages,
       searchParams.term,
+      searchParams.date,
     );
     navigate(
       `?page=${page}&per_page=${searchParams.per_page}` +
         `&query=${searchParams.query}&sort=${searchParams.sorting}` +
-        `&pages=${searchParams.pages}&term=${searchParams.term}`,
+        `&pages=${searchParams.pages}&term=${searchParams.term}&` +
+        `${searchParams.date}`,
     );
   };
 
@@ -215,10 +250,9 @@ function Papers({ searchParams, setSearchParams }) {
                 }
                 key={index}
               >
-                {accuracy[paper.id] && (
+                {accuracy[paper.id] != null && Number(accuracy[paper.id]) !== 0 && (
                   <div style={{ paddingBottom: '3px' }}>
-                    Query Match Accuracy:{' '}
-                    {(accuracy[paper.id] * 100).toFixed(1)}%
+                    Query Match Accuracy: {(accuracy[paper.id] * 100).toFixed(1)}%
                   </div>
                 )}
                 <div onClick={() => changePaper(paper.id.replace('/-/g', '/'))}>

@@ -12,7 +12,8 @@ function HomePage({ searchParams }) {
     navigate(
       `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
         `&query=${query}&sort=${searchParams.sorting}` +
-        `&pages=${searchParams.pages}&term=${searchParams.term}`,
+        `&pages=${searchParams.pages}&term=${searchParams.term}` +
+        `&date=${searchParams.date}`,
     );
   };
 

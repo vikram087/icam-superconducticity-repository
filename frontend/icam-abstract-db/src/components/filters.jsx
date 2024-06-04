@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/filters.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function Filters({ searchParams }) {
   const navigate = useNavigate();
@@ -26,15 +28,41 @@ function Filters({ searchParams }) {
     'Category',
   ]);
 
+  const [startDate, setStartDate] = useState(new Date(0));
+  const [endDate, setEndDate] = useState(new Date());
+  const formattedStart = startDate.toISOString().split('T')[0].replaceAll("-", "");
+  const formattedEnd = endDate.toISOString().split('T')[0].replaceAll("-", "");
+
+  const [dateRange, setDateRange] = useState(`${formattedStart}-${formattedEnd}`);
+
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const perPage = Number(query.get('per_page')) || numResults;
     let sorting = query.get('sort') || sortVal;
     const pages = Number(query.get('pages')) || pageNumber;
     let searchTerm = query.get('term') || term;
+    let date = query.get('date') || dateRange;
+    let startDate = date.split("-")[0];
+    let endDate = date.split("-")[1];
 
     const updatedResults = results.filter((r) => r !== perPage);
     updatedResults.unshift(perPage);
+
+    const currentDate = new Date();
+    const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, '');
+
+    if(dateRange.split("-").length !== 2) {
+      date = `00000000-${now}`;
+    }
+
+    if(isNaN(Number(startDate)) || startDate.length !== 8) {
+      startDate = `00000000`;
+      date = `${startDate}-${endDate}`;
+    }
+    if(isNaN(Number(endDate)) || endDate.length !== 8) {
+      endDate = now;
+      date = `${startDate}-${endDate}`;
+    }
 
     if (
       sorting !== 'Most-Recent' &&
@@ -63,6 +91,9 @@ function Filters({ searchParams }) {
     setSortVal(sorting);
     setPageNumber(pages);
     setTerm(searchTerm);
+    setDateRange(date);
+    setStartDate(convertIntToDate(startDate));
+    setEndDate(convertIntToDate(endDate));
 
     setResults(updatedResults);
     setOrder(updatedOrder);
@@ -76,17 +107,48 @@ function Filters({ searchParams }) {
       setPageNumber(30);
       pageValue = 30;
     }
+
     navigate(
       `?page=${searchParams.page}&per_page=${numResults}` +
         `&query=${searchParams.query}&sort=${sortVal}` +
-        `&pages=${pageValue}&term=${term}`,
+        `&pages=${pageValue}&term=${term}` 
+        + `&date=${dateRange}`,
     );
+    window.location.reload();
+  };
+
+  const convertIntToDate = (dateNum) => {
+    const dateString = String(dateNum);
+    const year = dateString.substring(0, 4);
+    const month = dateString.substring(4, 6) - 1;
+    const day = dateString.substring(6, 8);
+
+    let dateTime = new Date(year, month, day);
+    if(year + month + day === "00000000") {
+      dateTime = new Date(0);
+    }
+
+    return dateTime;
   };
 
   const handleInputChange = (event) => {
     const val = event.target.value;
     if (val > 0 || val === '') {
       setPageNumber(val);
+    }
+  };
+
+  const updateDateVal = (date, type) => {
+    const formattedDate = date.toISOString().split('T')[0].replaceAll('-', "");
+    let formattedStart = startDate.toISOString().split('T')[0].replaceAll("-", "");
+    const formattedEnd = endDate.toISOString().split('T')[0].replaceAll("-", "");
+
+    if (type === 'start') {
+      setStartDate(date);
+      setDateRange(`${formattedDate}-${formattedEnd}`);
+    } else if (type === 'end') {
+      setEndDate(date);
+      setDateRange(`${formattedStart}-${formattedDate}`);
     }
   };
 
@@ -137,6 +199,27 @@ function Filters({ searchParams }) {
         value={pageNumber}
         onChange={handleInputChange}
       ></input>
+      <br></br>
+      <br></br>
+      <b>Set Date Range</b>
+      <div>
+        <p>Start Date:</p>
+        <DatePicker
+          id="startDate"
+          dateFormat="yyyy-MM-dd"
+          selected={startDate}
+          onChange={(date) => updateDateVal(date, 'start')}
+        />
+      </div>
+      <div>
+        <p>End Date:</p>
+        <DatePicker
+          id="endDate"
+          dateFormat="yyyy-MM-dd"
+          selected={endDate}
+          onChange={(date) => updateDateVal(date, 'end')}
+        />
+      </div>
       <br></br>
       <br></br>
       <button onClick={handleButton} style={{ cursor: 'pointer' }}>

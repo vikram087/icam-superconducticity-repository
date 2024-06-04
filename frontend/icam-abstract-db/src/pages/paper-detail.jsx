@@ -19,10 +19,18 @@ function PaperDetail({ searchParams }) {
   }, [id]);
 
   const goBack = () => {
+    const startDate = new Date(0);
+    const endDate = new Date();
+    const formattedStart = startDate.toISOString().split('T')[0].replaceAll("-", "");
+    const formattedEnd = endDate.toISOString().split('T')[0].replaceAll("-", "");
+  
+    const dateRange = `${formattedStart}-${formattedEnd}`;
+
     navigate(
       `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
         `&query=${searchParams.query}&sort=${searchParams.sorting}` +
-        `&pages=${searchParams.pages}&term=${searchParams.term}`,
+        `&pages=${searchParams.pages}&term=${searchParams.term}` 
+        +`&date=${searchParams.date}`,
     );
   };
 

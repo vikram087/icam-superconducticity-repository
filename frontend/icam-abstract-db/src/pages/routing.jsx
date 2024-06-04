@@ -5,6 +5,9 @@ import { useState } from 'react';
 import PaperDetail from './paper-detail.jsx';
 
 function App() {
+  const currentDate = new Date();
+  const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, '');
+
   const [searchParams, setSearchParams] = useState({
     per_page: 20,
     page: 1,
@@ -12,6 +15,7 @@ function App() {
     sorting: 'Most-Relevant',
     pages: 30,
     term: 'Abstract',
+    date: `00000000-${now}`,
   });
 
   return (
