@@ -24,8 +24,8 @@ abstracts = [paper['_source']['summary'] for paper in papers['hits']['hits']]
 logging.set_verbosity_error()
 model_name = "deepset/bert-large-uncased-whole-word-masking-squad2"
 model = BertForQuestionAnswering.from_pretrained(model_name)
+# model = "path/to/save/fine-tuned-model"
 tokenizer = BertTokenizer.from_pretrained(model_name)
-# model_path = "path/to/save/fine-tuned-model"
 
 qa_pipeline = pipeline("question-answering", model=model, tokenizer=tokenizer)
 
@@ -41,6 +41,17 @@ questions = [
     "What experimental techniques are used for crystal growth?"
 ]
 
+def main():
+    for abstract in abstracts:
+        for question in questions:
+            # answer = get_answer(question, abstract, model, tokenizer)
+            answer = qa_pipeline(question=question, context=abstract)
+            print(f"Question: {question}\nAnswer: {answer['answer']}\nScore: {answer['score']}\n")
+        print("\n")
+
+if __name__ == "__main__":
+    main()
+    
 # def get_answer(question, context, model, tokenizer):
 #     inputs = tokenizer(question, context, return_tensors='pt', truncation=True, padding=True)
 #     input_ids = inputs['input_ids'].tolist()[0]
@@ -74,14 +85,3 @@ questions = [
 #         return "N/A"
     
 #     return answer
-
-def main():
-    for abstract in abstracts:
-        for question in questions:
-            # answer = get_answer(question, abstract, model, tokenizer)
-            answer = qa_pipeline(question=question, context=abstract)
-            print(f"Question: {question}\nAnswer: {answer['answer']}\nScore: {answer['score']}\n")
-        print("\n")
-
-if __name__ == "__main__":
-    main()
