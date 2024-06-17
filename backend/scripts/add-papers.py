@@ -169,7 +169,6 @@ def main(args):
         raise Exception("Flag error: please ensure your flag values match the specifications")
     
     upload_to_es(amount, iterations)
-    # 0-15999
 
 if __name__ == "__main__":
     parser = set_parser(program_name,program_usage,program_description,program_epilog,program_version)
