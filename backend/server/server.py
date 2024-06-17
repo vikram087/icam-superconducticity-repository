@@ -16,7 +16,7 @@ API_KEY = os.getenv('API_KEY')
 client = Elasticsearch(
   "https://localhost:9200",
   api_key=API_KEY,
-  ca_certs="./ca.crt"
+  ca_certs="../config/ca.crt"
 )
 
 # client = Elasticsearch("http://localhost:9200")
