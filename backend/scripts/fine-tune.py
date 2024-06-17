@@ -3,8 +3,8 @@ from transformers import BertForQuestionAnswering, BertTokenizer, Trainer, Train
 from datasets import Dataset
 
 # Load your dataset
-train_file_path = './train_dataset.json'
-validation_file_path = './validation_dataset.json'
+train_file_path = '../data/train_dataset.json'
+validation_file_path = '../data/validation_dataset.json'
 
 # Load the model and tokenizer
 model_name = "deepset/bert-large-uncased-whole-word-masking-squad2"
@@ -82,8 +82,8 @@ trainer = Trainer(
 trainer.train()
 
 # Save the fine-tuned model
-trainer.save_model("./fine-tuned-bert-large")
-tokenizer.save_pretrained("./fine-tuned-bert-large")
+trainer.save_model("../models/fine-tuned-bert-large")
+tokenizer.save_pretrained("../models/fine-tuned-bert-large")
 
 results = trainer.evaluate()
 print(results)
