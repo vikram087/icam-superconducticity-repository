@@ -43,6 +43,7 @@ questions = [
 
 def main():
     for abstract in abstracts:
+        print(f"Abstract: {abstract}\n")
         for question in questions:
             # answer = get_answer(question, abstract, model, tokenizer)
             answer = qa_pipeline(question=question, context=abstract)

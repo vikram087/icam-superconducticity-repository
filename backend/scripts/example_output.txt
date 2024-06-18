@@ -1,0 +1,457 @@
+Abstract: Short review on advanced superconducting circuits and devices.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: Short review on advanced superconducting circuits and devices.
+Score: 0.10817023366689682
+
+Question: What phenomena or phase is discussed?
+Answer: advanced superconducting circuits and devices.
+Score: 0.06256430596113205
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: advanced superconducting circuits and devices.
+Score: 0.0004764497862197459
+
+Question: What is the lattice name or crystal structure?
+Answer: superconducting circuits
+Score: 1.2034595783916302e-05
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: advanced superconducting circuits
+Score: 0.009350652806460857
+
+Question: What theoretical or computational techniques are used?
+Answer: advanced superconducting circuits
+Score: 0.0005457489169202745
+
+Question: What experimental characterization techniques are mentioned?
+Answer: advanced superconducting circuits
+Score: 0.02772584930062294
+
+Question: What experimental techniques are used for crystal growth?
+Answer: advanced superconducting circuits and devices.
+Score: 3.456554259173572e-05
+
+
+
+Abstract: The kinetic inductance properties of a thin superconducting sample of
+BSCCO-2223 compound is studied. A strong dependence of kinetic inductance with
+the variation of applied magnetic field is found at low temperature in the
+superconducting state. The kinetic inductance of a thin superconductor
+increases linearly with increasing magnetic field. This behavior is used for
+designing a superconducting modulator circuit. This behavior can be useful for
+device applications and designing of superconducting electronic circuits like
+superconducting power amplifier, superconducting transmitter and
+superconducting ac current controller.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: designing a superconducting modulator circuit.
+Score: 0.00043358193943277
+
+Question: What phenomena or phase is discussed?
+Answer: kinetic inductance properties
+Score: 0.06257305294275284
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: BSCCO-2223 compound
+Score: 0.2170121818780899
+
+Question: What is the lattice name or crystal structure?
+Answer: BSCCO-2223 compound
+Score: 5.427496603260806e-07
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: kinetic inductance
+Score: 0.0062568821012973785
+
+Question: What theoretical or computational techniques are used?
+Answer: designing a superconducting modulator circuit.
+Score: 0.0010585938580334187
+
+Question: What experimental characterization techniques are mentioned?
+Answer: kinetic inductance properties
+Score: 0.02727433852851391
+
+Question: What experimental techniques are used for crystal growth?
+Answer: superconducting electronic circuits
+Score: 8.102664650344593e-10
+
+
+
+Abstract: Reentrant superconductivity has been observed in the candidate spin-triplet
+superconductor UTe$_2$ as a function of the magnetic field applied along the
+hard axis. Resistivity measurements have shown, a broadened superconducting
+transition appears near the minimal $T_c$, highlighting the importance of
+superconducting fluctuations in this regime. We present a phenomenological
+study assuming a field-driven first-order transition between two
+superconducting states. We show that with quenched randomness,
+inhomogeneity-enhanced superconducting fluctuations near the transition could
+naturally account for both the reentrant superconductivity as well as the
+broadened superconducting transition.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: phenomenological study
+Score: 0.17765581607818604
+
+Question: What phenomena or phase is discussed?
+Answer: field-driven first-order transition between two superconducting states.
+Score: 0.013506188988685608
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: $T_c$,
+Score: 1.1121727538920823e-06
+
+Question: What is the lattice name or crystal structure?
+Answer: spin-triplet superconductor UTe$_2$
+Score: 1.1209820058866171e-06
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: inhomogeneity-enhanced superconducting fluctuations
+Score: 0.0014558711554855108
+
+Question: What theoretical or computational techniques are used?
+Answer: phenomenological study
+Score: 0.002681127516552806
+
+Question: What experimental characterization techniques are mentioned?
+Answer: Resistivity measurements
+Score: 0.16159872710704803
+
+Question: What experimental techniques are used for crystal growth?
+Answer: Resistivity measurements
+Score: 8.41447178601129e-09
+
+
+
+Abstract: Superconductors lacking both inversion symmetry and time-reversal symmetry
+have been attracting much attention as a platform for exotic superconducting
+phases and anomalous phenomena, including the superconducting diode effect.
+Recent studies revealed intrinsic phases with this symmetry, named anapole
+superconductivity and monopole superconductivity, which are $PT$-symmetric
+superconducting states with and without Cooper pairs' total momentum,
+respectively. To explore characteristic phenomena in these states, we calculate
+and predict the superconducting piezoelectric effect and superconducting diode
+effect. A close relationship with the finite-$q$ pairing, asymmetric Bogoliubov
+spectrum, and quantum geometry is discussed. This study reveals the
+piezoelectric and diode effects as potential probes to elucidate exotic
+superconducting phases.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: quantum geometry
+Score: 0.0007665689336135983
+
+Question: What phenomena or phase is discussed?
+Answer: anomalous
+Score: 0.10230303555727005
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: quantum geometry
+Score: 8.29546570457751e-06
+
+Question: What is the lattice name or crystal structure?
+Answer: symmetry
+Score: 1.7100566083172453e-06
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: quantum geometry
+Score: 0.002698556985706091
+
+Question: What theoretical or computational techniques are used?
+Answer: quantum geometry
+Score: 0.12667468190193176
+
+Question: What experimental characterization techniques are mentioned?
+Answer: quantum geometry
+Score: 0.033147260546684265
+
+Question: What experimental techniques are used for crystal growth?
+Answer: quantum geometry
+Score: 2.2289576850909043e-09
+
+
+
+Abstract: The Z = 12.67 family of materials includes CaBeSi and NaAlSi which have been
+reported as non-superconducting and superconducting respectively. We show with
+an algorithm how to generate other members of this family. We discover through
+the material specific characterization dataset (MSCD) scheme and the symmetry
+conditions for superconductivity, why some are superconducting and others may
+not be superconducting.We estimate too the Tcs of members of this interesting
+family of materials.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: an algorithm
+Score: 0.027756715193390846
+
+Question: What phenomena or phase is discussed?
+Answer: non-superconducting and superconducting
+Score: 0.019492996856570244
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: non-superconducting and superconducting
+Score: 0.00020910669991280884
+
+Question: What is the lattice name or crystal structure?
+Answer: material specific characterization dataset
+Score: 4.2400197344250046e-06
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: non-superconducting and superconducting
+Score: 0.0010150239104405046
+
+Question: What theoretical or computational techniques are used?
+Answer: algorithm
+Score: 0.030613388866186142
+
+Question: What experimental characterization techniques are mentioned?
+Answer: material specific characterization dataset (MSCD) scheme
+Score: 0.028570719063282013
+
+Question: What experimental techniques are used for crystal growth?
+Answer: material specific characterization dataset (MSCD) scheme
+Score: 4.01579973186017e-06
+
+
+
+Abstract: The complete scenario of high-Tc superconductivity based on experimental data
+from electron-tunneling spectroscopy on underdoped, overdoped and Ni-doped
+Bi2212 single crystals using a break-junction technique is presented. There are
+two different types of superconductivity in cuprates: superconductivity due to
+pairing of spinons on charged stripes and magnetic superconductivity mediated
+by spin-waves. The coherent state of the spinon superconductivity is
+established via the magnetic superconductivity. In NCCO, there is only the
+spinon superconductivity and the coherent state is established due to the
+Josephson coupling between charged stripes. Below Tc, we observe four different
+gaps, namely, (i) a SDW gap due to antiferromagnetic correlations; (ii) a
+superconducting gap due to spinon pairing; (iii) a d-wave magnetic
+superconducting gap, and (iv) a small superconducting gap most likely having
+g-wave symmetry. We show that the d-wave superconductivity is mediated by
+spin-waves and the magnitude of the superconducting gap due to pairing of
+spinons is larger than the magnitude of the d-wave gap, however, the d-wave gap
+is more intense. The superconducting gap due to pairing of spinons most likely
+has a s-wave symmetry. The maximum magnitudes of the SDW, the spinon and d-wave
+gaps are located at (p/2, p/2), (p/2, p/2) and (p, 0) on the Fermi surface,
+respectively. The d-g-wave superconductivity mediated by spin-waves can be
+considered as a pairing of magnetic polarons. We formulate a theorem for
+cuprates by analogy with the Anderson's theorem for classical superconductors.
+The presented model of high-Tc superconductivity naturally explains other
+experimental data.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: experimental data from electron-tunneling spectroscopy
+Score: 0.053121183067560196
+
+Question: What phenomena or phase is discussed?
+Answer: high-Tc superconductivity
+Score: 0.012897676788270473
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: Anderson's theorem for classical superconductors.
+Score: 7.759854634059593e-05
+
+Question: What is the lattice name or crystal structure?
+Answer: Bi2212 single crystals
+Score: 0.0002701360499486327
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: Below Tc,
+Score: 0.0002860771492123604
+
+Question: What theoretical or computational techniques are used?
+Answer: electron-tunneling spectroscopy
+Score: 0.011751402169466019
+
+Question: What experimental characterization techniques are mentioned?
+Answer: break-junction technique
+Score: 0.09511204063892365
+
+Question: What experimental techniques are used for crystal growth?
+Answer: break-junction
+Score: 0.01300792396068573
+
+
+
+Abstract: The superconducting high-entropy alloys (HEAs) recently attract considerable
+attention due to their exciting properties, such as the robustness of
+superconductivity against atomic disorder and extremely high-pressure. The
+well-studied crystal structure of superconducting HEAs is body-centered-cubic
+(bcc) containing Nb, Ti, and Zr atoms. The same elements are contained in
+Al5Nb24Ti40V5Zr26, which is a recently discovered bcc HEA and shows a
+gum-metal-like behavior after cold rolling. The gum metal is also an
+interesting system, exhibiting superelasticity and low Young's modulus. If gum
+metals show superconductivity and can be used as a superconducting wire, the
+gum-metal HEA superconductors might be the next-generation superconducting wire
+materials. Aiming at a fundamental assessment of as-cast Al-Nb-Ti-V-Zr
+multicomponent alloys including Al5Nb24Ti40V5Zr26, we have investigated the
+structural and superconducting properties of the alloys. All alloys
+investigated show the superconductivity, and the valence electron concentration
+dependence of the superconducting critical temperature is very close to those
+of typical superconducting bcc HEAs.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: fundamental assessment
+Score: 0.0008255598950199783
+
+Question: What phenomena or phase is discussed?
+Answer: superconductivity,
+Score: 0.03497157618403435
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: Nb, Ti, and Zr atoms.
+Score: 0.0014533867361024022
+
+Question: What is the lattice name or crystal structure?
+Answer: body-centered-cubic
+Score: 0.020926475524902344
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: superconductivity against atomic disorder and extremely high-pressure.
+Score: 2.0519119061646052e-05
+
+Question: What theoretical or computational techniques are used?
+Answer: structural and superconducting properties of the alloys.
+Score: 2.8022299375152215e-05
+
+Question: What experimental characterization techniques are mentioned?
+Answer: structural and superconducting properties
+Score: 0.08969796448945999
+
+Question: What experimental techniques are used for crystal growth?
+Answer: cold rolling.
+Score: 0.0001390543911838904
+
+
+
+Abstract: We analyze the enhancement of the superconducting critical temperature of
+superconducting/ferromagnetic bilayers due to the appearance of localized
+superconducting states in the vicinity of magnetic domain walls in the
+ferromagnet. We consider the case when the main mechanism of the
+superconductivity destruction via the proximity effect is the exchange field.
+We demonstrate that the influence of the domain walls on the superconducting
+properties of the bilayer may be quite strong if the domain wall thickness is
+of the order of superconducting coherence length.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: superconducting critical temperature
+Score: 0.00017936555377673358
+
+Question: What phenomena or phase is discussed?
+Answer: localized superconducting states
+Score: 0.006484337151050568
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: superconducting/ferromagnetic
+Score: 2.7996843527944293e-06
+
+Question: What is the lattice name or crystal structure?
+Answer: superconducting/ferromagnetic
+Score: 0.0006135288858786225
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: superconducting
+Score: 0.00047717965207993984
+
+Question: What theoretical or computational techniques are used?
+Answer: magnetic domain walls in the ferromagnet.
+Score: 1.752675962052308e-05
+
+Question: What experimental characterization techniques are mentioned?
+Answer: magnetic domain walls in the ferromagnet.
+Score: 4.5657936425413936e-05
+
+Question: What experimental techniques are used for crystal growth?
+Answer: superconducting/ferromagnetic bilayers
+Score: 6.271304808791456e-09
+
+
+
+Abstract: Following our previous investigations on superconductivity in amorphous
+carbon (aC) based systems; we have prepared thin composite aC-W films using
+electron-beam induced deposition. The films did not show any sign for
+superconductivity above 5 K. However, local, non-percolative, superconductivity
+emerged at Tc = 34.4 K after treatment with sulfur at 250 C for 24 hours. The
+superconducting features in the magnetization curves were by far sharper
+compared to our previous results, and the shielding fraction increased by about
+an order of magnitude. Our data suggest that pairing and localized
+superconductivity take place in the aC-S regions, whereas phase coherence,
+assisted by the W inclusions, was enhanced compared to our previous samples,
+yet still not to the degree of achieving global phase-coherence and percolating
+superconductivity.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: superconductivity in amorphous carbon (aC) based systems;
+Score: 0.0001896666071843356
+
+Question: What phenomena or phase is discussed?
+Answer: phase coherence,
+Score: 0.1847122758626938
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: amorphous carbon
+Score: 0.00010617425141390413
+
+Question: What is the lattice name or crystal structure?
+Answer: amorphous carbon
+Score: 9.265346307074651e-06
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: non-percolative,
+Score: 7.936700421851128e-05
+
+Question: What theoretical or computational techniques are used?
+Answer: electron-beam induced deposition.
+Score: 0.000212260551052168
+
+Question: What experimental characterization techniques are mentioned?
+Answer: electron-beam induced deposition.
+Score: 0.10854831337928772
+
+Question: What experimental techniques are used for crystal growth?
+Answer: electron-beam induced deposition.
+Score: 4.778796665050322e-06
+
+
+
+Abstract: Platinum-group transition-metal dichalcogenides have emerged as a subject of
+considerable interest in condensed matter physics due to their remarkable
+topological properties and unconventional superconducting behavior. In this
+study, we report the synthesis and superconducting characteristics of a new
+Dirac-type topological semimetallic compound 1$T$-RhSeTe. It shows type-II
+superconductivity with a superconducting transition temperature of 4.72 K and a
+high upper critical field. The coexistence of superconductivity and topological
+properties makes it a prime candidate for hosting topological
+superconductivity.
+
+Question: Is this paper theoretical, experimental, or computational?
+Answer: study,
+Score: 0.0022734743542969227
+
+Question: What phenomena or phase is discussed?
+Answer: type-II superconductivity
+Score: 0.04503089562058449
+
+Question: What chemical formulas or constituents are mentioned?
+Answer: Dirac-type topological semimetallic compound
+Score: 0.1450013369321823
+
+Question: What is the lattice name or crystal structure?
+Answer: semimetallic
+Score: 2.104045415762812e-05
+
+Question: What specific properties, like transition temperature, are mentioned?
+Answer: topological
+Score: 0.047960612922906876
+
+Question: What theoretical or computational techniques are used?
+Answer: condensed matter physics
+Score: 1.845973019953817e-05
+
+Question: What experimental characterization techniques are mentioned?
+Answer: synthesis and superconducting characteristics
+Score: 0.23385947942733765
+
+Question: What experimental techniques are used for crystal growth?
+Answer: synthesis
+Score: 1.0065200228837057e-08
+
+
+
