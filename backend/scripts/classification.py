@@ -38,7 +38,8 @@ questions = [
     "What specific properties, like transition temperature, are mentioned?",
     "What theoretical or computational techniques are used?",
     "What experimental characterization techniques are mentioned?",
-    "What experimental techniques are used for crystal growth?"
+    "What experimental techniques are used for crystal growth?",
+    "Does the paper mention important applications?" # newly added (mostly not mentioned)
 ]
 
 def main():
