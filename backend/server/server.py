@@ -7,7 +7,7 @@ import json
 from sentence_transformers import SentenceTransformer
 import redis
 import math
-# from datetime import datetime
+from datetime import datetime
 # import faiss
 
 load_dotenv()
@@ -70,7 +70,10 @@ def papers():
     sorting = str(data.get('sorting', ""))
     pages = int(data.get('pages', 30))
     term = str(data.get('term', ""))
-    date = str(data.get('date', "00000000-20240604"))
+    
+    today = datetime.today()
+    formatted_date = today.strftime('%Y%m%d')
+    date = str(data.get('date', f"00000000-{formatted_date}"))
     startDate = int(date.split("-")[0])
     endDate = int(date.split("-")[1])
     
