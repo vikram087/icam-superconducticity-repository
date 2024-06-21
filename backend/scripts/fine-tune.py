@@ -78,12 +78,13 @@ trainer = Trainer(
     eval_dataset=validation_dataset,
 )
 
-# Train the model
-trainer.train()
+if __name__ == "__main__":
+    # Train the model
+    trainer.train()
 
-# Save the fine-tuned model
-trainer.save_model("../models/fine-tuned-bert-large")
-tokenizer.save_pretrained("../models/fine-tuned-bert-large")
+    # Save the fine-tuned model
+    trainer.save_model("../models/fine-tuned-bert-large")
+    tokenizer.save_pretrained("../models/fine-tuned-bert-large")
 
-results = trainer.evaluate()
-print(results)
+    results = trainer.evaluate()
+    print(results)
