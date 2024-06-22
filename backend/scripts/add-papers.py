@@ -3,9 +3,10 @@
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 import os
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer # type: ignore
 import urllib.request as libreq
-import feedparser
+import feedparser # type: ignore
+from feedparser import FeedParserDict
 import time
 import argparse
 from argparse import Namespace
@@ -29,7 +30,7 @@ Created by Vikram Penumarti
 """
 
 load_dotenv()
-API_KEY: str = os.getenv('API_KEY')
+API_KEY: str|None = os.getenv('API_KEY')
 
 client: Elasticsearch = Elasticsearch(
   "https://localhost:9200",
@@ -66,10 +67,10 @@ def findInfo(start: int, amount: int) -> list[dict]:
     
   print(f'Searching arXiv for {search_query}')
     
-  with libreq.urlopen(url) as url:
-    content = url.read()
+  with libreq.urlopen(url) as response:
+    content: bytes = response.read()
 
-  feed = feedparser.parse(content)
+  feed: FeedParserDict = feedparser.parse(content)
   
   paper_list: list[dict] = []
   for entry in feed.entries:          

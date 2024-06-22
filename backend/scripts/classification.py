@@ -1,13 +1,14 @@
-from transformers import BertForQuestionAnswering, BertTokenizer, logging, pipeline, Pipeline
+from transformers import BertForQuestionAnswering, BertTokenizer, logging, pipeline, Pipeline # type: ignore
 # import torch
 # import string
 import os
 from elasticsearch import Elasticsearch
+from elastic_transport import ObjectApiResponse
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-API_KEY: str = os.getenv('API_KEY')
+API_KEY: str|None = os.getenv('API_KEY')
 
 # Initialize Elasticsearch client
 client: Elasticsearch = Elasticsearch(
@@ -17,7 +18,7 @@ client: Elasticsearch = Elasticsearch(
 )
 
 # Fetch papers from Elasticsearch
-papers: dict = client.search(query={"match_all": {}}, index="search-papers-meta", size=10)
+papers: ObjectApiResponse = client.search(query={"match_all": {}}, index="search-papers-meta", size=10)
 abstracts: list[str] = [paper['_source']['summary'] for paper in papers['hits']['hits']]
 
 # Load the BERT model and tokenizer for question answering

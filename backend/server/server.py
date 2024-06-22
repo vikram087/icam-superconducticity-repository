@@ -1,18 +1,20 @@
 from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from elasticsearch import Elasticsearch
+from elastic_transport import ObjectApiResponse
 from dotenv import load_dotenv
 import os
 import json
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer # type: ignore
 import redis
+from redis import Redis
 import math
 from datetime import datetime
-from typing import Union
+from typing import Sequence, Mapping
 # import faiss
 
 load_dotenv()
-API_KEY: str = os.getenv('API_KEY')
+API_KEY: str|None = os.getenv('API_KEY')
 
 client: Elasticsearch = Elasticsearch(
   "https://localhost:9200",
@@ -26,13 +28,13 @@ app: Flask = Flask(__name__)
 CORS(app)
 model: SentenceTransformer = SentenceTransformer('all-MiniLM-L6-v2')
 
-def getEmbedding(text: str) -> None:
+def getEmbedding(text: str) -> list[int]:
     return model.encode(text)
 
 # /api/papers/${paperId}
 @app.route('/api/papers/<paper_id>', methods=['GET'])
-def get_paper(paper_id: str) -> Response:
-    results: dict = client.get(index="search-papers-meta", id=paper_id)
+def get_paper(paper_id: str) -> tuple[Response, int]|Response:
+    results: ObjectApiResponse = client.get(index="search-papers-meta", id=paper_id)
     paper: dict = results['_source']
     if paper:
         return jsonify(paper)
@@ -40,15 +42,15 @@ def get_paper(paper_id: str) -> Response:
         return jsonify({"error": "No results found"}), 404
 
 
-redis_client: redis = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
-# cache = TTLCache(maxsize=100, ttl=3600)
-def get_cached_results(cache_key: str) -> dict:
-    cached_data: json = redis_client.get(cache_key)
+redis_client: Redis = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+
+def get_cached_results(cache_key: str) -> dict|None:
+    cached_data = redis_client.get(cache_key)
     if cached_data:
-        return json.loads(cached_data)
+        return json.loads(cached_data) # type: ignore
     return None
 
-def cache_results(cache_key: str, data: dict) -> None:
+def cache_results(cache_key: str, data: tuple[list[dict], int, dict]) -> None:
     redis_client.setex(cache_key, 3600, json.dumps(data))
     
 def make_cache_key(query: str, sorting: str, page: int, numResults: int, pages: int, term: str, startDate: int, endDate: int) -> str:
@@ -63,7 +65,7 @@ def make_cache_key(query: str, sorting: str, page: int, numResults: int, pages: 
 # vector-based search for title, summary
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
-def papers() -> Response:
+def papers() -> tuple[Response, int]|Response:
     data: dict = request.get_json()
     page: int = int(data.get('page', 0))
     numResults: int = int(data.get('results', 0))
@@ -81,39 +83,39 @@ def papers() -> Response:
     if term == "Abstract":
         field: str = "summary_embedding"
     elif term == "Title":
-        field: str = "title_embedding"
+        field = "title_embedding"
     elif term == "Category":
-        field: str = "categories"
+        field = "categories"
     elif term == "Authors":
-        field: str = "authors"
+        field = "authors"
         
     cache_key: str = make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate)
-    cached: dict = get_cached_results(cache_key)
+    cached: dict|None = get_cached_results(cache_key)
     if cached:
         return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
 
     if(sorting == "Most-Recent" or sorting == "Most-Relevant"):
         sort: str = "desc"
     elif(sorting == "Oldest-First"):
-        sort: str = "asc"
+        sort = "asc"
         
     knnSearch: bool = False
     
     size: int = client.search(query={"match_all": {}}, index="search-papers-meta")['hits']['total']['value']
     
     if pages < 1:
-        pages: int = 1
+        pages = 1
     elif pages*numResults > size:
-        pages: int = math.ceil(size/numResults)
+        pages = math.ceil(size/numResults)
         
     k: int = page*numResults
     if k > size:
-        k: int = size
+        k = size
     
     if sorting == "Most-Recent" or sorting == "Oldest-First":
-        pSort: list[Union[str, dict]] = [{"date": {"order": sort}}, "_score"]
+        pSort: Sequence[Mapping|str] = [{"date": {"order": sort}}, "_score"]
     elif sorting == "Most-Relevant":
-        pSort: list[dict] = [{'_score': {'order': sort}}]
+        pSort = [{'_score': {'order': sort}}]
         
     if query == "all" or field == "summary_embedding" or field == "title_embedding":
         quer: dict={
@@ -132,7 +134,7 @@ def papers() -> Response:
             }
         }
     else:
-        quer: dict={
+        quer={
             "bool": {
                 "must": {
                     "match": {
@@ -154,8 +156,8 @@ def papers() -> Response:
         }
         
     if query == "all" or field == "authors" or field == "categories":
-        knnSearch: bool = False
-        results: dict = client.search(
+        knnSearch = False
+        results: ObjectApiResponse = client.search(
             query=quer,
             size=numResults,
             from_=(page-1)*numResults,
@@ -163,8 +165,8 @@ def papers() -> Response:
             index="search-papers-meta"
         )
     elif field == "summary_embedding" or field == "title_embedding":
-        knnSearch: bool = True
-        results: dict = client.search(
+        knnSearch = True
+        results = client.search(
             knn={
                 'field': field,
                 'query_vector': getEmbedding(query),
@@ -195,17 +197,17 @@ def papers() -> Response:
         )['hits']['total']['value']
     
     if total > numResults*pages:
-        total: int = numResults*pages
+        total = numResults*pages
     
     if knnSearch:
-        papers: list[dict] = hits[(page-1)*numResults:]
+        papers = hits[(page-1)*numResults:]
         filtered_papers: list[dict] = [papers[i]['_source'] for i in range(len(papers)) if papers[i]['_source']['date'] > startDate and papers[i]['_source']['date'] < endDate]
         for i in range(len(hits)):
             if not hits[i]['_score']:
                 break
             accuracy[hits[i]['_source']['id']] = float(str(hits[i]['_score'])[1:])
     else:
-        filtered_papers: list[dict] = list(papers)
+        filtered_papers = list(papers)
             
     if filtered_papers:
         cache_results(cache_key, ( filtered_papers, total, accuracy ))
