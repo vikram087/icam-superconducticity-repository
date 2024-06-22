@@ -8,6 +8,7 @@ import urllib.request as libreq
 import feedparser
 import time
 import argparse
+from argparse import Namespace
 
 program_name: str = """
 add-papers.py
@@ -162,7 +163,7 @@ def upload_to_es(amount: int, iterations: int) -> None:
         
     print(f"Total documents in DB, finish: {start}\n")
     
-def main(args) -> None:
+def main(args: Namespace) -> None:
     amount: int = args.amt
     iterations: int = args.iter
     if amount > 2000 or amount < 1 or iterations < 1:
@@ -172,7 +173,7 @@ def main(args) -> None:
 
 if __name__ == "__main__":
     parser: argparse.ArgumentParser = set_parser(program_name,program_usage,program_description,program_epilog,program_version)
-    args = parser.parse_args()
+    args: Namespace = parser.parse_args()
     main(args)
 
 # # FIXME: comments, journal_ref, report_number
