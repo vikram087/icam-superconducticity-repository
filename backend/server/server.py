@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
@@ -8,12 +8,13 @@ from sentence_transformers import SentenceTransformer
 import redis
 import math
 from datetime import datetime
+from typing import Union
 # import faiss
 
 load_dotenv()
-API_KEY = os.getenv('API_KEY')
+API_KEY: str = os.getenv('API_KEY')
 
-client = Elasticsearch(
+client: Elasticsearch = Elasticsearch(
   "https://localhost:9200",
   api_key=API_KEY,
   ca_certs="../config/ca.crt"
@@ -21,37 +22,37 @@ client = Elasticsearch(
 
 # client = Elasticsearch("http://localhost:9200")
 
-app = Flask(__name__)
+app: Flask = Flask(__name__)
 CORS(app)
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model: SentenceTransformer = SentenceTransformer('all-MiniLM-L6-v2')
 
-def getEmbedding(text):
+def getEmbedding(text: str) -> None:
     return model.encode(text)
 
 # /api/papers/${paperId}
 @app.route('/api/papers/<paper_id>', methods=['GET'])
-def get_paper(paper_id):
-    results = client.get(index="search-papers-meta", id=paper_id)
-    paper = results['_source']
+def get_paper(paper_id: str) -> Response:
+    results: dict = client.get(index="search-papers-meta", id=paper_id)
+    paper: dict = results['_source']
     if paper:
         return jsonify(paper)
     else:
         return jsonify({"error": "No results found"}), 404
 
 
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+redis_client: redis = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 # cache = TTLCache(maxsize=100, ttl=3600)
-def get_cached_results(cache_key):
-    cached_data = redis_client.get(cache_key)
+def get_cached_results(cache_key: str) -> dict:
+    cached_data: json = redis_client.get(cache_key)
     if cached_data:
         return json.loads(cached_data)
     return None
 
-def cache_results(cache_key, data):
+def cache_results(cache_key: str, data: dict) -> None:
     redis_client.setex(cache_key, 3600, json.dumps(data))
     
-def make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate):
-    key = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}_{startDate}_{endDate}"
+def make_cache_key(query: str, sorting: str, page: int, numResults: int, pages: int, term: str, startDate: int, endDate: int) -> str:
+    key: str = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}_{startDate}_{endDate}"
     return key
 
 # cache.clear()
@@ -62,60 +63,60 @@ def make_cache_key(query, sorting, page, numResults, pages, term, startDate, end
 # vector-based search for title, summary
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
-def papers():
-    data = request.get_json()
-    page = int(data.get('page', 0))
-    numResults = int(data.get('results', 0))
-    query = str(data.get('query', ""))
-    sorting = str(data.get('sorting', ""))
-    pages = int(data.get('pages', 30))
-    term = str(data.get('term', ""))
+def papers() -> Response:
+    data: dict = request.get_json()
+    page: int = int(data.get('page', 0))
+    numResults: int = int(data.get('results', 0))
+    query: str = str(data.get('query', ""))
+    sorting: str = str(data.get('sorting', ""))
+    pages: int = int(data.get('pages', 30))
+    term: str = str(data.get('term', ""))
     
-    today = datetime.today()
-    formatted_date = today.strftime('%Y%m%d')
-    date = str(data.get('date', f"00000000-{formatted_date}"))
-    startDate = int(date.split("-")[0])
-    endDate = int(date.split("-")[1])
+    today: datetime = datetime.today()
+    formatted_date: str = today.strftime('%Y%m%d')
+    date: str = str(data.get('date', f"00000000-{formatted_date}"))
+    startDate: int = int(date.split("-")[0])
+    endDate: int = int(date.split("-")[1])
     
     if term == "Abstract":
-        field = "summary_embedding"
+        field: str = "summary_embedding"
     elif term == "Title":
-        field = "title_embedding"
+        field: str = "title_embedding"
     elif term == "Category":
-        field = "categories"
+        field: str = "categories"
     elif term == "Authors":
-        field = "authors"
+        field: str = "authors"
         
-    cache_key = make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate)
-    cached = get_cached_results(cache_key)
+    cache_key: str = make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate)
+    cached: dict = get_cached_results(cache_key)
     if cached:
         return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
 
     if(sorting == "Most-Recent" or sorting == "Most-Relevant"):
-        sort = "desc"
+        sort: str = "desc"
     elif(sorting == "Oldest-First"):
-        sort = "asc"
+        sort: str = "asc"
         
-    knnSearch = False
+    knnSearch: bool = False
     
-    size = client.search(query={"match_all": {}}, index="search-papers-meta")['hits']['total']['value']
+    size: int = client.search(query={"match_all": {}}, index="search-papers-meta")['hits']['total']['value']
     
     if pages < 1:
-        pages = 1
+        pages: int = 1
     elif pages*numResults > size:
-        pages = math.ceil(size/numResults)
+        pages: int = math.ceil(size/numResults)
         
-    k = page*numResults
+    k: int = page*numResults
     if k > size:
-        k = size
+        k: int = size
     
     if sorting == "Most-Recent" or sorting == "Oldest-First":
-        pSort = [{"date": {"order": sort}}, "_score"]
+        pSort: list[Union[str, dict]] = [{"date": {"order": sort}}, "_score"]
     elif sorting == "Most-Relevant":
-        pSort = [{'_score': {'order': sort}}]
+        pSort: list[dict] = [{'_score': {'order': sort}}]
         
     if query == "all" or field == "summary_embedding" or field == "title_embedding":
-        quer={
+        quer: dict={
             "bool": {
                 "must": {
                     "match_all": {}
@@ -131,7 +132,7 @@ def papers():
             }
         }
     else:
-        quer={
+        quer: dict={
             "bool": {
                 "must": {
                     "match": {
@@ -153,8 +154,8 @@ def papers():
         }
         
     if query == "all" or field == "authors" or field == "categories":
-        knnSearch = False
-        results = client.search(
+        knnSearch: bool = False
+        results: dict = client.search(
             query=quer,
             size=numResults,
             from_=(page-1)*numResults,
@@ -162,8 +163,8 @@ def papers():
             index="search-papers-meta"
         )
     elif field == "summary_embedding" or field == "title_embedding":
-        knnSearch = True
-        results = client.search(
+        knnSearch: bool = True
+        results: dict = client.search(
             knn={
                 'field': field,
                 'query_vector': getEmbedding(query),
@@ -177,15 +178,15 @@ def papers():
             index="search-papers-meta"
         )
         
-    hits = results['hits']['hits']
-    papers = []
-    accuracy = {}
+    hits: dict = results['hits']['hits']
+    papers: list[dict] = []
+    accuracy: dict = {}
     
     if not knnSearch:
         for i in range(len(hits)):
             papers.append(hits[i]['_source'])
     
-    total = client.search(
+    total: int = client.search(
             query=quer,
             size=numResults,
             from_=(page-1)*numResults,
@@ -194,17 +195,17 @@ def papers():
         )['hits']['total']['value']
     
     if total > numResults*pages:
-        total = numResults*pages
+        total: int = numResults*pages
     
     if knnSearch:
-        papers = hits[(page-1)*numResults:]
-        filtered_papers = [papers[i]['_source'] for i in range(len(papers)) if papers[i]['_source']['date'] > startDate and papers[i]['_source']['date'] < endDate]
+        papers: list[dict] = hits[(page-1)*numResults:]
+        filtered_papers: list[dict] = [papers[i]['_source'] for i in range(len(papers)) if papers[i]['_source']['date'] > startDate and papers[i]['_source']['date'] < endDate]
         for i in range(len(hits)):
             if not hits[i]['_score']:
                 break
             accuracy[hits[i]['_source']['id']] = float(str(hits[i]['_score'])[1:])
     else:
-        filtered_papers = list(papers)
+        filtered_papers: list[dict] = list(papers)
             
     if filtered_papers:
         cache_results(cache_key, ( filtered_papers, total, accuracy ))

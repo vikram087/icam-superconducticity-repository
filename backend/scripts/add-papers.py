@@ -9,28 +9,28 @@ import feedparser
 import time
 import argparse
 
-program_name = """
+program_name: str = """
 add-papers.py
 """
-program_usage = """
+program_usage: str = """
 add-papers.py [options] -i ITER -a AMT
 """
-program_description = """description:
+program_description: str = """description:
 This is a python script to upload a specified number of documents to an elasticsearch
 database from arXiv
 """
-program_epilog = """ 
+program_epilog: str = """ 
 
 """
-program_version = """
+program_version: str = """
 Version 3.0 2024-06-01
 Created by Vikram Penumarti
 """
 
 load_dotenv()
-API_KEY = os.getenv('API_KEY')
+API_KEY: str = os.getenv('API_KEY')
 
-client = Elasticsearch(
+client: Elasticsearch = Elasticsearch(
   "https://localhost:9200",
   api_key=API_KEY,
   ca_certs="../config/ca.crt"
@@ -41,10 +41,10 @@ client = Elasticsearch(
 
 # client = Elasticsearch("http://localhost:9200")
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model: SentenceTransformer = SentenceTransformer('all-MiniLM-L6-v2')
 
-def set_parser(program_name,program_usage,program_description,program_epilog,program_version):
-    parser = argparse.ArgumentParser(prog=program_name,
+def set_parser(program_name:str,program_usage:str,program_description:str,program_epilog:str,program_version:str) -> argparse.ArgumentParser:
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(prog=program_name,
                                      usage=program_usage,
                                      description=program_description,
                                      epilog=program_epilog,
@@ -57,11 +57,11 @@ def set_parser(program_name,program_usage,program_description,program_epilog,pro
     
     return parser
 
-def findInfo(start, amount):
-  search_query = 'all:superconductivity'
+def findInfo(start: int, amount: int) -> list[dict]:
+  search_query: str = 'all:superconductivity'
 #   wait_time = 60
 
-  url = f'http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}'
+  url: str = f'http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}'
     
   print(f'Searching arXiv for {search_query}')
     
@@ -70,9 +70,9 @@ def findInfo(start, amount):
 
   feed = feedparser.parse(content)
   
-  paper_list = []
+  paper_list: list[dict] = []
   for entry in feed.entries:          
-    paper_dict = {
+    paper_dict: dict = {
       'id': entry.id.split('/abs/')[-1].replace("/", "-"),
       'title': entry.title,
       'links': [link['href']for link in entry.get('links')],
@@ -96,7 +96,7 @@ def findInfo(start, amount):
     
   return replaceNullValues(paper_list)
 
-def replaceNullValues(papers_list):
+def replaceNullValues(papers_list: list[dict]) -> list[dict]:
   for i in range(len(papers_list)):
     for key, val in papers_list[i].items():
       if not val:
@@ -104,7 +104,7 @@ def replaceNullValues(papers_list):
   
   return papers_list 
     
-def createNewIndex(delete, index):
+def createNewIndex(delete: bool, index: str) -> None:
     if client.indices.exists(index=index) and delete:
         client.indices.delete(index=index)
     if not client.indices.exists(index=index):
@@ -129,12 +129,12 @@ def createNewIndex(delete, index):
     else:
         print("Index already exists and no deletion specified")
         
-def getEmbedding(text):
+def getEmbedding(text: str) -> list[int]:
     return model.encode(text)
 
-def insert_documents(documents, index):
+def insert_documents(documents: list[dict], index: str):
     print("Starting Insertion")
-    operations = []
+    operations: list[dict] = []
     for document in documents:
         operations.append({'create': {'_index': index, "_id": document["id"]} })
         operations.append({
@@ -148,9 +148,9 @@ def insert_documents(documents, index):
     print("Successfully Completed Insertion")
     return client.bulk(operations=operations)
 
-def upload_to_es(amount, iterations):
-    wait_time = 3
-    start = client.count(index="search-papers-meta")['count']
+def upload_to_es(amount: int, iterations: int) -> None:
+    wait_time: int = 3
+    start: int = client.count(index="search-papers-meta")['count']
     print(f"Total documents in DB, start: {start}\n")
     for i in range(iterations):
         insert_documents(findInfo(start, amount), "search-papers-meta")
@@ -162,16 +162,16 @@ def upload_to_es(amount, iterations):
         
     print(f"Total documents in DB, finish: {start}\n")
     
-def main(args):
-    amount = args.amt
-    iterations = args.iter
+def main(args) -> None:
+    amount: int = args.amt
+    iterations: int = args.iter
     if amount > 2000 or amount < 1 or iterations < 1:
         raise Exception("Flag error: please ensure your flag values match the specifications")
     
     upload_to_es(amount, iterations)
 
 if __name__ == "__main__":
-    parser = set_parser(program_name,program_usage,program_description,program_epilog,program_version)
+    parser: argparse.ArgumentParser = set_parser(program_name,program_usage,program_description,program_epilog,program_version)
     args = parser.parse_args()
     main(args)
 

@@ -1,4 +1,4 @@
-from transformers import BertForQuestionAnswering, BertTokenizer, logging, pipeline
+from transformers import BertForQuestionAnswering, BertTokenizer, logging, pipeline, Pipeline
 # import torch
 # import string
 import os
@@ -7,30 +7,30 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-API_KEY = os.getenv('API_KEY')
+API_KEY: str = os.getenv('API_KEY')
 
 # Initialize Elasticsearch client
-client = Elasticsearch(
+client: Elasticsearch = Elasticsearch(
     "https://localhost:9200",
     api_key=API_KEY,
     ca_certs="../config/ca.crt"
 )
 
 # Fetch papers from Elasticsearch
-papers = client.search(query={"match_all": {}}, index="search-papers-meta", size=10)
-abstracts = [paper['_source']['summary'] for paper in papers['hits']['hits']]
+papers: dict = client.search(query={"match_all": {}}, index="search-papers-meta", size=10)
+abstracts: list[str] = [paper['_source']['summary'] for paper in papers['hits']['hits']]
 
 # Load the BERT model and tokenizer for question answering
 logging.set_verbosity_error()
-model_name = "deepset/bert-large-uncased-whole-word-masking-squad2"
-model = BertForQuestionAnswering.from_pretrained(model_name)
+model_name: str = "deepset/bert-large-uncased-whole-word-masking-squad2"
+model: BertForQuestionAnswering = BertForQuestionAnswering.from_pretrained(model_name)
 # model = "path/to/save/fine-tuned-model"
-tokenizer = BertTokenizer.from_pretrained(model_name)
+tokenizer: BertTokenizer = BertTokenizer.from_pretrained(model_name)
 
-qa_pipeline = pipeline("question-answering", model=model, tokenizer=tokenizer)
+qa_pipeline: Pipeline = pipeline("question-answering", model=model, tokenizer=tokenizer)
 
 # Define questions
-questions = [
+questions: list[str] = [
     "Is this paper theoretical, experimental, or computational?",
     "What phenomena or phase is discussed?",
     "What chemical formulas or constituents are mentioned?",
@@ -42,12 +42,12 @@ questions = [
     "Does the paper mention important applications?" # newly added (mostly not mentioned)
 ]
 
-def main():
+def main() -> None:
     for abstract in abstracts:
         print(f"Abstract: {abstract}\n")
         for question in questions:
             # answer = get_answer(question, abstract, model, tokenizer)
-            answer = qa_pipeline(question=question, context=abstract)
+            answer: dict = qa_pipeline(question=question, context=abstract)
             print(f"Question: {question}\nAnswer: {answer['answer']}\nScore: {answer['score']}\n")
         print("\n")
 
