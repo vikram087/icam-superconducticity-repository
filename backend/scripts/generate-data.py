@@ -19,7 +19,7 @@ client: Elasticsearch = Elasticsearch(
 
 def getAbstracts(index: str, size: int) -> list[str]:
     data: dict = client.search(index=index, size=size)['hits']['hits']
-    abstracts: list[str] = [data[i]['_source']['summary'] for i in range(len(data))]
+    abstracts: list[str] = [res['_source']['summary'] for res in data]
     
     return abstracts
 
@@ -27,7 +27,7 @@ def getAbstracts(index: str, size: int) -> list[str]:
 ## FIXME: Prompt engineer further
 def getTrainingData(abstracts: list[str]) -> dict:
     questions: list[str] = [
-        "Is this paper theoretical, experimental, or computational?",
+        "Is this paper theoretical, experimental, or computational?", # might not be in text
         "What phenomena or phase is discussed?",
         "What chemical formulas or constituents are mentioned?",
         "What is the lattice name or crystal structure?",
@@ -38,38 +38,38 @@ def getTrainingData(abstracts: list[str]) -> dict:
         "Does the paper mention important applications?"
     ]
     
-    system_message: dict = {"role": "system", "content": "You are a helpful assistant designed to output JSON."}
+    system_message: dict = {"role": "system", "content": "You are a helpful assistant whos goal is to answer the questions based off the context given in the abstract."}
     responses: list[dict] = []
     
-    for i in range(len(abstracts)):
-        context_message: dict = {"role": "assistant", "content": f"Here is the abstract:\n\n{abstracts[i]}"}
+    for i, abstract in enumerate(abstracts):
+        context_message: dict = {"role": "assistant", "content": f"Here is the abstract:\n\n{abstract}"}
         qas: list[dict] = []
         
-        for j in range(len(questions)):
+        for j, question in enumerate(questions):
             messages: list[dict] = [
                 system_message,
                 context_message,
-                {"role": "user", "content": questions[j]}
+                {"role": "user", "content": question}
             ]
             response = gpt.chat.completions.create(
                 model="gpt-4o",
-                response_format={ "type": "json_object" },
+                # response_format={ "type": "json_object" },
                 messages=messages # type: ignore
             )
-            answer: str = response.choices[0].message.content
+            answer: str = response.choices[0].message.content # type: ignore
             
             qas.append({
                 "id": f"{i}-{j}",
-                "question": questions[j],
+                "question": question,
                 "answers": [{
                     "text": answer,
-                    "answer_start": abstracts[i].find(answer) if answer in abstracts[i] else -1
+                    "answer_start": abstract.find(answer) if answer in abstract else -1
                 }],
                 "is_impossible": False
             })
             
         responses.append({
-            "context": abstracts[i],
+            "context": abstract,
             "qas": qas
         })
         
@@ -100,13 +100,13 @@ def getInferences(abstracts: list[str]) -> list[dict]:
     system_message: dict = {"role": "system", "content": "You are a helpful assistant whos goal is to answer the questions based off the context given in the abstract."}
     responses: list[dict] = []
     
-    for i in range(len(abstracts)):
-        context_message: dict = {"role": "assistant", "content": f"Here is the abstract:\n\n{abstracts[i]}"}
-        for j in range(len(questions)):
+    for abstract in abstracts:
+        context_message: dict = {"role": "assistant", "content": f"Here is the abstract:\n\n{abstract}"}
+        for question in questions:
             messages: list[dict] = [
                 system_message,
                 context_message,
-                {"role": "user", "content": questions[j]}
+                {"role": "user", "content": question}
             ]
             response = gpt.chat.completions.create(
                 model="gpt-4o",
@@ -114,7 +114,7 @@ def getInferences(abstracts: list[str]) -> list[dict]:
                 messages=messages # type: ignore
             )
             answer: str|None = response.choices[0].message.content
-            responses.append({"question": questions[j], "answer": answer})
+            responses.append({"question": question, "answer": answer})
             
     return responses
     

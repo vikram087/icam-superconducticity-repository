@@ -185,9 +185,9 @@ def papers() -> tuple[Response, int]|Response:
     accuracy: dict = {}
     
     if not knnSearch:
-        for i in range(len(hits)):
-            papers.append(hits[i]['_source'])
-    
+        for hit in hits:
+            papers.append(hit['_source'])
+
     total: int = client.search(
             query=quer,
             size=numResults,
@@ -201,11 +201,11 @@ def papers() -> tuple[Response, int]|Response:
     
     if knnSearch:
         papers = hits[(page-1)*numResults:]
-        filtered_papers: list[dict] = [papers[i]['_source'] for i in range(len(papers)) if papers[i]['_source']['date'] > startDate and papers[i]['_source']['date'] < endDate]
-        for i in range(len(hits)):
-            if not hits[i]['_score']:
+        filtered_papers: list[dict] = [paper['_source'] for paper in papers if paper['_source']['date'] > startDate and paper['_source']['date'] < endDate]
+        for hit in hits:
+            if not hit['_score']:
                 break
-            accuracy[hits[i]['_source']['id']] = float(str(hits[i]['_score'])[1:])
+            accuracy[hit['_source']['id']] = float(str(hit['_score'])[1:])
     else:
         filtered_papers = list(papers)
             

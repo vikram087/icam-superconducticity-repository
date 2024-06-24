@@ -99,10 +99,10 @@ def findInfo(start: int, amount: int) -> list[dict]:
   return replaceNullValues(paper_list)
 
 def replaceNullValues(papers_list: list[dict]) -> list[dict]:
-  for i in range(len(papers_list)):
-    for key, val in papers_list[i].items():
+  for paper_dict in papers_list:
+    for key, val in paper_dict.items():
       if not val:
-        papers_list[i][key] = "N/A"
+        paper_dict[key] = "N/A"
   
   return papers_list 
     
