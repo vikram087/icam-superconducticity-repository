@@ -13,9 +13,6 @@ This project is a comprehensive search engine for superconductivity papers. It c
 - **Caching**: Uses Redis for optimized performance, achieving 91% faster fetching for cached results.
 - **Fuzzy Search**: Implements fuzzy search for authors and categories to improve search flexibility.
 
-## Quick Start
-...
-
 ## Architecture
 
 ### Backend
@@ -56,9 +53,6 @@ This project is a comprehensive search engine for superconductivity papers. It c
 ## Performance
 
 - 91% faster fetching for cached results using Redis
-
-## License
-...
 
 ## Contact
 
