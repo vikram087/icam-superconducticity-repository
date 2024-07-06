@@ -192,7 +192,6 @@ function Filters({ searchParams }) {
       <br></br>
       <b>Page Limit</b>
       <br></br>
-      <br></br>
       <input
         type="number"
         min={1}
@@ -201,7 +200,7 @@ function Filters({ searchParams }) {
       ></input>
       <br></br>
       <br></br>
-      <b>Set Date Range</b>
+      <b>Date Range</b>
       <div>
         <p>Start Date:</p>
         <DatePicker
