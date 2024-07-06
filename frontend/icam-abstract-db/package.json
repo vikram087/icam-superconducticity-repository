@@ -18,7 +18,8 @@
     "react-dom": "^18.2.0",
     "react-loader-spinner": "^6.1.6",
     "react-router-dom": "^6.23.1",
-    "rimraf": "^5.0.7"
+    "rimraf": "^5.0.7",
+    "styled-components": "^6.1.11"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

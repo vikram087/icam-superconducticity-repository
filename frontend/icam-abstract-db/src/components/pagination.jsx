@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import '../styles/pagination.css';
 
-function Pagination({ handlePageClick, page, totalPages }) {
+function Pagination({ handlePageClick, totalPages }) {
+  const query = new URLSearchParams(location.search);
+  let page = Number(query.get('page')) || searchParams.page;
+  if(page < 0) {
+    page = 1
+  }
   const [pageNumber, setPageNumber] = useState(page);
 
   const handleBack = () => {
@@ -45,28 +50,30 @@ function Pagination({ handlePageClick, page, totalPages }) {
   };
 
   return (
-    <div className="pagination-container">
-      <span style={{ cursor: 'pointer' }} onClick={() => handleNumber(1)}>
-        &lt;&lt;&nbsp;
-      </span>
-      <span style={{ cursor: 'pointer' }} onClick={handleBack}>
-        &nbsp;&lt;&nbsp;
-      </span>
-      <input
-        type="number"
-        onKeyDown={handleSubmit}
-        value={pageNumber}
-        onChange={handleInputChange}
-      ></input>
-      <span style={{ cursor: 'pointer' }} onClick={handleFront}>
-        &nbsp;&gt;&nbsp;
-      </span>
-      <span
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleNumber(totalPages)}
-      >
-        &nbsp;&gt;&gt;&nbsp;
-      </span>
+    <div className="pagination-wrapper">
+      <div className="pagination-container">
+        <span style={{ cursor: 'pointer' }} onClick={() => handleNumber(1)}>
+          &lt;&lt;&nbsp;
+        </span>
+        <span style={{ cursor: 'pointer' }} onClick={handleBack}>
+          &nbsp;&lt;&nbsp;
+        </span>
+        <input
+          type="number"
+          onKeyDown={handleSubmit}
+          value={pageNumber}
+          onChange={handleInputChange}
+        ></input>
+        <span style={{ cursor: 'pointer' }} onClick={handleFront}>
+          &nbsp;&gt;&nbsp;
+        </span>
+        <span
+          style={{ cursor: 'pointer' }}
+          onClick={() => handleNumber(totalPages)}
+        >
+          &nbsp;&gt;&gt;&nbsp;
+        </span>
+      </div>
     </div>
   );
 }

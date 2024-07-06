@@ -12,7 +12,6 @@ function Papers({ searchParams, setSearchParams }) {
 
   const [papers, setPapers] = useState([]);
   const [pageCount, setPageCount] = useState(0);
-  // const pageCount = 250;
   const [expandedIndex, setExpandedIndex] = useState(-1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -48,26 +47,26 @@ function Papers({ searchParams, setSearchParams }) {
       })
         .then((response) => response.json())
         .then((data) => {
+          const endTime = performance.now();
+
+          const totalTimeS = (endTime - startTime) / 1000;
+          const totalTime = totalTimeS.toFixed(2);
+
+          setTime(totalTime);
+          setLoading(false);
+
           setExpandedIndex(-1);
           setPapers(data.papers);
           setTotal(data.total);
           setAccuracy(data.accuracy);
           setPageCount(Math.ceil(data.total / searchParams.per_page));
-          if (data.total === undefined) {
-            setTotal(0);
-            setPapers([]);
-          }
-
-          setLoading(false);
-
-          const endTime = performance.now();
-
-          const totalTimeS = (endTime - startTime) / 1000;
-          const totalTime = totalTimeS.toFixed(2);
-          setTime(totalTime);
         })
         .catch((error) => {
-          console.error('Error fetching papers:', error);
+          setExpandedIndex(-1);
+          setTotal(0);
+          setPapers([]);
+          setAccuracy({});
+          setPageCount(0);
         });
     },
     [searchParams.per_page],
@@ -75,77 +74,19 @@ function Papers({ searchParams, setSearchParams }) {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    let page = Number(query.get('page')) || searchParams.page;
-    let perPage = Number(query.get('per_page')) || searchParams.per_page;
+    const page = Number(query.get('page')) || searchParams.page;
+    const perPage = Number(query.get('per_page')) || searchParams.per_page;
     const search = query.get('query') || searchParams.query;
-    let sorting = query.get('sort') || searchParams.sorting;
-    let pages = Number(query.get('pages')) || searchParams.pages;
-    let term = query.get('term') || searchParams.term;
-
-    let date = query.get('date') || searchParams.date;
-    let startDate = date.split("-")[0];
-    let endDate = date.split("-")[1];
-
-    const currentDate = new Date();
-    const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, '');
-
-    if(date.split("-").length !== 2) {
-      date = `00000000-${now}`;
-    }
-
-    if(isNaN(Number(startDate)) || startDate.length !== 8) {
-      startDate = `00000000`;
-      date = `${startDate}-${endDate}`;
-    }
-    if(isNaN(Number(endDate)) || endDate.length !== 8) {
-      endDate = now;
-      date = `${startDate}-${endDate}`;
-    }
-
-    if (perPage >= 100) {
-      perPage = 100;
-    } else if (perPage >= 50) {
-      perPage = 50;
-    } else if (perPage >= 20) {
-      perPage = 20;
-    } else {
-      perPage = 10;
-    }
-
-    if (
-      sorting !== 'Most-Recent' &&
-      sorting !== 'Oldest-First' &&
-      sorting !== 'Most-Relevant'
-    ) {
-      sorting = 'Most-Relevant';
-    }
-
-    if (
-      term !== 'Abstract' &&
-      term !== 'Title' &&
-      term !== 'Category' &&
-      term !== 'Authors'
-    ) {
-      term = 'Abstract';
-    }
-
-    if (!Number.isInteger(page) || page <= 0) {
-      page = 1;
-    }
-
-    if (!Number.isInteger(pages) || pages <= 0) {
-      pages = 30;
-    }
+    const sorting = query.get('sort') || searchParams.sorting;
+    const pages = Number(query.get('pages')) || searchParams.pages;
+    const term = query.get('term') || searchParams.term;
+    const date = query.get('date') || searchParams.date;
 
     navigate(
       `?page=${page}&per_page=${perPage}&query=${search}` +
         `&sort=${sorting}&pages=${pages}&term=${term}` 
         + `&date=${date}`,
     );
-
-    // if(page > total/perPage) {
-    //   page = total/perPage;
-    // }
 
     setSearchParams({
       per_page: perPage,
@@ -203,6 +144,7 @@ function Papers({ searchParams, setSearchParams }) {
       searchParams.term,
       searchParams.date,
     );
+
     navigate(
       `?page=${page}&per_page=${searchParams.per_page}` +
         `&query=${searchParams.query}&sort=${searchParams.sorting}` +
@@ -222,26 +164,26 @@ function Papers({ searchParams, setSearchParams }) {
 
   const chooseBody = () => {
     if (!loading && total === 0) {
-      return <></>;
+      return(
+        <div className='content-area'>
+          <div style={{ marginLeft: "-460px" }}>
+            <p className="pag-container results">
+              Please adjust search parameters to yield results
+            </p>
+          </div>
+        </div>
+      );
     } else if (!loading) {
       return (
         <div className="content-area">
-          <Pagination
-            handlePageClick={handlePageClick}
-            page={searchParams.page}
-            totalPages={pageCount}
-          />
-          <p className="pagination-container results">
-            {!loading && `${total} Results in ${time} seconds`}
-          </p>
-          <p
-            className="pagination-container results"
-            style={{ paddingRight: '200px' }}
-          >
-            {total === 10000
-              ? 'Results are Limited to the first 10,000 matching documents'
-              : ''}
-          </p>
+          <div style={{ marginLeft: "-460px" }}>
+            <div className="pag-container results">
+              <p>{!loading && `${total} Results in ${time} seconds`}</p>
+              <p>{total === 10000
+                ? 'Results are Limited to the first 10,000 matching documents'
+                : ''}</p>
+            </div>
+          </div>
           <ul className="list">
             {papers.map((paper, index) => (
               <div
@@ -285,8 +227,6 @@ function Papers({ searchParams, setSearchParams }) {
               </div>
             ))}
           </ul>
-          <ScrollToTop />
-          <ScrollToBottom />
         </div>
       );
     } else if (loading) {
@@ -309,7 +249,15 @@ function Papers({ searchParams, setSearchParams }) {
         <div className="filters">
           <Filters searchParams={searchParams} />
         </div>
-        {chooseBody()}
+        <div className='page-wrapper'>
+          <Pagination
+              handlePageClick={handlePageClick}
+              totalPages={pageCount}
+          />
+          {chooseBody()}
+          <ScrollToTop />
+          <ScrollToBottom />
+        </div>
       </div>
     </div>
   );
@@ -324,8 +272,12 @@ function ScrollToTop() {
   };
 
   return (
-    <button className="scroll-to-top-container" onClick={scrollToTopButton}>
-      ↑
+    <button className="bu scroll-to-top-container" onClick={scrollToTopButton}>
+      <svg className="svgIcon" viewBox="0 0 384 512">
+        <path
+          d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z"
+        ></path>
+      </svg>
     </button>
   );
 }
@@ -339,11 +291,12 @@ function ScrollToBottom() {
   };
 
   return (
-    <button
-      className="scroll-to-bottom-container"
-      onClick={scrollToBottomButton}
-    >
-      ↓
+    <button className="bu scroll-to-bottom-container" onClick={scrollToBottomButton}>
+      <svg className="svgIcon" viewBox="0 0 384 512">
+      <path
+        d="M214.6 410.6c-12.5 12.5-32.8 12.5-45.3 0l-160-160c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 310.8V16c0-17.7 14.3-32 32-32s32 14.3 32 32v294.8l115.4-115.4c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3l-160 160z"
+      ></path>
+      </svg>
     </button>
   );
 }

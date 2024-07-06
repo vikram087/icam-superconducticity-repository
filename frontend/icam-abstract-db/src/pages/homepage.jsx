@@ -23,8 +23,9 @@ function HomePage({ searchParams }) {
         ICAM Superconductivity Database
       </p>
       <br></br>
-      <div className="go-to-papers" onClick={() => goToSearch('all')}>
-        <button className="go-to-button">Go to Papers</button>
+      <div onClick={() => goToSearch('all')}>
+        {/* <button className="go-to-button">Go to Papers</button> */}
+        <GoTo />
       </div>
       <br></br>
       <Search searchParams={searchParams} />
@@ -32,6 +33,17 @@ function HomePage({ searchParams }) {
       <p>Powered with Elasticsearch</p>
     </div>
   );
+}
+
+function GoTo() {
+  return (
+    <button class="learn-more">
+      <span class="circle" aria-hidden="true">
+        <span class="icon arrow"></span>
+      </span>
+      <span class="button-text">Go To Papers</span>
+    </button>
+  )
 }
 
 export default HomePage;

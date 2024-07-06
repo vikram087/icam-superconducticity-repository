@@ -15,18 +15,18 @@ function Filters({ searchParams }) {
   const [numResults, setNumResults] = useState(searchParams.per_page || 20);
   const [term, setTerm] = useState(searchParams.term || 'Abstract');
 
-  const [results, setResults] = useState([20, 10, 50, 100]);
-  const [order, setOrder] = useState([
+  const results = [10, 20, 50, 100];
+  const order = [
     'Most-Relevant',
     'Most-Recent',
     'Oldest-First',
-  ]);
-  const [terms, setTerms] = useState([
+  ];
+  const terms = [
     'Abstract',
     'Title',
     'Authors',
     'Category',
-  ]);
+  ];
 
   const [startDate, setStartDate] = useState(new Date(0));
   const [endDate, setEndDate] = useState(new Date());
@@ -37,19 +37,30 @@ function Filters({ searchParams }) {
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const perPage = Number(query.get('per_page')) || numResults;
-    let sorting = query.get('sort') || sortVal;
-    const pages = Number(query.get('pages')) || pageNumber;
     let searchTerm = query.get('term') || term;
+    let sorting = query.get('sort') || sortVal;
+    let perPage = Number(query.get('per_page')) || numResults; // need to add
+    let pages = Number(query.get('pages')) || pageNumber; // need to add
     let date = query.get('date') || dateRange;
     let startDate = date.split("-")[0];
     let endDate = date.split("-")[1];
 
-    const updatedResults = results.filter((r) => r !== perPage);
-    updatedResults.unshift(perPage);
-
     const currentDate = new Date();
     const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, '');
+
+    if (perPage >= 100) {
+      perPage = 100;
+    } else if (perPage >= 50) {
+      perPage = 50;
+    } else if (perPage >= 20) {
+      perPage = 20;
+    } else {
+      perPage = 10;
+    }
+
+    if (!Number.isInteger(pages) || pages <= 0) {
+      pages = 30;
+    }
 
     if(dateRange.split("-").length !== 2) {
       date = `00000000-${now}`;
@@ -81,12 +92,6 @@ function Filters({ searchParams }) {
       searchTerm = 'Abstract';
     }
 
-    const updatedOrder = order.filter((r) => r !== sorting);
-    updatedOrder.unshift(sorting);
-
-    const updatedTerms = terms.filter((r) => r !== searchTerm);
-    updatedTerms.unshift(searchTerm);
-
     setNumResults(perPage);
     setSortVal(sorting);
     setPageNumber(pages);
@@ -95,9 +100,6 @@ function Filters({ searchParams }) {
     setStartDate(convertIntToDate(startDate));
     setEndDate(convertIntToDate(endDate));
 
-    setResults(updatedResults);
-    setOrder(updatedOrder);
-    setTerms(updatedTerms);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
@@ -114,7 +116,6 @@ function Filters({ searchParams }) {
         `&pages=${pageValue}&term=${term}` 
         + `&date=${dateRange}`,
     );
-    window.location.reload();
   };
 
   const convertIntToDate = (dateNum) => {
@@ -154,53 +155,18 @@ function Filters({ searchParams }) {
 
   return (
     <div>
-      <b>Search Term</b>
-      <br></br>
-      <br></br>
-      <select onChange={(e) => setTerm(e.target.value)}>
-        {terms.map((option, index) => (
-          <option key={index} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-      <br></br>
-      <br></br>
-      <b>Sort</b>
-      <br></br>
-      <div className="results-per-page">
-        <select onChange={(e) => setSortVal(e.target.value.replace(' ', '-'))}>
-          {order.map((option, index) => (
-            <option key={index} value={option}>
-              {option.replace('-', ' ')}
-            </option>
-          ))}
-        </select>
-      </div>
-      <br></br>
-      <b>Results Per Page</b>
-      <br></br>
-      <div className="results-per-page">
-        <select onChange={(e) => setNumResults(e.target.value)}>
-          {results.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
-      <br></br>
-      <b>Page Limit</b>
-      <br></br>
+      <Dropdown terms={terms} setTerm={setTerm} value={"Term"} term={term} />
+      <Sort order={order} setSortVal={setSortVal} sort={sortVal} />
+      <Dropdown terms={results} setTerm={setNumResults} value={"Per Page"} term={numResults} />
+      <p className='bold'>Page Limit</p>
       <input
         type="number"
         min={1}
         value={pageNumber}
         onChange={handleInputChange}
+        className='styled-input'
       ></input>
-      <br></br>
-      <br></br>
-      <b>Date Range</b>
+      <p className='bold'>Date Range</p>
       <div>
         <p>Start Date:</p>
         <DatePicker
@@ -219,11 +185,40 @@ function Filters({ searchParams }) {
           onChange={(date) => updateDateVal(date, 'end')}
         />
       </div>
-      <br></br>
-      <br></br>
-      <button onClick={handleButton} style={{ cursor: 'pointer' }}>
+      <button className="submitBtn" onClick={handleButton} style={{ cursor: 'pointer', marginTop: "20px" }}>
         Submit
+        <svg fill="white" viewBox="0 0 448 512" height="1em" className="arrow"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"></path></svg>
       </button>
+    </div>
+  );
+}
+
+function Dropdown({ terms, setTerm, value, term }) {
+  return (
+    <div className="paste-button" style={{ paddingBottom: "10px" }}>
+      <button className="but">{value}: {term}&nbsp; ▼</button>
+      <div className="dropdown-content">
+        {terms.map((option, index) => (
+            <option key={index} value={option} onClick={() => setTerm(option)}>
+              {option}
+            </option>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Sort({ order, setSortVal, sort }) {
+  return (
+    <div className="paste-button" style={{ paddingBottom: "10px" }}>
+      <button className="but">Sort: {sort.replace('-', ' ')}&nbsp; ▼</button>
+      <div className="dropdown-content">
+        {order.map((option, index) => (
+            <option key={index} value={option} onClick={() => setSortVal(option.replace(' ', '-'))}>
+              {option.replace('-', ' ')}
+            </option>
+        ))}
+      </div>
     </div>
   );
 }

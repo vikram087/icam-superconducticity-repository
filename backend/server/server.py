@@ -66,19 +66,27 @@ def make_cache_key(query: str, sorting: str, page: int, numResults: int, pages: 
 # /api/papers
 @app.route("/api/papers", methods=['POST'])
 def papers() -> tuple[Response, int]|Response:
-    data: dict = request.get_json()
-    page: int = int(data.get('page', 0))
-    numResults: int = int(data.get('results', 0))
-    query: str = str(data.get('query', ""))
-    sorting: str = str(data.get('sorting', ""))
-    pages: int = int(data.get('pages', 30))
-    term: str = str(data.get('term', ""))
+    try:
+        data: dict = request.get_json()
+        page: int = int(data.get('page', 0))
+        numResults: int = int(data.get('results', 0))
+        query: str = str(data.get('query', ""))
+        sorting: str = str(data.get('sorting', ""))
+        pages: int = int(data.get('pages', 30))
+        term: str = str(data.get('term', ""))
+        
+        today: datetime = datetime.today()
+        formatted_date: str = today.strftime('%Y%m%d')
+        date: str = str(data.get('date', f"00000000-{formatted_date}"))
+        startDate: int = int(date.split("-")[0])
+        endDate: int = int(date.split("-")[1])
+    except:
+        return jsonify(None)
     
-    today: datetime = datetime.today()
-    formatted_date: str = today.strftime('%Y%m%d')
-    date: str = str(data.get('date', f"00000000-{formatted_date}"))
-    startDate: int = int(date.split("-")[0])
-    endDate: int = int(date.split("-")[1])
+    if page < 0:
+        return jsonify(None)    
+    if numResults < 0 or (numResults != 10 and numResults != 20 and numResults != 50 and numResults != 100):
+        return jsonify(None)
     
     if term == "Abstract":
         field: str = "summary_embedding"
@@ -88,6 +96,8 @@ def papers() -> tuple[Response, int]|Response:
         field = "categories"
     elif term == "Authors":
         field = "authors"
+    else:
+        return jsonify(None)
         
     cache_key: str = make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate)
     cached: dict|None = get_cached_results(cache_key)
@@ -98,13 +108,15 @@ def papers() -> tuple[Response, int]|Response:
         sort: str = "desc"
     elif(sorting == "Oldest-First"):
         sort = "asc"
+    else:
+        return jsonify(None)
         
     knnSearch: bool = False
     
     size: int = client.search(query={"match_all": {}}, index="search-papers-meta")['hits']['total']['value']
     
     if pages < 1:
-        pages = 1
+        return jsonify(None)
     elif pages*numResults > size:
         pages = math.ceil(size/numResults)
         
@@ -157,28 +169,39 @@ def papers() -> tuple[Response, int]|Response:
         
     if query == "all" or field == "authors" or field == "categories":
         knnSearch = False
-        results: ObjectApiResponse = client.search(
-            query=quer,
-            size=numResults,
-            from_=(page-1)*numResults,
-            sort=[{"date": {"order": sort}}] if (sorting == "Most-Recent" or sorting == "Oldest-First") else None,
-            index="search-papers-meta"
-        )
+        try:
+            results: ObjectApiResponse = client.search(
+                query=quer,
+                size=numResults,
+                from_=(page-1)*numResults,
+                sort=[{"date": {"order": sort}}] if (sorting == "Most-Recent" or sorting == "Oldest-First") else None,
+                index="search-papers-meta"
+            )
+        except:
+            return jsonify(None)
+        if results['hits']['hits'] == []:
+            return jsonify(None)
+        
     elif field == "summary_embedding" or field == "title_embedding":
         knnSearch = True
-        results = client.search(
-            knn={
-                'field': field,
-                'query_vector': getEmbedding(query),
-                'num_candidates': size,
-                'k': k,
-            },
-            query=quer,
-            from_=0,
-            size=page*numResults,
-            sort=pSort,
-            index="search-papers-meta"
-        )
+        try:
+            results = client.search(
+                knn={
+                    'field': field,
+                    'query_vector': getEmbedding(query),
+                    'num_candidates': size,
+                    'k': k,
+                },
+                query=quer,
+                from_=0,
+                size=page*numResults,
+                sort=pSort,
+                index="search-papers-meta"
+            )
+        except:
+            return jsonify(None)
+        if results['hits']['hits'] == []:
+            return jsonify(None)
         
     hits: dict = results['hits']['hits']
     papers: list[dict] = []
