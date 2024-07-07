@@ -18,6 +18,7 @@ function Papers({ searchParams, setSearchParams }) {
   const [loading, setLoading] = useState(true);
   const [accuracy, setAccuracy] = useState({});
   const [time, setTime] = useState('');
+  const [highlightedStars, setHighlightedStars] = useState({});
 
   const navigate = useNavigate();
 
@@ -81,6 +82,12 @@ function Papers({ searchParams, setSearchParams }) {
     const term = query.get('term') || searchParams.term;
     const date = query.get('date') || searchParams.date;
 
+    const storedStars = localStorage.getItem('highlightedStars');
+    if (storedStars) {
+      setHighlightedStars(JSON.parse(storedStars));
+      // localStorage.clear();
+    }
+
     setSearchParams({
       per_page: perPage,
       page: page,
@@ -132,6 +139,16 @@ function Papers({ searchParams, setSearchParams }) {
     changePage(pageNumber);
   };
 
+  const toggleStar = (id) => {
+    const uid = id.replaceAll("-", "_");
+    setHighlightedStars((prev) => {
+      const newStars = { ...prev, [uid]: !prev[uid] };
+      console.log(newStars);
+      localStorage.setItem('highlightedStars', JSON.stringify(newStars));
+      return newStars;
+    });
+  };
+
   const chooseBody = () => {
     if (!loading && total === 0) {
       return(
@@ -167,10 +184,20 @@ function Papers({ searchParams, setSearchParams }) {
                     Query Match Accuracy: {(accuracy[paper.id] * 100).toFixed(1)}%
                   </div>
                 )}
-                <div onClick={() => changePaper(paper.id.replace('/-/g', '/'))}>
-                  <u className="paper-title">
-                    <Content content={paper.title} />
-                  </u>
+                <div className='title-container'>
+                  <div onClick={() => changePaper(paper.id.replace('/-/g', '/'))}>
+                    <u className="paper-title">
+                      <Content content={paper.title} />
+                    </u>
+                  </div>
+                  <img
+                    width={20}
+                    height={20}
+                    src={highlightedStars[paper.id.replaceAll("-", "_")] ? '/filled_star.png' : '/empty_star.png'}
+                    onClick={() => toggleStar(paper.id)}
+                    className="star-icon"
+                    alt="star icon">
+                  </img>
                 </div>
                 <p>
                   by&nbsp;

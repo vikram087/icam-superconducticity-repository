@@ -40,7 +40,7 @@ function App() {
         />
         <Route
           path="/favorites"
-          element={<Favorites searchParams={searchParams}/>}
+          element={<Favorites searchParams={searchParams} />}
         />
         <Route
           path="/about"

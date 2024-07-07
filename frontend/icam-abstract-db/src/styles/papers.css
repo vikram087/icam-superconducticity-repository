@@ -204,3 +204,20 @@
   align-items: center;
   justify-content: center;
 }
+
+.title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.star-icon {
+  font-size: 1.5em;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.star-icon.highlighted {
+  color: gold;
+}
