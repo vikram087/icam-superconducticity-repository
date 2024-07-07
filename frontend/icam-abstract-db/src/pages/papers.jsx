@@ -143,7 +143,6 @@ function Papers({ searchParams, setSearchParams }) {
     const uid = id.replaceAll("-", "_");
     setHighlightedStars((prev) => {
       const newStars = { ...prev, [uid]: !prev[uid] };
-      console.log(newStars);
       localStorage.setItem('highlightedStars', JSON.stringify(newStars));
       return newStars;
     });

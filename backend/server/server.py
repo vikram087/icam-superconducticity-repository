@@ -31,6 +31,18 @@ model: SentenceTransformer = SentenceTransformer('all-MiniLM-L6-v2')
 def getEmbedding(text: str) -> list[int]:
     return model.encode(text)
 
+# /api/papers/fetch
+@app.route('/api/papers/fetch', methods=['POST'])
+def get_papers() -> tuple[Response, int]|Response:
+    data: dict = json.loads(request.get_json())
+    stars: list = list(data.keys())
+    papers: list[ObjectApiResponse] = [client.get(index="search-papers-meta", id=star) for star in stars]
+    
+    if papers:
+        return jsonify(papers)
+    else:
+        return jsonify({"error": "No results found"}), 404
+
 # /api/papers/${paperId}
 @app.route('/api/papers/<paper_id>', methods=['GET'])
 def get_paper(paper_id: str) -> tuple[Response, int]|Response:
