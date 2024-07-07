@@ -6,6 +6,7 @@ import Content from '../components/mathjax.jsx';
 import Pagination from '../components/pagination.jsx';
 import Filters from '../components/filters.jsx';
 import '../styles/papers.css';
+import NavBar from '../components/navbar.jsx';
 
 function Papers({ searchParams, setSearchParams }) {
   const location = useLocation();
@@ -28,7 +29,7 @@ function Papers({ searchParams, setSearchParams }) {
     }
   };
 
-  const getPapers = useCallback(
+  const getPapers = 
     (page, results, query, sorting, startTime, pages, term, dateRange) => {
       fetch('http://localhost:8080/api/papers', {
         method: 'POST',
@@ -68,9 +69,7 @@ function Papers({ searchParams, setSearchParams }) {
           setAccuracy({});
           setPageCount(0);
         });
-    },
-    [searchParams.per_page],
-  );
+    }
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -81,12 +80,6 @@ function Papers({ searchParams, setSearchParams }) {
     const pages = Number(query.get('pages')) || searchParams.pages;
     const term = query.get('term') || searchParams.term;
     const date = query.get('date') || searchParams.date;
-
-    navigate(
-      `?page=${page}&per_page=${perPage}&query=${search}` +
-        `&sort=${sorting}&pages=${pages}&term=${term}` 
-        + `&date=${date}`,
-    );
 
     setSearchParams({
       per_page: perPage,
@@ -114,16 +107,6 @@ function Papers({ searchParams, setSearchParams }) {
     );
   }, [
     location.search,
-    getPapers,
-    navigate,
-    searchParams.page,
-    searchParams.per_page,
-    searchParams.query,
-    searchParams.sorting,
-    searchParams.pages,
-    searchParams.term,
-    searchParams.date,
-    setSearchParams,
   ]);
 
   const changePage = (page) => {
@@ -131,19 +114,6 @@ function Papers({ searchParams, setSearchParams }) {
       ...prevParams,
       page: page,
     }));
-
-    const startTime = performance.now();
-
-    getPapers(
-      page,
-      searchParams.per_page,
-      searchParams.query,
-      searchParams.sorting,
-      startTime,
-      searchParams.pages,
-      searchParams.term,
-      searchParams.date,
-    );
 
     navigate(
       `?page=${page}&per_page=${searchParams.per_page}` +
@@ -241,22 +211,22 @@ function Papers({ searchParams, setSearchParams }) {
 
   return (
     <div>
-      <p className="title" onClick={() => navigate('/')}>
-        ICAM Superconductivity Database
-      </p>
-      <Search searchParams={searchParams} papers={papers} />
-      <div className="page-container">
-        <div className="filters">
-          <Filters searchParams={searchParams} />
-        </div>
-        <div className='page-wrapper'>
-          <Pagination
-              handlePageClick={handlePageClick}
-              totalPages={pageCount}
-          />
-          {chooseBody()}
-          <ScrollToTop />
-          <ScrollToBottom />
+      <NavBar searchParams={searchParams}/>
+        <div className='page-main'>
+        <Search searchParams={searchParams} papers={papers} />
+        <div className="page-container">
+          <div className="filters">
+            <Filters searchParams={searchParams} />
+          </div>
+          <div className='page-wrapper'>
+            <Pagination
+                handlePageClick={handlePageClick}
+                totalPages={pageCount}
+            />
+            {chooseBody()}
+            <ScrollToTop />
+            <ScrollToBottom />
+          </div>
         </div>
       </div>
     </div>

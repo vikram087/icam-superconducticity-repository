@@ -5,6 +5,16 @@
   width: 100%; 
 }
 
+.page-main {
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background-color: #f9f9f9;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
 .journals {
   padding-top: 10px;
 }
@@ -71,14 +81,14 @@
 .scroll-to-top-container {
   position: fixed;
   bottom: 20px; 
-  right: 20px; 
+  right: 15px; 
   z-index: 1000;
 }
 
 .scroll-to-bottom-container {
   position: fixed;
   bottom: 20px; 
-  left: 20px; 
+  left: 15px; 
   z-index: 1000;
 }
 
@@ -113,8 +123,8 @@
 }
 
 .bu {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background-color: #2f3640;
   border: none;
@@ -177,7 +187,7 @@
 .results {
   padding-left: 30px;
   user-select: auto;
-  text-align: center; /* Center the text inside the results */
+  text-align: center;
 }
 
 .content-area {

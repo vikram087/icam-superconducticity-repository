@@ -3,6 +3,8 @@ import Papers from './papers.jsx';
 import HomePage from './homepage.jsx';
 import { useState } from 'react';
 import PaperDetail from './paper-detail.jsx';
+import Favorites from './favorites.jsx';
+import About from './about.jsx';
 
 function App() {
   const currentDate = new Date();
@@ -35,6 +37,14 @@ function App() {
         <Route
           path="/papers/:id"
           element={<PaperDetail searchParams={searchParams} />}
+        />
+        <Route
+          path="/favorites"
+          element={<Favorites searchParams={searchParams}/>}
+        />
+        <Route
+          path="/about"
+          element={<About searchParams={searchParams} />}
         />
       </Routes>
     </Router>

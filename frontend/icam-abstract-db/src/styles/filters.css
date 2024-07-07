@@ -15,7 +15,7 @@
   font-weight: 600;
   cursor: pointer;
   color: white;
-  background: #2f3640;
+  background: var(--gradient-2, linear-gradient(90deg, #2AF598 0%, #009EFD 100%));
   letter-spacing: 0.7px;
 }
 

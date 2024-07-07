@@ -21,10 +21,6 @@ function PaperDetail({ searchParams }) {
   const goBack = () => {
     const startDate = new Date(0);
     const endDate = new Date();
-    const formattedStart = startDate.toISOString().split('T')[0].replaceAll("-", "");
-    const formattedEnd = endDate.toISOString().split('T')[0].replaceAll("-", "");
-  
-    const dateRange = `${formattedStart}-${formattedEnd}`;
 
     navigate(
       `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +

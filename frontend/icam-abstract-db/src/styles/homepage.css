@@ -1,19 +1,40 @@
+/* homepage.css */
 .main {
     text-align: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-left: 100px;
+    padding-right: 100px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
 }
 
 .home-title {
-    font-size: xx-large;
+    font-size: 2.5em;
     margin-top: 20px;
+    margin-bottom: 10px;
     cursor: pointer;
+    color: #2f3640;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .go-to-papers {
-    border-radius: 100px;
-    border: 1px solid black;
+    border-radius: 50px;
+    border: 1px solid #2f3640;
     padding: 10px 20px;
     display: inline-block;
     cursor: pointer;
+    background-color: #2f3640;
+    color: white;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.go-to-papers:hover {
+    background-color: white;
+    color: #2f3640;
 }
 
 .go-to-button {
@@ -36,14 +57,14 @@
     padding: 0;
     font-size: inherit;
     font-family: inherit;
-   }
-   
-   .learn-more {
+}
+
+.learn-more {
     width: 12rem;
     height: auto;
-   }
-   
-   .learn-more .circle {
+}
+
+.learn-more .circle {
     transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
     position: relative;
     display: block;
@@ -52,26 +73,26 @@
     height: 3rem;
     background: #2f3640;
     border-radius: 1.625rem;
-   }
-   
-   .learn-more .circle .icon {
+}
+
+.learn-more .circle .icon {
     transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
     position: absolute;
     top: 0;
     bottom: 0;
     margin: auto;
     background: #fff;
-   }
-   
-   .learn-more .circle .icon.arrow {
+}
+
+.learn-more .circle .icon.arrow {
     transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
     left: 0.625rem;
     width: 1.125rem;
     height: 0.125rem;
     background: none;
-   }
-   
-   .learn-more .circle .icon.arrow::before {
+}
+
+.learn-more .circle .icon.arrow::before {
     position: absolute;
     content: "";
     top: -0.29rem;
@@ -81,9 +102,9 @@
     border-top: 0.125rem solid #fff;
     border-right: 0.125rem solid #fff;
     transform: rotate(45deg);
-   }
-   
-   .learn-more .button-text {
+}
+
+.learn-more .button-text {
     transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
     position: absolute;
     top: 0;
@@ -97,17 +118,78 @@
     line-height: 1.6;
     text-align: center;
     text-transform: uppercase;
-   }
-   
-   .learn-more:hover .circle {
+}
+
+.learn-more:hover .circle {
     width: 100%;
-   }
-   
-   .learn-more:hover .circle .icon.arrow {
+}
+
+.learn-more:hover .circle .icon.arrow {
     background: #fff;
     transform: translate(1rem, 0);
-   }
-   
-   .learn-more:hover .button-text {
+}
+
+.learn-more:hover .button-text {
     color: #fff;
-   }
+}
+
+.overview, .features, .architecture, .usage, .performance, .contact {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.overview, .features, .usage, .architecture, .performance, .contact {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+    animation: blueGlow 3s linear infinite; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    color: #2f3640;
+    border-bottom: 2px solid #2f3640;
+    padding-bottom: 5px;
+}
+
+h3 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #2f3640;
+}
+
+ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+ul li {
+    margin-bottom: 10px;
+}
+
+ul li strong {
+    font-weight: bold;
+}
+
+p {
+    line-height: 1.6;
+    color: #555;
+}
+
+@keyframes blueGlow {
+    0%, 100% {
+      box-shadow: 0 0 2px 1px #45b3e0; 
+    }
+    25% {
+      box-shadow: 0 2px 2px 1px #45b3e0;
+    }
+    50% {
+      box-shadow: 2px 0 2px 1px #45b3e0;
+    }
+    75% {
+      box-shadow: 0 -2px 2px 1px #45b3e0; 
+    }
+}  

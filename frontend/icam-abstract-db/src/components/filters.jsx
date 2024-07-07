@@ -118,6 +118,18 @@ function Filters({ searchParams }) {
     );
   };
 
+  const handleReset = () => {
+    const currentDate = new Date();
+    const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, '');
+  
+    navigate(
+      `?page=1&per_page=20` +
+        `&query=all&sort=Most-Relevant` +
+        `&pages=30&term=Abstract` 
+        + `&date=00000000-${now}`,
+    );
+  }
+
   const convertIntToDate = (dateNum) => {
     const dateString = String(dateNum);
     const year = dateString.substring(0, 4);
@@ -155,6 +167,9 @@ function Filters({ searchParams }) {
 
   return (
     <div>
+      <button className="submitBtn" onClick={handleReset} style={{ cursor: 'pointer', marginBottom: "10px" }}>
+        Reset Filters
+      </button>
       <Dropdown terms={terms} setTerm={setTerm} value={"Term"} term={term} />
       <Sort order={order} setSortVal={setSortVal} sort={sortVal} />
       <Dropdown terms={results} setTerm={setNumResults} value={"Per Page"} term={numResults} />

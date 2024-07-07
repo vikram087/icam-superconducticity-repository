@@ -1,0 +1,62 @@
+/* about.css */
+.about-container {
+    text-align: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-left: 100px;
+    padding-right: 100px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #2f3640;
+}
+
+.mission-statement {
+    font-size: 1.2em;
+    margin-bottom: 40px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.people-cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+}
+
+.card-img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.card h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #2f3640;
+}
+
+.card p {
+    font-size: 1em;
+    color: #555;
+    line-height: 1.6;
+}
