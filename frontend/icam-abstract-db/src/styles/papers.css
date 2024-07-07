@@ -7,6 +7,7 @@
 
 .page-main {
   max-width: 1260px;
+  min-height: 100vh;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Arial', sans-serif;

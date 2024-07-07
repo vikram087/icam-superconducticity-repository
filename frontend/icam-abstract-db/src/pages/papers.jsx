@@ -168,6 +168,7 @@ function Papers({ searchParams, setSearchParams }) {
               <p>{total === 10000
                 ? 'Results are Limited to the first 10,000 matching documents'
                 : ''}</p>
+              <b style={{ fontSize: "large", paddingBottom: "10px" }}>Displaying Results for: "{searchParams.query}"</b>
             </div>
           </div>
           <ul className="list">
@@ -259,7 +260,7 @@ function Papers({ searchParams, setSearchParams }) {
   );
 }
 
-function ScrollToTop() {
+export function ScrollToTop() {
   const scrollToTopButton = () => {
     window.scrollTo({
       top: 0,
@@ -278,7 +279,7 @@ function ScrollToTop() {
   );
 }
 
-function ScrollToBottom() {
+export function ScrollToBottom() {
   const scrollToBottomButton = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,

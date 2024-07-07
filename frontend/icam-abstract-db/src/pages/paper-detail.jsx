@@ -21,7 +21,7 @@ function PaperDetail({ searchParams }) {
   const goBack = () => {
     const startDate = new Date(0);
     const endDate = new Date();
-
+    
     navigate(
       `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
         `&query=${searchParams.query}&sort=${searchParams.sorting}` +

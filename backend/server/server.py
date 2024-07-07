@@ -34,9 +34,10 @@ def getEmbedding(text: str) -> list[int]:
 # /api/papers/fetch
 @app.route('/api/papers/fetch', methods=['POST'])
 def get_papers() -> tuple[Response, int]|Response:
-    data: dict = json.loads(request.get_json())
-    stars: list = list(data.keys())
-    papers: list[ObjectApiResponse] = [client.get(index="search-papers-meta", id=star) for star in stars]
+    data: dict = request.get_json()
+    stars: list[str] = [key.replace("_", "-") for key in list(data.keys()) if data[key]]
+    responses: list[ObjectApiResponse] = [client.get(index="search-papers-meta", id=star) for star in stars]
+    papers: list[dict] = [response['_source'] for response in responses]
     
     if papers:
         return jsonify(papers)
