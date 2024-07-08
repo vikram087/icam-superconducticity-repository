@@ -41,48 +41,32 @@ function HomePage({ searchParams }) {
         <section className="features">
           <h2>Features</h2>
           <ul>
-            <li><strong>Advanced Search:</strong> Find papers using natural language queries.</li>
-            <li><strong>Sorting and Filtering:</strong> Sort results by relevance or date, and filter based on various criteria including date range.</li>
-            <li><strong>Pagination:</strong> View results with easy navigation and customizable results per page.</li>
-            <li><strong>Answer Generation:</strong> Get answers to specific questions based on paper abstracts.</li>
-            <li><strong>Performance:</strong> Optimized for fast retrieval of frequently accessed papers.</li>
+            <li><strong>Vector Search:</strong> Find papers using natural language queries.</li>
             <li><strong>Fuzzy Search:</strong> Improved search flexibility for authors and categories.</li>
-          </ul>
-        </section>
-        <section className="architecture">
-          <h2>Architecture</h2>
-          <h3>Backend</h3>
-          <ul>
-            <li><strong>Data Management:</strong> Efficient storage and retrieval of paper metadata.</li>
-            <li><strong>Query Processing:</strong> Advanced algorithms for accurate and fast search results.</li>
-            <li><strong>Performance Optimization:</strong> Techniques to ensure fast and reliable access to data.</li>
-          </ul>
-          <h3>Frontend</h3>
-          <ul>
-            <li><strong>User Interface:</strong> Intuitive and responsive design for easy navigation and use.</li>
-          </ul>
-          <h3>Deployment</h3>
-          <ul>
-            <li><strong>Scalable Hosting:</strong> Ensures reliability and performance.</li>
+            <li><strong>Performance:</strong> Optimized for fast retrieval of frequently accessed papers.</li>
+            <li><strong>Answer Generation:</strong> View inferences based on paper abstracts.</li>
+            <li><strong>Custom Search Parameters:</strong> Customize search parameters to view results unique to your needs.</li>
+            <li><strong>Favorites:</strong> Favorite research papers to revisit them later.</li>
           </ul>
         </section>
         <section className="usage">
           <h2>Usage</h2>
-          <h3>Searching</h3>
-          <p>Use natural language queries for titles and abstracts to get the best results.</p>
-          <p>Use keywords for authors and categories.</p>
-          <h3>Filtering</h3>
-          <p>Filter papers by date range using the date picker.</p>
-          <h3>Sorting</h3>
-          <p>Sort results by relevance or publication date using the dropdown menu.</p>
-          <h3>Pagination</h3>
-          <p>Customize results per page and navigate through pages easily.</p>
-          <h3>Performance Tips</h3>
-          <p>For optimal performance, refine your search queries to find relevant results quickly. Frequently accessed papers load faster.</p>
+          <ul>
+            <li>Search by Abstract, titles, authors, and categories</li>
+            <li>Use natural language queries for titles and abstracts to get the best results.</li>
+            <li>Use keywords for authors and categories.</li>
+            <li>Sort results by relevance or publication date.</li>
+            <li>Customize number of results per page and page limit.</li>
+            <li>Filter papers by date range using the date picker.</li>
+          </ul>
         </section>
         <section className="performance">
-          <h2>Performance</h2>
-          <p>Fast retrieval of results, especially for frequently accessed papers.</p>
+          <h2>Performance Tips</h2>
+          <ul>
+            <li>Frequently searched queries will load faster due to caching.</li>
+            <li>Reduce the number of pages and results per page for faster loading.</li>
+            <li>Earlier pages will load faster than later pages for vector searching.</li>
+          </ul>
         </section>
         <section className="contact">
           <h2>Contact</h2>

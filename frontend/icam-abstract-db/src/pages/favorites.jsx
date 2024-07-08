@@ -12,9 +12,11 @@ function Favorites({ searchParams, setPrevUrl }) {
     const [papers, setPapers] = useState([]);
     const [papersCopy, setPapersCopy] = useState([]);
     const [expandedIndex, setExpandedIndex] = useState(-1);
+    const [query, setQuery] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
+        setQuery("all")
         const storedStars = localStorage.getItem('highlightedStars');
         setHighlightedStars(JSON.parse(storedStars));
 
@@ -65,7 +67,10 @@ function Favorites({ searchParams, setPrevUrl }) {
             <NavBar searchParams={searchParams} />
             <div className="page-main">
                 <h1 style={{ textAlign: "center" }}>Favorites</h1>
-                <Search papers={papers} setPapers={setPapers} papersCopy={papersCopy} />
+                <Search papers={papers} setPapers={setPapers} papersCopy={papersCopy} setQuery={setQuery} />
+                <div style={{ textAlign: "center" }}>
+                  <b style={{ fontSize: "large", paddingBottom: "10px" }}>Displaying Results for: "{query}"</b>
+                </div>
                 <div className="page-container">
                     <div className="content-area">
                         {papers ? <ul className="list" style={{ paddingLeft: "100px" }}>
@@ -126,17 +131,23 @@ function Favorites({ searchParams, setPrevUrl }) {
     );
 }
 
-function Search({ papers, setPapers, papersCopy }) {
+function Search({ papers, setPapers, papersCopy, setQuery }) {
   const [inputValue, setInputValue] = useState('');
 
   const goToSearch = (query) => {
     if(!papers) {
+      setQuery(query);
+      if(query === "") {
+        setQuery("all")
+      }
       return;
     }
     if(query === "" || query == "all") {
+        setQuery("all");
         setPapers(papersCopy);
         return;
     }
+    setQuery(query);
 
     const options = {
         keys: ['title', 'authors', 'summary'],
