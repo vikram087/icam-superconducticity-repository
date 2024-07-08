@@ -8,7 +8,7 @@ import Filters from '../components/filters.jsx';
 import '../styles/papers.css';
 import NavBar from '../components/navbar.jsx';
 
-function Papers({ searchParams, setSearchParams }) {
+function Papers({ searchParams, setSearchParams, setPrevUrl }) {
   const location = useLocation();
 
   const [papers, setPapers] = useState([]);
@@ -131,6 +131,7 @@ function Papers({ searchParams, setSearchParams }) {
   };
 
   const changePaper = (paperId) => {
+    setPrevUrl(window.location.href);
     navigate(`/papers/${paperId}`);
   };
 
@@ -240,6 +241,7 @@ function Papers({ searchParams, setSearchParams }) {
     <div>
       <NavBar searchParams={searchParams}/>
         <div className='page-main'>
+        <h1 style={{ textAlign: "center" }}>Papers</h1>
         <Search searchParams={searchParams} papers={papers} />
         <div className="page-container">
           <div className="filters">

@@ -20,6 +20,8 @@ function App() {
     date: `00000000-${now}`,
   });
 
+  const [prevUrl, setPrevUrl] = useState("");
+
   return (
     <Router>
       <Routes>
@@ -30,17 +32,18 @@ function App() {
             <Papers
               searchParams={searchParams}
               setSearchParams={setSearchParams}
+              setPrevUrl={setPrevUrl}
             />
           }
           exact
         />
         <Route
           path="/papers/:id"
-          element={<PaperDetail searchParams={searchParams} />}
+          element={<PaperDetail searchParams={searchParams} prevUrl={prevUrl} />}
         />
         <Route
           path="/favorites"
-          element={<Favorites searchParams={searchParams} />}
+          element={<Favorites searchParams={searchParams} setPrevUrl={setPrevUrl} />}
         />
         <Route
           path="/about"

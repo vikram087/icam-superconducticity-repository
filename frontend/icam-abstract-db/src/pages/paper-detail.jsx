@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { TailSpin } from 'react-loader-spinner';
 import Content from '../components/mathjax';
 import '../styles/paper-detail.css';
+import NavBar from '../components/navbar';
 
-function PaperDetail({ searchParams }) {
+function PaperDetail({ searchParams, prevUrl }) {
   const [paper, setPaper] = useState(null);
+  const [highlightedStars, setHighlightedStars] = useState([]);
 
-  const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
+    const storedStars = localStorage.getItem('highlightedStars');
+    setHighlightedStars(JSON.parse(storedStars));
+
     fetch(`http://localhost:8080/api/papers/${id}`)
       .then((response) => response.json())
       .then((data) => {
@@ -19,15 +23,7 @@ function PaperDetail({ searchParams }) {
   }, [id]);
 
   const goBack = () => {
-    const startDate = new Date(0);
-    const endDate = new Date();
-    
-    navigate(
-      `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
-        `&query=${searchParams.query}&sort=${searchParams.sorting}` +
-        `&pages=${searchParams.pages}&term=${searchParams.term}` 
-        +`&date=${searchParams.date}`,
-    );
+    window.location.href = prevUrl;
   };
 
   const replaceID = (id) => {
@@ -62,65 +58,89 @@ function PaperDetail({ searchParams }) {
     return day + ' ' + month + ' ' + year;
   };
 
+  const toggleStar = (id) => {
+    const uid = id.replaceAll("-", "_");
+    setHighlightedStars((prev) => {
+      const newStars = { ...prev, [uid]: !prev[uid] };
+      localStorage.setItem('highlightedStars', JSON.stringify(newStars));
+      return newStars;
+    });
+  };
+
   return paper ? (
-    <div className="paper">
-      <div className="button">
-        <button className="return" onClick={goBack}>
-          Go Back
-        </button>
-      </div>
-      <u>
-        <Content content={paper.title} />
-      </u>
-      <p>
-        <strong>Authors:</strong>{' '}
-        {paper.authors.map((author, index) => (
-          <span key={index}>
-            {author}
-            {index < paper.authors.length - 1 ? ', ' : ''}
-          </span>
-        ))}
-      </p>
-      <p>
-        <strong>arXiv ID:</strong> {replaceID(paper.id)}
-      </p>
-      <p>
-        <strong>DOI:</strong> {paper.doi}
-      </p>
-      <strong>Links:</strong>
-      {paper.links.map((link, index) => (
-        <a href={link} key={index} target="_blank" rel="noreferrer">
-          <br></br>
-          {link}
-        </a>
-      ))}
-      <p>
-        <strong>Categories:</strong>{' '}
-        {paper.categories.map((category, index) => (
-          <span key={index}>
-            {category}
-            {index < paper.categories.length - 1 ? ', ' : ''}
-          </span>
-        ))}
-      </p>
-      <p>
-        <strong>Submission Date:</strong> {numToDate(String(paper.date))}
-      </p>
-      <p>
-        <strong>Update Date:</strong> {numToDate(String(paper.updated))}
-      </p>
-      <p>
-        <strong>Comments:</strong> {paper.comments}
-      </p>
-      <p>
-        <strong>Primary Category:</strong> {paper.primary_category}
-      </p>
-      <p>
-        <strong>Journal Ref:</strong> {paper.journal_ref}
-      </p>
-      <div className="abstract">
-        <strong>Abstract:</strong> <br></br>
-        <Content content={paper.summary} />
+    <div>
+      <NavBar searchParams={searchParams} />
+      <div className='page-main'>
+        <div className="paper">
+          <div className="button">
+            <button className="return" onClick={goBack}>
+              Go Back
+            </button>
+          </div>
+          <div className='title-container'>
+            <h3 style={{ textAlign: "center", paddingBottom: "10px" }}>
+              <Content content={paper.title} />
+            </h3>
+            <img
+              width={20}
+              height={20}
+              src={highlightedStars[paper.id.replaceAll("-", "_")] ? '/filled_star.png' : '/empty_star.png'}
+              onClick={() => toggleStar(paper.id)}
+              className="star-icon"
+              alt="star icon">
+            </img>
+            </div>
+          <p>
+            <strong>Authors:</strong>{' '}
+            {paper.authors.map((author, index) => (
+              <span key={index}>
+                {author}
+                {index < paper.authors.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </p>
+          <p>
+            <strong>arXiv ID:</strong> {replaceID(paper.id)}
+          </p>
+          <p>
+            <strong>DOI:</strong> {paper.doi}
+          </p>
+          <strong>Links:</strong>
+          {paper.links.map((link, index) => (
+            <a href={link} key={index} target="_blank" rel="noreferrer">
+              <br></br>
+              {link}
+            </a>
+          ))}
+          <p>
+            <strong>Categories:</strong>{' '}
+            {paper.categories.map((category, index) => (
+              <span key={index}>
+                {category}
+                {index < paper.categories.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </p>
+          <p>
+            <strong>Submission Date:</strong> {numToDate(String(paper.date))}
+          </p>
+          <p>
+            <strong>Update Date:</strong> {numToDate(String(paper.updated))}
+          </p>
+          <p>
+            <strong>Comments:</strong> {paper.comments}
+          </p>
+          <p>
+            <strong>Primary Category:</strong> {paper.primary_category}
+          </p>
+          <p>
+            <strong>Journal Ref:</strong> {paper.journal_ref}
+          </p>
+          <div className="abstract">
+            <strong>Abstract:</strong> <br></br>
+            <Content content={paper.summary} />
+          </div>
+        </div>
       </div>
     </div>
   ) : (

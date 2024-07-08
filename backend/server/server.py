@@ -36,6 +36,10 @@ def getEmbedding(text: str) -> list[int]:
 def get_papers() -> tuple[Response, int]|Response:
     data: dict = request.get_json()
     stars: list[str] = [key.replace("_", "-") for key in list(data.keys()) if data[key]]
+    
+    if len(stars) == 0:
+        return jsonify(None)
+    
     responses: list[ObjectApiResponse] = [client.get(index="search-papers-meta", id=star) for star in stars]
     papers: list[dict] = [response['_source'] for response in responses]
     
