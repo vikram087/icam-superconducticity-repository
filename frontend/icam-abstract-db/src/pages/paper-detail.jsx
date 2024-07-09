@@ -23,7 +23,12 @@ function PaperDetail({ searchParams, prevUrl }) {
   }, [id]);
 
   const goBack = () => {
-    window.location.href = prevUrl;
+    if(prevUrl) {
+      window.location.href = prevUrl;
+    } else {
+      window.location.href = "http://localhost:5173/"
+    }
+    
   };
 
   const replaceID = (id) => {
