@@ -32,6 +32,9 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 
   const getPapers = 
     (page, results, query, sorting, startTime, pages, term, dateRange) => {
+      const search = parseInput(query).search;
+      const parsed = parseInput(query).boolean;
+
       fetch('http://localhost:8080/api/papers', {
         method: 'POST',
         headers: {
@@ -40,11 +43,12 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
         body: JSON.stringify({
           page: page,
           results: results,
-          query: query,
+          query: search,
           sorting: sorting,
           pages: pages,
           term: term,
           date: dateRange,
+          parsedInput: parsed
         }),
       })
         .then((response) => response.json())
@@ -71,6 +75,80 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
           setPageCount(0);
         });
     }
+
+    const parseInput = (query) => {
+      const allOccur = (arr, searchString) => {
+        let indices = [];
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i] === searchString) {
+                indices.push(i);
+            }
+        }
+        return indices;
+      };
+
+      const removeDups = (list) => {
+        return [... new Set(list)];
+      };
+
+      query = query.toLowerCase();
+      const beforeIndex = query.indexOf("|");
+      let orTerms = [];
+      let andTerms = [];
+      let notTerms = [];
+      let mustTerms = [];
+      let indices = [];
+
+      if(beforeIndex === -1) {
+        return { "search": query, "boolean": { "or": orTerms, "not": notTerms, "must": mustTerms } }
+      }
+
+      const before = query.substring(0, beforeIndex).trim();
+      const after = query.substring(beforeIndex + 1, query.length).trim();
+      const quer = before.split(" ");
+  
+      const or = allOccur(quer, "or");
+      const and = allOccur(quer, "and");
+      const not = allOccur(quer, "not");
+      const must = allOccur(quer, "must");
+  
+      if(or !== -1) {
+        for(let i = 0; i < or.length; i++) {
+          orTerms.push(quer[or[i] - 1]);
+          orTerms.push(quer[or[i] + 1]);
+          indices.push(or[i] - 1);
+          indices.push(or[i] + 1);
+        }
+      }
+      if(and !== -1) {
+        for(let i = 0; i < and.length; i++) {
+          andTerms.push(quer[and[i] - 1]);
+          andTerms.push(quer[and[i] + 1]);
+          indices.push(and[i] - 1);
+          indices.push(and[i] + 1);
+        }
+      }
+      if(not !== -1) {
+        for(let i = 0; i < not.length; i++) {
+          notTerms.push(quer[not[i] + 1]);
+          indices.push(not[i] + 1);
+        }
+      }
+      if(must !== -1) {
+        for(let i = 0; i < must.length; i++) {
+          mustTerms.push(quer[must[i] + 1]);
+          indices.push(must[i] + 1);
+        }
+      }
+
+      orTerms = removeDups(orTerms);
+      notTerms = removeDups(notTerms);
+      mustTerms = removeDups(mustTerms.concat(andTerms));
+
+      const boolean = { "or": orTerms, "not": notTerms, "must": mustTerms }
+
+      return { "search": after, "boolean": boolean }
+    };
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);

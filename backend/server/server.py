@@ -70,8 +70,8 @@ def get_cached_results(cache_key: str) -> dict|None:
 def cache_results(cache_key: str, data: tuple[list[dict], int, dict]) -> None:
     redis_client.setex(cache_key, 3600, json.dumps(data))
     
-def make_cache_key(query: str, sorting: str, page: int, numResults: int, pages: int, term: str, startDate: int, endDate: int) -> str:
-    key: str = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}_{startDate}_{endDate}"
+def make_cache_key(query: str, sorting: str, page: int, numResults: int, pages: int, term: str, startDate: int, endDate: int, parsedResults: dict) -> str:
+    key: str = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}_{startDate}_{endDate}_{parsedResults['must']}_{parsedResults['not']}_{parsedResults['or']}"
     return key
 
 # cache.clear()
@@ -91,6 +91,14 @@ def papers() -> tuple[Response, int]|Response:
         sorting: str = str(data.get('sorting', ""))
         pages: int = int(data.get('pages', 30))
         term: str = str(data.get('term', ""))
+        parsedInput: dict = dict(data.get('parsedInput', []))
+        
+        print(parsedInput)
+        print(query)
+        
+        mustV: list[str] = parsedInput['must']
+        orV: list[str] = parsedInput['or']
+        notV: list[str] = parsedInput['not']
         
         today: datetime = datetime.today()
         formatted_date: str = today.strftime('%Y%m%d')
@@ -116,7 +124,7 @@ def papers() -> tuple[Response, int]|Response:
     else:
         return jsonify(None)
         
-    cache_key: str = make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate)
+    cache_key: str = make_cache_key(query, sorting, page, numResults, pages, term, startDate, endDate, parsedInput)
     cached: dict|None = get_cached_results(cache_key)
     if cached:
         return jsonify({ "papers": cached[0], "total": cached[1], "accuracy": cached[2] })
@@ -147,42 +155,34 @@ def papers() -> tuple[Response, int]|Response:
         pSort = [{'_score': {'order': sort}}]
         
     if query == "all" or field == "summary_embedding" or field == "title_embedding":
-        quer: dict={
-            "bool": {
-                "must": {
-                    "match_all": {}
-                },
-                "filter": {
-                    "range": {
-                        "date": {
-                            "gte": startDate,
-                            "lte": endDate,
-                        }
-                    }
-                }
-            }
-        }
+        tag = "summary" if field == "summary_embedding" else "title"
+        must_clause = [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in mustV] if mustV else {"match_all": {}}
+        should_clause = [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in orV] if orV else []
+        must_not_clause = [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in notV] if notV else []
     else:
-        quer={
-            "bool": {
-                "must": {
-                    "match": {
-                        field: {
-                            "query": query,
-                            "fuzziness": "AUTO"
-                        }
-                    }
-                },
-                "filter": {
-                    "range": {
-                        "date": {
-                            "gte": startDate,
-                            "lte": endDate,
-                        }
+        must_clause = [{"match": {field: {"query": query,"fuzziness": "AUTO"}}}]
+
+        if mustV:
+            must_clause.extend([{"match": {field: {"query": label, "fuzziness": "AUTO"}}} for label in mustV])
+
+        should_clause = [{"match": {field: {"query": label, "fuzziness": "AUTO"}}} for label in orV] if orV else []
+        must_not_clause = [{"match": {field: {"query": label, "fuzziness": "AUTO"}}} for label in notV] if notV else []
+
+    quer = {
+        "bool": {
+            "must": must_clause,
+            "should": should_clause,
+            "must_not": must_not_clause,
+            "filter": {
+                "range": {
+                    "date": {
+                        "gte": startDate,
+                        "lte": endDate,
                     }
                 }
             }
         }
+    }
         
     if query == "all" or field == "authors" or field == "categories":
         knnSearch = False
