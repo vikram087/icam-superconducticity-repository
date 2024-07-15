@@ -210,7 +210,7 @@ def papers() -> tuple[Response, int]|Response:
                     'k': k,
                 },
                 query=quer,
-                from_=0,
+                from_=0, # consider changing to (page-1)*numResults
                 size=page*numResults,
                 sort=pSort,
                 index="search-papers-meta"
