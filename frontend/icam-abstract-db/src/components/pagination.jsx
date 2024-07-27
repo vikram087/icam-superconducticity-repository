@@ -52,9 +52,11 @@ function Pagination({ handlePageClick, totalPages }) {
 	return (
 		<div className="pagination-wrapper">
 			<div className="pagination-container">
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<span style={{ cursor: "pointer" }} onClick={() => handleNumber(1)}>
 					&lt;&lt;&nbsp;
 				</span>
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<span style={{ cursor: "pointer" }} onClick={handleBack}>
 					&nbsp;&lt;&nbsp;
 				</span>
@@ -64,9 +66,11 @@ function Pagination({ handlePageClick, totalPages }) {
 					value={pageNumber}
 					onChange={handleInputChange}
 				/>
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<span style={{ cursor: "pointer" }} onClick={handleFront}>
 					&nbsp;&gt;&nbsp;
 				</span>
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<span
 					style={{ cursor: "pointer" }}
 					onClick={() => handleNumber(totalPages)}

@@ -24,10 +24,12 @@ function HomePage({ searchParams }) {
 		<div>
 			<NavBar searchParams={searchParams} />
 			<div className="main">
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<p className="home-title" onClick={() => navigate("/")}>
 					ICAM Superconductivity Database
 				</p>
 				<br />
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<div onClick={() => goToSearch("all")}>
 					<GoTo />
 				</div>

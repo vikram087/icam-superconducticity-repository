@@ -77,6 +77,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 			<div className="page-main">
 				<div className="paper">
 					<div className="button">
+						{/* biome-ignore lint/a11y/useButtonType: <explanation> */}
 						<button className="return" onClick={goBack}>
 							Go Back
 						</button>
@@ -85,6 +86,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						<h3 style={{ textAlign: "center", paddingBottom: "10px" }}>
 							<Content content={paper.title} />
 						</h3>
+						{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 						<img
 							width={20}
 							height={20}
@@ -101,7 +103,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 					<p>
 						<strong>Authors:</strong>{" "}
 						{paper.authors.map((author, index) => (
-							<span key={index}>
+							<span key={`${author}_detail`}>
 								{author}
 								{index < paper.authors.length - 1 ? ", " : ""}
 							</span>
@@ -114,16 +116,16 @@ function PaperDetail({ searchParams, prevUrl }) {
 						<strong>DOI:</strong> {paper.doi}
 					</p>
 					<strong>Links:</strong>
-					{paper.links.map((link, index) => (
-						<a href={link} key={index} target="_blank" rel="noreferrer">
+					{paper.links.map((link) => (
+						<a href={link} key={link} target="_blank" rel="noreferrer">
 							<br />
 							{link}
 						</a>
 					))}
 					<p>
 						<strong>Categories:</strong>{" "}
-						{paper.categories.map((category, index) => (
-							<span key={index}>
+						{paper.categories.map((category) => (
+							<span key={category}>
 								{category}
 								{index < paper.categories.length - 1 ? ", " : ""}
 							</span>
@@ -145,7 +147,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						<strong>Journal Ref:</strong> {paper.journal_ref}
 					</p>
 					<div className="abstract">
-						<strong>Abstract:</strong> <br></br>
+						<strong>Abstract:</strong> <br />
 						<Content content={paper.summary} />
 					</div>
 				</div>

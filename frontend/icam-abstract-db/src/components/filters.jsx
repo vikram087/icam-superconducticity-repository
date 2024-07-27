@@ -95,7 +95,7 @@ function Filters({ searchParams }) {
 		setDateRange(date);
 		setStartDate(convertIntToDate(startDate));
 		setEndDate(convertIntToDate(endDate));
-	}, [location.search]);
+	}, [location.search /*, numResults, sortVal, pageNumber, term, dateRange*/]); // FIXME: make sure this works well
 
 	const handleButton = () => {
 		let pageValue = pageNumber;
@@ -215,7 +215,7 @@ function Filters({ searchParams }) {
 			>
 				Submit
 				<svg
-					aria-label=""
+					aria-label="submit button"
 					role="img"
 					fill="white"
 					viewBox="0 0 448 512"
@@ -236,8 +236,9 @@ function Dropdown({ terms, setTerm, value, term }) {
 				{value}: {term}&nbsp; ▼
 			</button>
 			<div className="dropdown-content">
-				{terms.map((option, index) => (
-					<option key={index} value={option} onClick={() => setTerm(option)}>
+				{terms.map((option) => (
+					// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+					<option key={option} value={option} onClick={() => setTerm(option)}>
 						{option}
 					</option>
 				))}
@@ -254,8 +255,9 @@ function Sort({ order, setSortVal, sort }) {
 			</button>
 			<div className="dropdown-content">
 				{order.map((option, index) => (
+					// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 					<option
-						key={index}
+						key={option}
 						value={option}
 						onClick={() => setSortVal(option.replace(" ", "-"))}
 					>

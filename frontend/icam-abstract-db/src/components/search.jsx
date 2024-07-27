@@ -54,7 +54,7 @@ function Search({ searchParams }) {
 				>
 					<svg
 						role="img"
-						aria-label=""
+						aria-label="submit button"
 						xmlns="http://www.w3.org/2000/svg"
 						width="29"
 						height="29"

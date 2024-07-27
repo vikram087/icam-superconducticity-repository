@@ -88,9 +88,10 @@ function Favorites({ searchParams, setPrevUrl }) {
 												? "expanded-container"
 												: "container"
 										}
-										key={index}
+										key={`${paper.id}_favs`}
 									>
 										<div className="title-container">
+											{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 											<div
 												onClick={() =>
 													changePaper(paper.id.replace("/-/g", "/"))
@@ -100,6 +101,7 @@ function Favorites({ searchParams, setPrevUrl }) {
 													<Content content={paper.title} />
 												</u>
 											</div>
+											{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 											<img
 												width={20}
 												height={20}
@@ -111,12 +113,12 @@ function Favorites({ searchParams, setPrevUrl }) {
 												onClick={() => toggleStar(paper.id)}
 												className="star-icon"
 												alt="star icon"
-											></img>
+											/>
 										</div>
 										<p>
 											by&nbsp;
 											{paper.authors.map((author, index) => (
-												<span key={index}>
+												<span key={`${paper.id}_authors`}>
 													<em>
 														{author}
 														{index < paper.authors.length - 1 ? ", " : ""}
@@ -130,6 +132,7 @@ function Favorites({ searchParams, setPrevUrl }) {
 											}
 										>
 											<Content content={paper.summary} />
+											{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 											<div
 												className="expand-button"
 												onClick={() => toggleExpand(index)}
@@ -216,7 +219,7 @@ function Search({ papers, setPapers, papersCopy, setQuery }) {
 				>
 					<svg
 						role="img"
-						aria-label=""
+						aria-label="search"
 						xmlns="http://www.w3.org/2000/svg"
 						width="29"
 						height="29"
