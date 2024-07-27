@@ -40,8 +40,8 @@
 
 .go-to-button {
     background-color: transparent;
-    border: none; 
-    font: inherit; 
+    border: none;
+    font: inherit;
     padding: 0;
     cursor: pointer;
 }
@@ -134,18 +134,28 @@
     color: #fff;
 }
 
-.overview, .features, .architecture, .usage, .performance, .contact {
+.overview,
+.features,
+.architecture,
+.usage,
+.performance,
+.contact {
     margin-bottom: 30px;
     text-align: left;
 }
 
-.overview, .features, .usage, .architecture, .performance, .contact {
+.overview,
+.features,
+.usage,
+.architecture,
+.performance,
+.contact {
     background-color: #ffffff;
     padding: 15px;
     border-radius: 5px;
     /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
-    animation: blueGlow 3s linear infinite; 
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    animation: blueGlow 3s linear infinite;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
@@ -181,16 +191,21 @@ p {
 }
 
 @keyframes blueGlow {
-    0%, 100% {
-      box-shadow: 0 0 2px 1px #45b3e0; 
+
+    0%,
+    100% {
+        box-shadow: 0 0 2px 1px #45b3e0;
     }
+
     25% {
-      box-shadow: 0 2px 2px 1px #45b3e0;
+        box-shadow: 0 2px 2px 1px #45b3e0;
     }
+
     50% {
-      box-shadow: 2px 0 2px 1px #45b3e0;
+        box-shadow: 2px 0 2px 1px #45b3e0;
     }
+
     75% {
-      box-shadow: 0 -2px 2px 1px #45b3e0; 
+        box-shadow: 0 -2px 2px 1px #45b3e0;
     }
-}  
+}
