@@ -1,140 +1,143 @@
 .bold {
-  font-weight: bold;
+	font-weight: bold;
 }
 
 .submitBtn {
-  width: 120px;
-  height: 35px;
-  border-radius: 30px;
-  border: none;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.13);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  color: white;
-  background: var(--gradient-2, linear-gradient(90deg, #2AF598 0%, #009EFD 100%));
-  letter-spacing: 0.7px;
+	width: 120px;
+	height: 35px;
+	border-radius: 30px;
+	border: none;
+	box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.13);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-weight: 600;
+	cursor: pointer;
+	color: white;
+	background: var(
+		--gradient-2,
+		linear-gradient(90deg, #2af598 0%, #009efd 100%)
+	);
+	letter-spacing: 0.7px;
 }
 
 .submitBtn:hover .arrow {
-  animation: slide-in-left 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	animation: slide-in-left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
 @keyframes slide-in-left {
-  0% {
-    transform: translateX(-10px);
-    opacity: 0;
-  }
+	0% {
+		transform: translateX(-10px);
+		opacity: 0;
+	}
 
-  100% {
-    transform: translateX(0px);
-    opacity: 1;
-  }
+	100% {
+		transform: translateX(0px);
+		opacity: 1;
+	}
 }
 
 .submitBtn:active {
-  transform: scale(0.97);
+	transform: scale(0.97);
 }
 
 .but {
-  background-color: #2f3640;
-  color: white;
-  padding: 8px 15px;
-  font-size: 15px;
-  font-weight: bold;
-  border: 2px solid transparent;
-  border-radius: 15px;
-  cursor: pointer;
+	background-color: #2f3640;
+	color: white;
+	padding: 8px 15px;
+	font-size: 15px;
+	font-weight: bold;
+	border: 2px solid transparent;
+	border-radius: 15px;
+	cursor: pointer;
 }
 
 .dropdown-content {
-  display: none;
-  font-size: 13px;
-  position: absolute;
-  z-index: 1;
-  min-width: 200px;
-  background-color: gray;
-  border: 2px solid black;
-  border-radius: 0px 15px 15px 15px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
+	display: none;
+	font-size: 13px;
+	position: absolute;
+	z-index: 1;
+	min-width: 200px;
+	background-color: gray;
+	border: 2px solid black;
+	border-radius: 0px 15px 15px 15px;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	cursor: pointer;
 }
 
 .dropdown-content option {
-  color: white;
-  padding: 8px 10px;
-  text-decoration: none;
-  display: block;
-  transition: 0.1s;
+	color: white;
+	padding: 8px 10px;
+	text-decoration: none;
+	display: block;
+	transition: 0.1s;
 }
 
 .dropdown-content option:hover {
-  background-color: #E5E4E2;
-  color: #45b3e0;
-  border-radius: 10px;
+	background-color: #e5e4e2;
+	color: #45b3e0;
+	border-radius: 10px;
 }
 
 .dropdown-content option:focus {
-  background-color: #2f3640;
-  color: #45b3e0;
+	background-color: #2f3640;
+	color: #45b3e0;
 }
 
 .dropdown-content #top:hover {
-  border-radius: 0px 13px 0px 0px;
+	border-radius: 0px 13px 0px 0px;
 }
 
 .dropdown-content #bottom:hover {
-  border-radius: 0px 0px 13px 13px;
+	border-radius: 0px 0px 13px 13px;
 }
 
 .paste-button:hover .but {
-  border-radius: 15px 15px 0px 0px;
+	border-radius: 15px 15px 0px 0px;
 }
 
 .paste-button:hover .dropdown-content {
-  display: block;
+	display: block;
 }
 
 .react-datepicker__input-container input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 16px;
 }
 
 .react-datepicker__input-container input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+	border-color: #007bff;
+	box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
 }
 
 .react-datepicker__header {
-  background-color: #007bff;
-  color: white;
+	background-color: #007bff;
+	color: white;
 }
 
 .react-datepicker__day--selected {
-  background-color: #007bff;
-  color: white;
+	background-color: #007bff;
+	color: white;
 }
 
 .react-datepicker__day--keyboard-selected {
-  background-color: #0056b3;
-  color: white;
+	background-color: #0056b3;
+	color: white;
 }
 
 .styled-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 16px;
 }
 
 .styled-input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+	border-color: #007bff;
+	box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
 }

@@ -1,49 +1,49 @@
 .page-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
 }
 
 .page-main {
-  max-width: 1260px;
-  min-height: 100vh;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Arial', sans-serif;
-  background-color: #f9f9f9;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+	max-width: 1260px;
+	min-height: 100vh;
+	margin: 0 auto;
+	padding: 20px;
+	font-family: "Arial", sans-serif;
+	background-color: #f9f9f9;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	border-radius: 10px;
 }
 
 .journals {
-  padding-top: 10px;
+	padding-top: 10px;
 }
 
 .filters {
-  flex: 0 1 auto;
-  border-right: 2px solid #eee;
-  padding-top: 5%;
-  margin-left: 5%;
-  padding-right: 100px;
-  margin-right: 5%;
-  width: 300px;
+	flex: 0 1 auto;
+	border-right: 2px solid #eee;
+	padding-top: 5%;
+	margin-left: 5%;
+	padding-right: 100px;
+	margin-right: 5%;
+	width: 300px;
 }
 
 .container {
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  margin-right: 5%;
-  width: 90%;
+	padding: 10px;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	margin-right: 5%;
+	width: 90%;
 }
 
 .expanded-container {
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  margin-right: 5%;
-  width: 90%;
+	padding: 10px;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	margin-right: 5%;
+	width: 90%;
 }
 
 /* .container:hover {
@@ -51,176 +51,176 @@
 } */
 
 .list {
-  padding: 10px;
-  padding-right: 5%;
-  width: 90%;
+	padding: 10px;
+	padding-right: 5%;
+	width: 90%;
 }
 
 .papers-loader {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .papers-loader p {
-  font-size: x-large;
+	font-size: x-large;
 }
 
 .text {
-  white-space: wrap;
-  overflow: hidden;
-  text-overflow: clip;
-  max-width: 100%;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  /* FIXME: Not sure tbh */
-  -webkit-box-orient: vertical;
-  position: relative;
+	white-space: wrap;
+	overflow: hidden;
+	text-overflow: clip;
+	max-width: 100%;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	/* FIXME: Not sure tbh */
+	-webkit-box-orient: vertical;
+	position: relative;
 }
 
 .scroll-to-top-container {
-  position: fixed;
-  bottom: 20px;
-  right: 15px;
-  z-index: 1000;
+	position: fixed;
+	bottom: 20px;
+	right: 15px;
+	z-index: 1000;
 }
 
 .scroll-to-bottom-container {
-  position: fixed;
-  bottom: 20px;
-  left: 15px;
-  z-index: 1000;
+	position: fixed;
+	bottom: 20px;
+	left: 15px;
+	z-index: 1000;
 }
 
 .text .expand-button,
 .expanded .expand-button {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  /* background: white; */
-  cursor: pointer;
-  color: #f09f9c;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	/* background: white; */
+	cursor: pointer;
+	color: #f09f9c;
 }
 
 .expanded {
-  white-space: normal;
-  overflow: visible;
-  max-width: none;
-  display: block;
+	white-space: normal;
+	overflow: visible;
+	max-width: none;
+	display: block;
 }
 
 .title {
-  font-size: xx-large;
-  margin-top: 20px;
-  padding-left: 5%;
-  cursor: pointer;
+	font-size: xx-large;
+	margin-top: 20px;
+	padding-left: 5%;
+	cursor: pointer;
 }
 
 .paper-title {
-  color: #45b3e0;
-  font-size: large;
-  cursor: pointer;
+	color: #45b3e0;
+	font-size: large;
+	cursor: pointer;
 }
 
 .bu {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #2f3640;
-  border: none;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0px 0px 0px 4px #45b3e0;
-  cursor: pointer;
-  transition-duration: 0.3s;
-  overflow: hidden;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background-color: #2f3640;
+	border: none;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0px 0px 0px 4px #45b3e0;
+	cursor: pointer;
+	transition-duration: 0.3s;
+	overflow: hidden;
 }
 
 .svgIcon {
-  width: 12px;
-  transition-duration: 0.3s;
+	width: 12px;
+	transition-duration: 0.3s;
 }
 
 .svgIcon path {
-  fill: white;
+	fill: white;
 }
 
 .bu:hover {
-  width: 80px;
-  border-radius: 50px;
-  transition-duration: 0.3s;
-  background-color: #45b3e0;
-  align-items: center;
+	width: 80px;
+	border-radius: 50px;
+	transition-duration: 0.3s;
+	background-color: #45b3e0;
+	align-items: center;
 }
 
 .bu:hover .svgIcon {
-  /* width: 20px; */
-  transition-duration: 0.3s;
-  transform: translateY(-200%);
+	/* width: 20px; */
+	transition-duration: 0.3s;
+	transform: translateY(-200%);
 }
 
 .bu::before {
-  position: absolute;
-  bottom: -20px;
-  color: white;
-  font-size: 0px;
+	position: absolute;
+	bottom: -20px;
+	color: white;
+	font-size: 0px;
 }
 
 .scroll-to-top-container::before {
-  content: "Top";
+	content: "Top";
 }
 
 .scroll-to-bottom-container::before {
-  content: "Bottom";
+	content: "Bottom";
 }
 
 .bu:hover::before {
-  font-size: 13px;
-  opacity: 1;
-  bottom: unset;
-  /* transform: translateY(-30px); */
-  transition-duration: 0.3s;
+	font-size: 13px;
+	opacity: 1;
+	bottom: unset;
+	/* transform: translateY(-30px); */
+	transition-duration: 0.3s;
 }
 
 .results {
-  padding-left: 30px;
-  user-select: auto;
-  text-align: center;
+	padding-left: 30px;
+	user-select: auto;
+	text-align: center;
 }
 
 .content-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .pag-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .title-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .star-icon {
-  font-size: 1.5em;
-  color: #ccc;
-  cursor: pointer;
-  transition: color 0.3s;
+	font-size: 1.5em;
+	color: #ccc;
+	cursor: pointer;
+	transition: color 0.3s;
 }
 
 .star-icon.highlighted {
-  color: gold;
+	color: gold;
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { TailSpin } from "react-loader-spinner";
 import Search from "../components/search.jsx";
@@ -192,7 +192,19 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		setLoading(true);
 
 		getPapers(page, perPage, search, sorting, startTime, pages, term, date);
-	}, [location.search]);
+	}, [
+		location.search,
+		/*searchParams.page,
+		searchParams.per_page,
+		searchParams.query,
+		searchParams.sorting,
+		searchParams.pages,
+		searchParams.term,
+		searchParams.date,
+		searchParams,
+		setSearchParams,
+		getPapers,*/
+	]);
 
 	const changePage = (page) => {
 		setSearchParams((prevParams) => ({
@@ -250,7 +262,12 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 									? "Results are Limited to the first 10,000 matching documents"
 									: ""}
 							</p>
-							<b style={{ fontSize: "large", paddingBottom: "10px" }}>
+							<b
+								style={{
+									fontSize: "large",
+									paddingBottom: "10px",
+								}}
+							>
 								Displaying Results for: "{searchParams.query}"
 							</b>
 						</div>
@@ -271,7 +288,6 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 										</div>
 									)}
 								<div className="title-container">
-									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<div
 										onClick={() => changePaper(paper.id.replace("/-/g", "/"))}
 									>
@@ -279,7 +295,6 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 											<Content content={paper.title} />
 										</u>
 									</div>
-									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<img
 										width={20}
 										height={20}
@@ -308,7 +323,6 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 									className={expandedIndex === index ? "text expanded" : "text"}
 								>
 									<Content content={paper.summary} />
-									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<div
 										className="expand-button"
 										onClick={() => toggleExpand(index)}

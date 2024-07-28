@@ -95,7 +95,7 @@ function Filters({ searchParams }) {
 		setDateRange(date);
 		setStartDate(convertIntToDate(startDate));
 		setEndDate(convertIntToDate(endDate));
-	}, [location.search /*, numResults, sortVal, pageNumber, term, dateRange*/]); // FIXME: make sure this works well
+	}, [location.search /*,numResults, sortVal, pageNumber, term, dateRange*/]); // FIXME: make sure this works well
 
 	const handleButton = () => {
 		let pageValue = pageNumber;
@@ -237,7 +237,6 @@ function Dropdown({ terms, setTerm, value, term }) {
 			</button>
 			<div className="dropdown-content">
 				{terms.map((option) => (
-					// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 					<option key={option} value={option} onClick={() => setTerm(option)}>
 						{option}
 					</option>
@@ -255,7 +254,6 @@ function Sort({ order, setSortVal, sort }) {
 			</button>
 			<div className="dropdown-content">
 				{order.map((option, index) => (
-					// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 					<option
 						key={option}
 						value={option}

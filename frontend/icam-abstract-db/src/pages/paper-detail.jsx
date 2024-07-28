@@ -77,16 +77,19 @@ function PaperDetail({ searchParams, prevUrl }) {
 			<div className="page-main">
 				<div className="paper">
 					<div className="button">
-						{/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-						<button className="return" onClick={goBack}>
+						<button className="return" type="button" onClick={goBack}>
 							Go Back
 						</button>
 					</div>
 					<div className="title-container">
-						<h3 style={{ textAlign: "center", paddingBottom: "10px" }}>
+						<h3
+							style={{
+								textAlign: "center",
+								paddingBottom: "10px",
+							}}
+						>
 							<Content content={paper.title} />
 						</h3>
-						{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 						<img
 							width={20}
 							height={20}

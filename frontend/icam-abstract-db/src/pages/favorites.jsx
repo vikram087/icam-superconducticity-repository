@@ -91,7 +91,6 @@ function Favorites({ searchParams, setPrevUrl }) {
 										key={`${paper.id}_favs`}
 									>
 										<div className="title-container">
-											{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 											<div
 												onClick={() =>
 													changePaper(paper.id.replace("/-/g", "/"))
@@ -101,7 +100,6 @@ function Favorites({ searchParams, setPrevUrl }) {
 													<Content content={paper.title} />
 												</u>
 											</div>
-											{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 											<img
 												width={20}
 												height={20}
@@ -132,7 +130,6 @@ function Favorites({ searchParams, setPrevUrl }) {
 											}
 										>
 											<Content content={paper.summary} />
-											{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 											<div
 												className="expand-button"
 												onClick={() => toggleExpand(index)}
