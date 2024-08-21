@@ -29,7 +29,7 @@ CORS(app)
 model: SentenceTransformer = SentenceTransformer("all-MiniLM-L6-v2")
 
 
-def getEmbedding(text: str) -> list[int]:
+def get_embedding(text: str) -> list[int]:
     return model.encode(text)
 
 
@@ -84,14 +84,14 @@ def make_cache_key(
     query: str,
     sorting: str,
     page: int,
-    numResults: int,
+    num_results: int,
     pages: int,
     term: str,
-    startDate: int,
-    endDate: int,
-    parsedResults: dict,
+    start_date: int,
+    end_date: int,
+    parsed_results: dict,
 ) -> str:
-    key: str = f"{query}_{sorting}_{page}_{numResults}_{pages}_{term}_{startDate}_{endDate}_{parsedResults['must']}_{parsedResults['not']}_{parsedResults['or']}"
+    key: str = f"{query}_{sorting}_{page}_{num_results}_{pages}_{term}_{start_date}_{end_date}_{parsed_results['must']}_{parsed_results['not']}_{parsed_results['or']}"
     return key
 
 
@@ -108,32 +108,35 @@ def papers() -> tuple[Response, int] | Response:
     try:
         data: dict = request.get_json()
         page: int = int(data.get("page", 0))
-        numResults: int = int(data.get("results", 0))
+        num_results: int = int(data.get("results", 0))
         query: str = str(data.get("query", ""))
         sorting: str = str(data.get("sorting", ""))
         pages: int = int(data.get("pages", 30))
         term: str = str(data.get("term", ""))
-        parsedInput: dict = dict(data.get("parsedInput", []))
+        parsed_input: dict = dict(data.get("parsedInput", []))
 
-        print(parsedInput)
+        print(parsed_input)
         print(query)
 
-        mustV: list[str] = parsedInput["must"]
-        orV: list[str] = parsedInput["or"]
-        notV: list[str] = parsedInput["not"]
+        must_v: list[str] = parsed_input["must"]
+        or_v: list[str] = parsed_input["or"]
+        not_v: list[str] = parsed_input["not"]
 
         today: datetime = datetime.today()
         formatted_date: str = today.strftime("%Y%m%d")
         date: str = str(data.get("date", f"00000000-{formatted_date}"))
-        startDate: int = int(date.split("-")[0])
-        endDate: int = int(date.split("-")[1])
+        start_date: int = int(date.split("-")[0])
+        end_date: int = int(date.split("-")[1])
     except Exception:
         return jsonify(None)
 
     if page < 0:
         return jsonify(None)
-    if numResults < 0 or (
-        numResults != 10 and numResults != 20 and numResults != 50 and numResults != 100
+    if num_results < 0 or (
+        num_results != 10
+        and num_results != 20
+        and num_results != 50
+        and num_results != 100
     ):
         return jsonify(None)
 
@@ -149,7 +152,15 @@ def papers() -> tuple[Response, int] | Response:
         return jsonify(None)
 
     cache_key: str = make_cache_key(
-        query, sorting, page, numResults, pages, term, startDate, endDate, parsedInput
+        query,
+        sorting,
+        page,
+        num_results,
+        pages,
+        term,
+        start_date,
+        end_date,
+        parsed_input,
     )
     cached: dict | None = get_cached_results(cache_key)
     if cached:
@@ -162,7 +173,7 @@ def papers() -> tuple[Response, int] | Response:
     else:
         return jsonify(None)
 
-    knnSearch: bool = False
+    knn_search: bool = False
 
     size: int = client.search(query={"match_all": {}}, index="search-papers-meta")[
         "hits"
@@ -170,57 +181,63 @@ def papers() -> tuple[Response, int] | Response:
 
     if pages < 1:
         return jsonify(None)
-    elif pages * numResults > size:
-        pages = math.ceil(size / numResults)
+    elif pages * num_results > size:
+        pages = math.ceil(size / num_results)
 
-    k: int = page * numResults
+    k: int = page * num_results
     if k > size:
         k = size
 
     if sorting == "Most-Recent" or sorting == "Oldest-First":
-        pSort: Sequence[Mapping | str] = [{"date": {"order": sort}}, "_score"]
+        p_sort: Sequence[Mapping | str] = [{"date": {"order": sort}}, "_score"]
     elif sorting == "Most-Relevant":
-        pSort = [{"_score": {"order": sort}}]
+        p_sort = [{"_score": {"order": sort}}]
 
     if query == "all" or field == "summary_embedding" or field == "title_embedding":
         tag = "summary" if field == "summary_embedding" else "title"
         must_clause = (
-            [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in mustV]
-            if mustV
+            [
+                {"match": {tag: {"query": label, "fuzziness": "AUTO"}}}
+                for label in must_v
+            ]
+            if must_v
             else {"match_all": {}}
         )
         should_clause = (
-            [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in orV]
-            if orV
+            [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in or_v]
+            if or_v
             else []
         )
         must_not_clause = (
-            [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in notV]
-            if notV
+            [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in not_v]
+            if not_v
             else []
         )
     else:
         must_clause = [{"match": {field: {"query": query, "fuzziness": "AUTO"}}}]
 
-        if mustV:
+        if must_v:
             must_clause.extend(
                 [
                     {"match": {field: {"query": label, "fuzziness": "AUTO"}}}
-                    for label in mustV
+                    for label in must_v
                 ]
             )
 
         should_clause = (
-            [{"match": {field: {"query": label, "fuzziness": "AUTO"}}} for label in orV]
-            if orV
+            [
+                {"match": {field: {"query": label, "fuzziness": "AUTO"}}}
+                for label in or_v
+            ]
+            if or_v
             else []
         )
         must_not_clause = (
             [
                 {"match": {field: {"query": label, "fuzziness": "AUTO"}}}
-                for label in notV
+                for label in not_v
             ]
-            if notV
+            if not_v
             else []
         )
 
@@ -232,8 +249,8 @@ def papers() -> tuple[Response, int] | Response:
             "filter": {
                 "range": {
                     "date": {
-                        "gte": startDate,
-                        "lte": endDate,
+                        "gte": start_date,
+                        "lte": end_date,
                     }
                 }
             },
@@ -241,12 +258,12 @@ def papers() -> tuple[Response, int] | Response:
     }
 
     if query == "all" or field == "authors" or field == "categories":
-        knnSearch = False
+        knn_search = False
         try:
             results: ObjectApiResponse = client.search(
                 query=quer,
-                size=numResults,
-                from_=(page - 1) * numResults,
+                size=num_results,
+                from_=(page - 1) * num_results,
                 sort=[{"date": {"order": sort}}]
                 if (sorting == "Most-Recent" or sorting == "Oldest-First")
                 else None,
@@ -258,19 +275,19 @@ def papers() -> tuple[Response, int] | Response:
             return jsonify(None)
 
     elif field == "summary_embedding" or field == "title_embedding":
-        knnSearch = True
+        knn_search = True
         try:
             results = client.search(
                 knn={
                     "field": field,
-                    "query_vector": getEmbedding(query),
+                    "query_vector": get_embedding(query),
                     "num_candidates": size,
                     "k": k,
                 },
                 query=quer,
-                from_=0,  # consider changing to (page-1)*numResults
-                size=page * numResults,
-                sort=pSort,
+                from_=0,  # consider changing to (page-1)*num_results
+                size=page * num_results,
+                sort=p_sort,
                 index="search-papers-meta",
             )
         except Exception:
@@ -282,28 +299,28 @@ def papers() -> tuple[Response, int] | Response:
     papers: list[dict] = []
     accuracy: dict = {}
 
-    if not knnSearch:
+    if not knn_search:
         for hit in hits:
             papers.append(hit["_source"])
 
     total: int = client.search(
         query=quer,
-        size=numResults,
-        from_=(page - 1) * numResults,
+        size=num_results,
+        from_=(page - 1) * num_results,
         sort=[{"date": {"order": sort}}],
         index="search-papers-meta",
     )["hits"]["total"]["value"]
 
-    if total > numResults * pages:
-        total = numResults * pages
+    if total > num_results * pages:
+        total = num_results * pages
 
-    if knnSearch:
-        papers = hits[(page - 1) * numResults :]
+    if knn_search:
+        papers = hits[(page - 1) * num_results :]
         filtered_papers: list[dict] = [
             paper["_source"]
             for paper in papers
-            if paper["_source"]["date"] > startDate
-            and paper["_source"]["date"] < endDate
+            if paper["_source"]["date"] > start_date
+            and paper["_source"]["date"] < end_date
         ]
         for hit in hits:
             if not hit["_score"]:

@@ -10,7 +10,6 @@ import feedparser  # type: ignore
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from feedparser import FeedParserDict
-from generate_data import generate_answers
 from sentence_transformers import SentenceTransformer  # type: ignore
 
 program_name: str = """
@@ -27,7 +26,7 @@ program_epilog: str = """
 
 """
 program_version: str = """
-Version 3.0 2024-06-01
+Version 2.3.1 2024-06-01
 Created by Vikram Penumarti
 """
 
@@ -66,7 +65,7 @@ def set_parser(
         required=False,
         default=1,
         type=int,
-        help="[Optional] Number of iterations of file uploads to perform (higher number is more likely to get rate limited, min 1)",
+        help="[Optional] Number of iterations of file uploads to perform (higher number is more likely to get rate limited, min 1)\nDefault: 1",
     )
     parser.add_argument(
         "-a",
@@ -74,7 +73,7 @@ def set_parser(
         required=False,
         default=2000,
         type=int,
-        help="[Optional] Number of documents to fetch from arXiv (max 2000, min 1)",
+        help="[Optional] Number of documents to fetch from arXiv (max 2000, min 1)\nDefault: 2000",
     )
     parser.add_argument("-v", "--version", action="version", version=program_version)
 
@@ -168,9 +167,6 @@ def insert_documents(documents: list[dict], index: str):
                 **document,
                 "summary_embedding": getEmbedding(document["summary"]),
                 "title_embedding": getEmbedding(document["title"]),
-                "inferences": generate_answers(
-                    {"summary": document["summary"], "id": document["id"]}
-                ),
             }
         )
         # print(operations[1])
@@ -184,7 +180,7 @@ def upload_to_es(amount: int, iterations: int) -> None:
     wait_time: int = 3
     start: int = client.count(index="search-papers-meta")["count"]
     print(f"Total documents in DB, start: {start}\n")
-    for i in range(iterations):
+    for _ in range(iterations):
         insert_documents(findInfo(start, amount), "search-papers-meta")
         print(f"Uploaded documents {start} - {start + amount}")
         start += amount

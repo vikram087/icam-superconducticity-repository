@@ -9,6 +9,5 @@ transformers==4.41.1
 datasets==2.20.0
 mypy==1.10.0
 openai==1.35.3
-# torch==2.3.0
-# requests==2.31.0
-# beautifulsoup4==4.12.3
+torch==2.3.0
+spacy==3.7.5
