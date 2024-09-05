@@ -40,29 +40,70 @@ def load_dev_data() -> list[tuple]:
         return ast.literal_eval(file.read())
 
 
-def data_to_binary(nlp: Language, data: list[tuple]) -> None:
-    db = DocBin()
+# def data_to_binary(nlp: Language, data: list[tuple]) -> None:
+#     db = DocBin()
 
-    for text, annot in data:
+#     for text, annot in data:
+#         doc: Doc = nlp.make_doc(text)
+#         ents: list[Span] = []
+#         for start, end, label in annot["entities"]:
+#             span: Span | None = doc.char_span(
+#                 start, end, label=label, alignment_mode="contract"
+#             )
+#             if span is None:
+#                 print(f"Skipping entity {start, end, label}")
+#             else:
+#                 ents.append(span)
+#         doc.ents = ents
+#         db.add(doc)
+
+
+#     db.to_disk("../data/train.spacy")
+def data_to_binary(nlp: Language, data: list[tuple]) -> list[int]:
+    db = DocBin()
+    skipped: list[int] = [0, 0]
+
+    for i, (text, annot) in enumerate(data):
         doc: Doc = nlp.make_doc(text)
         ents: list[Span] = []
+        overlap_found = False
         for start, end, label in annot["entities"]:
             span: Span | None = doc.char_span(
                 start, end, label=label, alignment_mode="contract"
             )
             if span is None:
-                print(f"Skipping entity {start, end, label}")
+                print(f"Skipping entity {start, end, label} in document {i}")
+                skipped[0] += 1
             else:
-                ents.append(span)
+                for ent in ents:
+                    # Check if the current span overlaps with any existing span
+                    if span.start < ent.end and span.end > ent.start:
+                        overlap_found = True
+                        print(
+                            f"Overlap detected in document {i}: {span} overlaps with {ent}"
+                        )
+                        skipped[1] += 1
+                # ents.append(span)
+                if not overlap_found:
+                    ents.append(span)
+
         doc.ents = ents
         db.add(doc)
 
+        # if not overlap_found:
+        #     doc.ents = ents
+        #     db.add(doc)
+        # else:
+        #     print(f"Skipping document {i} due to overlapping entities.")
+
     db.to_disk("../data/train.spacy")
+
+    return skipped
 
 
 def train_model() -> Language:
     train_or_no: str = input(
-        "Do you consent to the following command being run?:\npython -m spacy train config.cfg --output ../models --paths.train train.spacy --paths.dev train.spacy"
+        "Do you consent to the following command being run?:\npython -m spacy train config.cfg --output ../models --paths.train train.spacy --paths.dev train.spacy\n"
     )
     train_or_no = train_or_no.strip().lower()
 
@@ -97,8 +138,25 @@ def main() -> None:
     train_data: list[tuple] = load_train_data()
     dev_data: list[tuple] = load_dev_data()
 
-    data_to_binary(nlp, train_data)
-    data_to_binary(nlp, dev_data)
+    skipped_train: list[int] = data_to_binary(nlp, train_data)
+    skipped_dev: list[int] = data_to_binary(nlp, dev_data)
+
+    total_train: int = sum([len(tup[1]["entities"]) for tup in train_data])
+    print(f"\n==========\nTrain\n\nSpan is None: {skipped_train[0]}")
+    print(f"Overlap Found: {skipped_train[1]}")
+    print(f"Total entities skipped: {sum(skipped_train)}")
+    print(f"Total entities: {total_train}")
+    print(
+        f"Total entities in DocBin: {total_train - sum(skipped_train)}\n\n==========\n"
+    )
+
+    total_dev: int = sum([len(tup[1]["entities"]) for tup in dev_data])
+    print(f"==========\nDev\n\nSpan is None: {skipped_dev[0]}")
+    print(f"Overlap Found: {skipped_dev[1]}")
+    print(f"Total entities skipped: {sum(skipped_dev)}")
+    print(f"Total entities: {total_dev}")
+    print(f"Total entities in DocBin: {total_dev - sum(skipped_dev)}\n\n==========\n")
+
     nlp_ner: Language = train_model()
 
     test(nlp_ner)

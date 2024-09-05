@@ -7,6 +7,7 @@ from difflib import SequenceMatcher
 import re
 import argparse
 from argparse import Namespace
+import ast
 
 program_name: str = """
 generate_training_data.py
@@ -64,8 +65,8 @@ def set_parser(
     return parser
 
 
-def get_abstracts(index: str, size: int) -> list[str]:
-    data: dict = client.search(index=index, size=size)["hits"]["hits"]
+def get_abstracts(index: str, size: int, start: int) -> list[str]:
+    data: dict = client.search(index=index, size=size, from_=start)["hits"]["hits"]
     abstracts: list[str] = [summary["_source"]["summary"] for summary in data]
 
     return abstracts
@@ -248,11 +249,22 @@ def write_to_training_file(train_data: list[tuple], test_data: list[tuple]) -> N
             file.write(str(v))
 
 
-def get_parsed_data(amount) -> tuple[list, list]:
-    abstracts: list[str] = get_abstracts("search-papers-meta", 2 * amount)
+def get_data_in_file():
+    with open("../data/train.json", "r") as file:
+        train_data = ast.literal_eval(file.read())
+    with open("../data/dev.json", "r") as file:
+        dev_data = ast.literal_eval(file.read())
 
-    train = abstracts[0:amount]
-    test = abstracts[amount:]
+    start = len(train_data) + len(dev_data)
+
+    return train_data, dev_data, start
+
+
+def get_parsed_data(amount, start) -> tuple[list, list]:
+    abstracts: list[str] = get_abstracts("search-papers-meta", 1.5 * amount, start)
+
+    train: list[str] = abstracts[0:amount]
+    test: list[str] = abstracts[amount:]
 
     train_answers: list[tuple] = get_training_data(train)
     test_answers: list[tuple] = get_training_data(test)

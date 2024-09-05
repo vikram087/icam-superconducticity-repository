@@ -95,6 +95,21 @@ def make_cache_key(
     return key
 
 
+def get_excluded_ids(cache_key: str) -> list[str]:
+    split_key: list[str] = cache_key.split("_")
+    excluded_ids: list[str] = []
+
+    for i in range(1, 501):
+        split_key[2] = str(i)
+        new_cache_key: str = "_".join(split_key)
+        cached: dict | None = get_cached_results(new_cache_key)
+        if cached:
+            id: str = cached[0]["id"]
+            excluded_ids.append(id)
+
+    return excluded_ids
+
+
 # cache.clear()
 # print("Cleared cache")
 # redis-cli FLUSHALL # command on cli to clear cache
@@ -175,9 +190,10 @@ def papers() -> tuple[Response, int] | Response:
 
     knn_search: bool = False
 
-    size: int = client.search(query={"match_all": {}}, index="search-papers-meta")[
-        "hits"
-    ]["total"]["value"]
+    # size: int = client.search(query={"match_all": {}}, index="search-papers-meta")[
+    #     "hits"
+    # ]["total"]["value"]
+    size: int = client.count(index="search-papers-meta")["count"]
 
     if pages < 1:
         return jsonify(None)
@@ -241,6 +257,12 @@ def papers() -> tuple[Response, int] | Response:
             else []
         )
 
+    excluded_ids: list[str] = get_excluded_ids(
+        cache_key
+    )  # can leverage excluding ids for pagination
+    must_not_pre: dict = {"ids": {"values": excluded_ids}}
+    print(excluded_ids)
+
     quer = {
         "bool": {
             "must": must_clause,
@@ -282,7 +304,9 @@ def papers() -> tuple[Response, int] | Response:
                     "field": field,
                     "query_vector": get_embedding(query),
                     "num_candidates": size,
-                    "k": k,
+                    # "k": k,
+                    "k": num_results,
+                    "filter": must_not_pre,
                 },
                 query=quer,
                 from_=0,  # consider changing to (page-1)*num_results
