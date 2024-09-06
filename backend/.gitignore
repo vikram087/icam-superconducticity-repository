@@ -1,4 +1,7 @@
 .env
 .DS_Store
-.venv
+.venv*
+lbnlp
+.ruff_cache
+.mypy_cache
 models
