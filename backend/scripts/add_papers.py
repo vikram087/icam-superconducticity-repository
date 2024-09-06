@@ -1,5 +1,3 @@
-# from bs4 import BeautifulSoup
-# import requests
 import argparse
 import os
 import time
@@ -11,6 +9,7 @@ from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from feedparser import FeedParserDict
 from sentence_transformers import SentenceTransformer  # type: ignore
+from typing import Optional
 
 program_name: str = """
 add_papers.py
@@ -31,10 +30,10 @@ Created by Vikram Penumarti
 """
 
 load_dotenv()
-API_KEY: str | None = os.getenv("API_KEY")
+API_KEY: Optional[str] = os.getenv("API_KEY")
 
 client: Elasticsearch = Elasticsearch(
-    "https://localhost:9200", api_key=API_KEY, ca_certs="../config/ca.crt"
+    "https://localhost:9200", api_key=API_KEY, ca_certs="../../config/ca.crt"
 )
 
 # print(client.info())

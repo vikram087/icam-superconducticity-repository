@@ -13,16 +13,12 @@ from flask_cors import CORS
 from redis import Redis
 from sentence_transformers import SentenceTransformer  # type: ignore
 
-# import faiss
-
 load_dotenv()
 API_KEY: str | None = os.getenv("API_KEY")
 
 client: Elasticsearch = Elasticsearch(
     "https://localhost:9200", api_key=API_KEY, ca_certs="../config/ca.crt"
 )
-
-# client = Elasticsearch("http://localhost:9200")
 
 app: Flask = Flask(__name__)
 CORS(app)

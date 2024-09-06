@@ -1,7 +1,7 @@
 .env
 .DS_Store
 .venv*
-lbnlp
-.ruff_cache
 .mypy_cache
-models
+.ruff_cache
+__pycache__
+lbnlp
