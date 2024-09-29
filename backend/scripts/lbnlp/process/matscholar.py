@@ -4,10 +4,12 @@ import unidecode
 from os import path
 from monty.fractions import gcd_float
 
-from chemdataextractor.doc import Paragraph
 from gensim.models.phrases import Phraser
 from pymatgen.core.periodic_table import Element
 from pymatgen.core.composition import Composition, CompositionError
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
 
 PHRASER_PATH = path.join(path.dirname(__file__), 'phraser.pkl')
 
@@ -119,18 +121,28 @@ class MatScholarProcess:
             else:
                 return [token]
 
-        cde_p = Paragraph(text)
-        tokens = cde_p.tokens
+        # Process the text using spaCy
+        doc = nlp(text)
+        
+        # Initialize an empty list to hold tokens
         toks = []
-        for sentence in tokens:
-            if keep_sentences:
-                toks.append([])
-                for tok in sentence:
-                    toks[-1] += split_token(tok.text, so=split_oxidation)
-            else:
-                for tok in sentence:
-                    toks += split_token(tok.text, so=split_oxidation)
+
+        # Iterate over sentences in the document
+        if keep_sentences:
+            # Group tokens by sentences
+            for sent in doc.sents:
+                sentence_tokens = []
+                for token in sent:
+                    sentence_tokens += split_token(token.text, so=split_oxidation)  # Use the local function
+                toks.append(sentence_tokens)
+        else:
+            # Flatten all tokens into a single list
+            for sent in doc.sents:
+                for token in sent:
+                    toks += split_token(token.text, so=split_oxidation)  # Use the local function
+        
         return toks
+
 
     def process(self, tokens, exclude_punct=False, convert_num=True, normalize_materials=True, remove_accents=True,
                 make_phrases=False, split_oxidation=True):

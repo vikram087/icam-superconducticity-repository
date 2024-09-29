@@ -3,8 +3,9 @@ import os
 import re
 from lbnlp.parse.material import MaterialParser
 from lbnlp.parse.simple import SimpleParser
-from chemdataextractor.doc import Paragraph
+import spacy
 
+nlp = spacy.load("en_core_web_sm")
 
 class Normalizer:
     """
@@ -322,7 +323,9 @@ class MatNormalizer:
         return new_compositions
 
     def _find_variables(self, var, raw_text, mp):
-        sents = Paragraph(raw_text).sentences
+        doc = nlp(raw_text)
+        sents = [sent.text for sent in doc.sents]
+        
         i = 0
         values = []
         while len(values) == 0 and i < len(sents):

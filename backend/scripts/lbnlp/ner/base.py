@@ -17,16 +17,14 @@ class BaseModel(object):
         """
         self.config = config
         self.logger = config.logger
-        self.sess   = None
-        self.saver  = None
-
+        self.sess = None
+        self.saver = None
 
     def reinitialize_weights(self, scope_name):
         """Reinitializes the weights of a given layer"""
         variables = tf.contrib.framework.get_variables(scope_name)
         init = tf.variables_initializer(variables)
         self.sess.run(init)
-
 
     def add_train_op(self, lr_method, lr, loss, clip=-1):
         """Defines self.train_op that performs an update on a batch
@@ -38,27 +36,26 @@ class BaseModel(object):
             clip: (python float) clipping of gradient. If < 0, no clipping
 
         """
-        _lr_m = lr_method.lower() # lower to make sure
+        _lr_m = lr_method.lower()  # lower to make sure
 
         with tf.variable_scope("train_step"):
-            if _lr_m == 'adam': # sgd method
+            if _lr_m == "adam":  # sgd method
                 optimizer = tf.train.AdamOptimizer(lr)
-            elif _lr_m == 'adagrad':
+            elif _lr_m == "adagrad":
                 optimizer = tf.train.AdagradOptimizer(lr)
-            elif _lr_m == 'sgd':
+            elif _lr_m == "sgd":
                 optimizer = tf.train.GradientDescentOptimizer(lr)
-            elif _lr_m == 'rmsprop':
+            elif _lr_m == "rmsprop":
                 optimizer = tf.train.RMSPropOptimizer(lr)
             else:
                 raise NotImplementedError("Unknown method {}".format(_lr_m))
 
-            if clip > 0: # gradient clipping if clip is positive
-                grads, vs     = zip(*optimizer.compute_gradients(loss))
-                grads, gnorm  = tf.clip_by_global_norm(grads, clip)
+            if clip > 0:  # gradient clipping if clip is positive
+                grads, vs = zip(*optimizer.compute_gradients(loss))
+                grads, gnorm = tf.clip_by_global_norm(grads, clip)
                 self.train_op = optimizer.apply_gradients(zip(grads, vs))
             else:
                 self.train_op = optimizer.minimize(loss)
-
 
     def initialize_session(self):
         """Defines self.sess and initialize the variables"""
@@ -70,7 +67,6 @@ class BaseModel(object):
         tf.set_random_seed(1)
         self.saver = tf.train.Saver()
 
-
     def restore_session(self, dir_model):
         """Reload weights into session
 
@@ -81,7 +77,6 @@ class BaseModel(object):
         """
         self.logger.info("Reloading the latest trained model...")
         self.saver.restore(self.sess, dir_model)
-
 
     def save_session(self):
         """Saves session = weights"""
@@ -100,7 +95,6 @@ class BaseModel(object):
         self.sess.close()
         tf.reset_default_graph()
 
-
     def add_summary(self):
         """Defines variables for Tensorboard
 
@@ -108,10 +102,10 @@ class BaseModel(object):
             dir_output: (string) where the results are written
 
         """
-        self.merged      = tf.summary.merge_all()
-        self.file_writer = tf.summary.FileWriter(self.config.dir_output,
-                self.sess.graph)
-
+        self.merged = tf.summary.merge_all()
+        self.file_writer = tf.summary.FileWriter(
+            self.config.dir_output, self.sess.graph
+        )
 
     def train(self, train, dev):
         """Performs training with early stopping and lr exponential decay
@@ -122,15 +116,16 @@ class BaseModel(object):
 
         """
         best_score = 0
-        nepoch_no_imprv = 0 # for early stopping
-        self.add_summary() # tensorboard
+        nepoch_no_imprv = 0  # for early stopping
+        self.add_summary()  # tensorboard
 
         for epoch in range(self.config.nepochs):
-            self.logger.info("Epoch {:} out of {:}".format(epoch + 1,
-                        self.config.nepochs))
+            self.logger.info(
+                "Epoch {:} out of {:}".format(epoch + 1, self.config.nepochs)
+            )
 
             score = self.run_epoch(train, dev, epoch)
-            self.config.lr *= self.config.lr_decay # decay learning rate
+            self.config.lr *= self.config.lr_decay  # decay learning rate
 
             # early stopping and saving best parameters
             if score >= best_score:
@@ -141,10 +136,11 @@ class BaseModel(object):
             else:
                 nepoch_no_imprv += 1
                 if nepoch_no_imprv >= self.config.nepoch_no_imprv:
-                    self.logger.info("- early stopping {} epochs without "\
-                            "improvement".format(nepoch_no_imprv))
+                    self.logger.info(
+                        "- early stopping {} epochs without "
+                        "improvement".format(nepoch_no_imprv)
+                    )
                     break
-
 
     def evaluate(self, test):
         """Evaluate model on test set
@@ -155,8 +151,7 @@ class BaseModel(object):
         """
         self.logger.info("Testing model")
         metrics = self.run_evaluate(test)
-        msg = " - ".join(["{} {:04.2f}".format(k, v)
-                for k, v in metrics.items()])
+        msg = " - ".join(["{} {:04.2f}".format(k, v) for k, v in metrics.items()])
         self.logger.info(msg)
         return metrics
 
@@ -168,12 +163,11 @@ class BaseModel(object):
 
         """
         self.logger.info("Getting f1 for all tags")
-        tags = ['MAT', 'PRO', 'DSC', 'SPL', 'APL', 'SMT', 'CMT', 'PVL', 'PUT']
+        tags = ["MAT", "PRO", "DSC", "SPL", "APL", "SMT", "CMT", "PVL", "PUT"]
         all_metrics = []
         for tag in tags:
             metrics = self.evaluate_all(test, tag)
-            msg = " - ".join(["{} {}".format(k, v)
-                for k, v in metrics.items()])
+            msg = " - ".join(["{} {}".format(k, v) for k, v in metrics.items()])
             self.logger.info(msg)
             all_metrics.append(metrics)
         return all_metrics

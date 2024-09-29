@@ -23,8 +23,12 @@ def load(model_name, ignore_requirements=False):
 def load_ner_model(basepath):
     ner_path = os.path.join(basepath, "ner")
 
-    processor = MatScholarProcess(phraser_path=os.path.join(basepath, "embeddings/phraser.pkl"))
-    normalizer = Normalizer(os.path.join(basepath, "normalize"), os.path.join(basepath, "rsc"))
+    processor = MatScholarProcess(
+        phraser_path=os.path.join(basepath, "embeddings/phraser.pkl")
+    )
+    normalizer = Normalizer(
+        os.path.join(basepath, "normalize"), os.path.join(basepath, "rsc")
+    )
     return NERClassifier(ner_path, normalizer, processor, enforce_local=True)
 
 
@@ -41,10 +45,17 @@ class NERClassifierConvenienceWrapper:
      - PVT/PUT property simplification to PRO entities
 
     """
+
     def __init__(self, ner_path, basepath):
-        self.processor = MatScholarProcess(phraser_path=os.path.join(basepath, "embeddings/phraser.pkl"))
-        self.normalizer = Normalizer(os.path.join(basepath, "normalize"), os.path.join(basepath, "rsc"))
-        self.clf = NERClassifier(ner_path, self.normalizer, self.processor, enforce_local=True)
+        self.processor = MatScholarProcess(
+            phraser_path=os.path.join(basepath, "embeddings/phraser.pkl")
+        )
+        self.normalizer = Normalizer(
+            os.path.join(basepath, "normalize"), os.path.join(basepath, "rsc")
+        )
+        self.clf = NERClassifier(
+            ner_path, self.normalizer, self.processor, enforce_local=True
+        )
 
     def tag_doc(self, doc):
         tagged = self.clf.tag_doc(doc)
@@ -80,4 +91,3 @@ class NERClassifierConvenienceWrapper:
 
         tagged_concat = self.normalizer._concatenate_ents(new_tagged)
         return tagged_concat
-
