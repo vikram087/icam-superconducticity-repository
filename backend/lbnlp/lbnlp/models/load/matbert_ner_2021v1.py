@@ -57,6 +57,6 @@ class MatBERTNERModelWrapper:
         Returns:
 
         """
-        predictions = predict(texts, model_file=self.model_file, state_path=self.state_path_file, scheme="IOBES", device=device)
+        predictions = predict(texts, model_file=self.model_file, state_path=self.state_path_file, scheme="IOBES", device=device, is_file=False)
         return predictions
 
