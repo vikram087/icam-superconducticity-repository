@@ -18,7 +18,8 @@ class ModelPkgLoader:
             self.metadata_modelpkgs = json.load(f)
 
         if modelpkg_name not in self.metadata_modelpkgs:
-            raise KeyError(f"Model package name {modelpkg_name} not in metadata")
+            raise KeyError(
+                f"Model package name {modelpkg_name} not in metadata")
 
         self.metadata_pkg = self.metadata_modelpkgs[modelpkg_name]
         self.models_info = self.metadata_pkg["models"]
@@ -46,24 +47,17 @@ class ModelPkgLoader:
         if os.path.exists(self.file_path):
             self.is_downloaded = True
         else:
-            print(
-                f"Fetching {os.path.basename(self.file_path)} model package from {url} to {self.file_path}",
-                flush=True,
-            )
+            print(f"Fetching {os.path.basename(self.file_path)} model package from {url} to {self.file_path}", flush=True)
 
-            content_length = requests.get(url, stream=True).headers["Content-length"]
+            content_length = requests.get(url, stream=True).headers['Content-length']
             print(f"Total file size: {int(content_length)/1e9} GB")
 
             chunk_size = 2048
-            chunks = int(int(content_length) / chunk_size)
+            chunks = int(int(content_length)/chunk_size)
 
             r = requests.get(url, stream=True)
             with open(self.file_path, "wb") as file_out:
-                for chunk in tqdm.tqdm(
-                    r.iter_content(chunk_size=chunk_size),
-                    total=chunks,
-                    desc=f"Total chunks of size {chunk_size} bytes downloaded",
-                ):
+                for chunk in tqdm.tqdm(r.iter_content(chunk_size=chunk_size), total=chunks, desc=f"Total chunks of size {chunk_size} bytes downloaded"):
                     file_out.write(chunk)
             r.close()
             self.is_downloaded = True
@@ -79,8 +73,7 @@ class ModelPkgLoader:
         sha256_truth = self.metadata_pkg["hash"]
         if sha256_test != sha256_truth:
             raise ValueError(
-                f"Hash of modelpkg file {os.path.basename(self.file_path)} ({sha256_test}) does not match truth hash ({sha256_truth})."
-            )
+                f"Hash of modelpkg file {os.path.basename(self.file_path)} ({sha256_test}) does not match truth hash ({sha256_truth}).")
 
     def structure(self):
         """
@@ -89,14 +82,13 @@ class ModelPkgLoader:
         Returns:
 
         """
-        if self.modelpkg_name in ["matscholar_2020v1"]:
+        if self.modelpkg_name in ["matscholar_2020v1", "matbert_ner_2021v1", "relevance_2020v1"]:
             print(f"Extracting file for model package {self.modelpkg_name}...")
             with zipfile.ZipFile(self.file_path, "r") as zipped:
                 zipped.extractall(self.structured_path)
         else:
             raise NotImplementedError(
-                f"Model package {self.modelpkg_name} has no structuring/unzipping protocol"
-            )
+                f"Model package {self.modelpkg_name} has no structuring/unzipping protocol")
 
     def load(self):
         if not os.path.exists(self.structured_path):

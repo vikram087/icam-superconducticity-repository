@@ -1,7 +1,7 @@
 *.py[cod]
 */__pycache__/*
 
-venv3.7.17
+venv_matbert
 
 # doc builds
 docs/_build/*
