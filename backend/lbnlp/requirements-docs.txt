@@ -1,2 +1,0 @@
-# Requirements for creating, deploying, and editing documentation
-mkdocs-material==6.1.0
