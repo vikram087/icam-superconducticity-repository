@@ -28,9 +28,9 @@ class NERClassifier:
         self.config.dim_char = 50
 
         # Check to see if we have a tf serving api running the model
-        self.api_url = os.environ.get("TF_SERVING_URL")
+        self.api_url = os.environ.get('TF_SERVING_URL')
         # Load the model
-        tf.compat.v1.reset_default_graph()
+        tf.reset_default_graph()
         if not enforce_local and self.api_url:
             self.model = NERServingModel(self.config, api_url=self.api_url)
         else:
@@ -69,12 +69,8 @@ class NERClassifier:
         tagged_doc = []
         for sent, sent_num in zip(processed_sents, processed_sents_num):
             tags = self.model.predict(sent)
-            tagged_doc.append(
-                [
-                    (token, tag) if token != "<nUm>" else (token_num, tag)
-                    for token, token_num, tag in zip(sent, sent_num, tags)
-                ]
-            )
+            tagged_doc.append([(token, tag) if token != '<nUm>' else (token_num, tag)
+                               for token, token_num, tag in zip(sent, sent_num, tags)])
 
         return tagged_doc
 
@@ -121,12 +117,8 @@ class NERClassifier:
             tagged_doc = []
             for sent, sent_num in zip(processed_sents, processed_sents_num):
                 tags = self.model.predict(sent)
-                tagged_doc.append(
-                    [
-                        (token, tag) if token != "<nUm>" else (token_num, tag)
-                        for token, token_num, tag in zip(sent, sent_num, tags)
-                    ]
-                )
+                tagged_doc.append([(token, tag) if token != '<nUm>' else (token_num, tag)
+                                   for token, token_num, tag in zip(sent, sent_num, tags)])
             tagged_docs.append(tagged_doc)
 
         return tagged_docs

@@ -1,4 +1,4 @@
-from lbnlp.models.load.matscholar_2020v1 import (
+from backend.lbnlp.lbnlp.models.load.matscholar_2020v1 import (
     load,
     NERClassifier,
 )
