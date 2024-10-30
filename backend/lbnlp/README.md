@@ -27,6 +27,7 @@ from importlib_metadata import version, PackageNotFoundError
 - ran setup.py install and setup.py build after deps installed
 - had to move annotate_texts into lbnlp dir for imports
 
+git clone https://github.com/vikram087/icam-superconducticity-repository.git
 sudo apt update
 sudo apt install software-properties-common
 sudo add-apt-repository ppa:deadsnakes/ppa
