@@ -8,10 +8,12 @@ import tensorflow as tf
 from lbnlp.ner.data_utils import minibatches, pad_sequences, get_chunks
 from lbnlp.ner.general_utils import Progbar
 from lbnlp.ner.base import BaseModel
-
+from tf_crf_layer.crf import crf_log_likelihood, viterbi_decode
+from tensorflow.keras.layers import LSTM, Bidirectional, Dropout
 
 np.random.seed(1)
-tf.set_random_seed(1)
+tf.random.set_seed(1)
+tf.compat.v1.disable_eager_execution()
 
 
 class NERModel(BaseModel):
@@ -24,29 +26,38 @@ class NERModel(BaseModel):
     def add_placeholders(self):
         """Define placeholders = entries to computational graph"""
         # shape = (batch size, max length of sentence in batch)
-        self.word_ids = tf.placeholder(tf.int32, shape=[None, None], name="word_ids")
+        self.word_ids = tf.compat.v1.placeholder(
+            tf.int32, shape=[None, None], name="word_ids"
+        )
 
         # shape = (batch size)
-        self.sequence_lengths = tf.placeholder(
+        self.sequence_lengths = tf.compat.v1.placeholder(
             tf.int32, shape=[None], name="sequence_lengths"
         )
 
         # shape = (batch size, max length of sentence, max length of word)
-        self.char_ids = tf.placeholder(
+        self.char_ids = tf.compat.v1.placeholder(
             tf.int32, shape=[None, None, None], name="char_ids"
         )
 
         # shape = (batch_size, max_length of sentence)
-        self.word_lengths = tf.placeholder(
+        self.word_lengths = tf.compat.v1.placeholder(
             tf.int32, shape=[None, None], name="word_lengths"
         )
 
         # shape = (batch size, max length of sentence in batch)
-        self.labels = tf.placeholder(tf.int32, shape=[None, None], name="labels")
+        self.labels = tf.compat.v1.placeholder(
+            tf.int32, shape=[None, None], name="labels"
+        )
 
         # hyper parameters
-        self.dropout = tf.placeholder(dtype=tf.float32, shape=[], name="dropout")
-        self.lr = tf.placeholder(dtype=tf.float32, shape=[], name="lr")
+        self.dropout = tf.compat.v1.placeholder(
+            dtype=tf.float32, shape=[], name="dropout"
+        )
+        self.dropout = (
+            float(self.dropout) if not isinstance(self.dropout, tf.Tensor) else 0.5
+        )
+        self.lr = tf.compat.v1.placeholder(dtype=tf.float32, shape=[], name="lr")
 
     def get_feed_dict(self, words, labels=None, lr=None, dropout=None):
         """Given some data, pad it and build a feed dictionary
@@ -97,10 +108,10 @@ class NERModel(BaseModel):
         and we don't train the vectors. Otherwise, a random matrix with
         the correct shape is initialized.
         """
-        with tf.variable_scope("words"):
+        with tf.compat.v1.variable_scope("words"):
             if self.config.embeddings is None:
                 self.logger.info("WARNING: randomly initializing word vectors")
-                _word_embeddings = tf.get_variable(
+                _word_embeddings = tf.compat.v1.get_variable(
                     name="_word_embeddings",
                     dtype=tf.float32,
                     shape=[self.config.nwords, self.config.dim_word],
@@ -117,10 +128,10 @@ class NERModel(BaseModel):
                 _word_embeddings, self.word_ids, name="word_embeddings"
             )
 
-        with tf.variable_scope("chars"):
+        with tf.compat.v1.variable_scope("chars"):
             if self.config.use_chars:
                 # get char embeddings matrix
-                _char_embeddings = tf.get_variable(
+                _char_embeddings = tf.compat.v1.get_variable(
                     name="_char_embeddings",
                     dtype=tf.float32,
                     shape=[self.config.nchars, self.config.dim_char],
@@ -134,26 +145,31 @@ class NERModel(BaseModel):
                 char_embeddings = tf.reshape(
                     char_embeddings, shape=[s[0] * s[1], s[-2], self.config.dim_char]
                 )
-                word_lengths = tf.reshape(self.word_lengths, shape=[s[0] * s[1]])
+                # word_lengths = tf.reshape(self.word_lengths, shape=[s[0] * s[1]])
 
                 # bi lstm on chars
-                cell_fw = tf.contrib.rnn.LSTMCell(
-                    self.config.hidden_size_char, state_is_tuple=True
-                )
-                cell_bw = tf.contrib.rnn.LSTMCell(
-                    self.config.hidden_size_char, state_is_tuple=True
-                )
-                _output = tf.nn.bidirectional_dynamic_rnn(
-                    cell_fw,
-                    cell_bw,
-                    char_embeddings,
-                    sequence_length=word_lengths,
-                    dtype=tf.float32,
-                )
+                # cell_fw = tf.contrib.rnn.LSTMCell(
+                #     self.config.hidden_size_char, state_is_tuple=True
+                # )
+                # cell_fw = tf.keras.layers.LSTMCell(self.config.hidden_size_char)
+                # cell_bw = tf.contrib.rnn.LSTMCell(
+                #     self.config.hidden_size_char, state_is_tuple=True
+                # )
+                # cell_bw = tf.keras.layers.LSTMCell(self.config.hidden_size_char)
+                # _output = tf.compat.v1.nn.bidirectional_dynamic_rnn(
+                #     cell_fw,
+                #     cell_bw,
+                #     char_embeddings,
+                #     sequence_length=word_lengths,
+                #     dtype=tf.float32,
+                # )
+                output = Bidirectional(
+                    LSTM(self.config.hidden_size_char, return_sequences=True)
+                )(char_embeddings)
 
                 # read and concat output
-                _, ((_, output_fw), (_, output_bw)) = _output
-                output = tf.concat([output_fw, output_bw], axis=-1)
+                # _, ((_, output_fw), (_, output_bw)) = _output
+                # output = tf.concat([output_fw, output_bw], axis=-1)
 
                 # shape = (batch size, max sentence length, char hidden size)
                 output = tf.reshape(
@@ -169,27 +185,35 @@ class NERModel(BaseModel):
         For each word in each sentence of the batch, it corresponds to a vector
         of scores, of dimension equal to the number of tags.
         """
-        with tf.variable_scope("bi-lstm"):
-            cell_fw = tf.contrib.rnn.LSTMCell(self.config.hidden_size_lstm)
-            cell_bw = tf.contrib.rnn.LSTMCell(self.config.hidden_size_lstm)
-            (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(
-                cell_fw,
-                cell_bw,
-                self.word_embeddings,
-                sequence_length=self.sequence_lengths,
-                dtype=tf.float32,
-            )
-            output = tf.concat([output_fw, output_bw], axis=-1)
-            output = tf.nn.dropout(output, self.dropout)
+        with tf.compat.v1.variable_scope("bi-lstm"):
+            # cell_fw = tf.contrib.rnn.LSTMCell(self.config.hidden_size_lstm)
+            # cell_bw = tf.contrib.rnn.LSTMCell(self.config.hidden_size_lstm)
+            # cell_fw = tf.keras.layers.LSTMCell(self.config.hidden_size_char)
+            # cell_bw = tf.keras.layers.LSTMCell(self.config.hidden_size_char)
+            # (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(
+            #     cell_fw,
+            #     cell_bw,
+            #     self.word_embeddings,
+            #     sequence_length=self.sequence_lengths,
+            #     dtype=tf.float32,
+            # )
+            # output = tf.concat([output_fw, output_bw], axis=-1)
+            # output = tf.nn.dropout(output, self.dropout)
+            output = Bidirectional(
+                LSTM(self.config.hidden_size_lstm, return_sequences=True)
+            )(self.word_embeddings)
 
-        with tf.variable_scope("proj"):
-            W = tf.get_variable(
+            # Apply dropout
+            output = Dropout(self.dropout)(output)
+
+        with tf.compat.v1.variable_scope("proj"):
+            W = tf.compat.v1.get_variable(
                 "W",
                 dtype=tf.float32,
                 shape=[2 * self.config.hidden_size_lstm, self.config.ntags],
             )
 
-            b = tf.get_variable(
+            b = tf.compat.v1.get_variable(
                 "b",
                 shape=[self.config.ntags],
                 dtype=tf.float32,
@@ -216,7 +240,10 @@ class NERModel(BaseModel):
     def add_loss_op(self):
         """Defines the loss"""
         if self.config.use_crf:
-            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(
+            # log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(
+            #     self.logits, self.labels, self.sequence_lengths
+            # )
+            log_likelihood, trans_params = crf_log_likelihood(
                 self.logits, self.labels, self.sequence_lengths
             )
             self.trans_params = trans_params  # need to evaluate it for decoding
@@ -242,7 +269,7 @@ class NERModel(BaseModel):
 
         # Generic functions that add training op and initialize session
         self.add_train_op(self.config.lr_method, self.lr, self.loss, self.config.clip)
-        self.initialize_session()  # now self.sess is defined and vars are init
+        # self.initialize_session()  # now self.sess is defined and vars are init
 
     def predict_batch(self, words):
         """
@@ -266,9 +293,10 @@ class NERModel(BaseModel):
             # iterate over the sentences because no batching in vitervi_decode
             for logit, sequence_length in zip(logits, sequence_lengths):
                 logit = logit[:sequence_length]  # keep only the valid steps
-                viterbi_seq, viterbi_score = tf.contrib.crf.viterbi_decode(
-                    logit, trans_params
-                )
+                # viterbi_seq, viterbi_score = tf.contrib.crf.viterbi_decode(
+                #     logit, trans_params
+                # )
+                viterbi_seq, viterbi_score = viterbi_decode(logit, trans_params)
                 viterbi_sequences += [viterbi_seq]
 
             return viterbi_sequences, sequence_lengths
@@ -477,9 +505,10 @@ class NERServingModel(NERModel):
             # iterate over the sentences because no batching in vitervi_decode
             for logit, sequence_length in zip(logits, sequence_lengths):
                 logit = logit[:sequence_length]  # keep only the valid steps
-                viterbi_seq, viterbi_score = tf.contrib.crf.viterbi_decode(
-                    logit, trans_params
-                )
+                # viterbi_seq, viterbi_score = tf.contrib.crf.viterbi_decode(
+                #     logit, trans_params
+                # )
+                viterbi_seq, viterbi_score = viterbi_decode(logit, trans_params)
                 viterbi_sequences += [viterbi_seq]
 
             return viterbi_sequences, sequence_lengths
@@ -518,7 +547,7 @@ class NERServingModel(NERModel):
 
         """
 
-        tf.saved_model.simple_save(
+        tf.compat.v1.saved_model.simple_save(
             self.sess,
             save_dir,
             {

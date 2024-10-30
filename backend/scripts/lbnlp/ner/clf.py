@@ -30,7 +30,7 @@ class NERClassifier:
         # Check to see if we have a tf serving api running the model
         self.api_url = os.environ.get("TF_SERVING_URL")
         # Load the model
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
         if not enforce_local and self.api_url:
             self.model = NERServingModel(self.config, api_url=self.api_url)
         else:
