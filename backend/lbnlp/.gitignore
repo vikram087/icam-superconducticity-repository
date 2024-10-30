@@ -1,6 +1,7 @@
 *.py[cod]
 */__pycache__/*
 
+venv3.7.17
 
 # doc builds
 docs/_build/*
