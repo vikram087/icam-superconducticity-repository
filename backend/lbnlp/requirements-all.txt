@@ -6,6 +6,7 @@ matbert_ner @ git+https://github.com/lbnlp/MatBERT_NER@0.2#egg=matbert_ner
 
 tensorflow==1.15.0
 numpy==1.18.4
+protobuf==3.20.3
 
 ## Shared
 

@@ -1,44 +1,53 @@
-# Superconductivity Paper Search Engine - Frontend
+# Setup of Frontend
 
-## Overview
+This guide provides instructions to set up and run the frontend, which provides an interface for interacting with the ICAM Abstract Database. The frontend allows users to search and view research paper abstracts retrieved from the database.
 
-This is the frontend component of the Superconductivity Paper Search Engine. It provides a user-friendly interface for searching and exploring superconductivity papers.
+## Table of Contents
+- [Clone the Repository](#1-clone-the-repository)
+- [Install Node Modules](#2-install-node-modules)
+- [Run the Frontend](#3-run-the-frontend)
+- [Next Steps](#next-steps)
+- [Troubleshooting](#troubleshooting)
 
-## Features
+## Setup
 
-- Interactive search interface for superconductivity papers
-- Sorting and filtering capabilities
-- Pagination with customizable results per page
-- Date range selection for filtering papers
+### 1. Clone the Repository
 
-## Technologies Used
+Clone the repository containing the frontend code, then navigate to the frontend directory.
 
-- **React.js**: JavaScript library for building the user interface
-- **CSS**: For styling components
-- **Axios**: For making HTTP requests to the backend API
+   ```bash
+   git clone https://github.com/vikram087/icam-superconducticity-repository.git
+   cd icam-superconducticity-repository/frontend/icam-abstract-db
+   ```
 
-## Usage
+### 2. Install Node Modules
 
-### Searching
-- Use the search bar to enter queries
-- For titles and abstracts: Use context-based queries for better results
-- For authors and categories: Use keyword-based searches
+Install the required dependencies for the frontend.
 
-### Filtering
-- Use the date picker to filter papers within a specific time frame
+   ```bash
+   npm install
+   ```
 
-### Sorting
-- Use the dropdown menu to sort results by relevance or publication date
+   This command installs all necessary packages listed in `package.json`.
 
-### Pagination
-- Use the dropdown to customize results per page
-- Navigate through pages using the pagination controls
+### 3. Run the Frontend
 
-## Performance Tips
+Start the frontend development server:
 
-- Refine your search queries to find relevant results on earlier pages for faster performance
-- Frequently accessed papers will load more quickly due to backend caching
+   ```bash
+   npm run dev
+   ```
 
-## Contact
+   This will start the frontend on a local development server, typically at `http://localhost:3000`.
 
-- **Lead Developer**: Vikram Penumarti (vpenumarti@ucdavis.edu)
+## Next Steps
+
+After starting the development server:
+- Open your browser and go to `http://localhost:3000` to access the application.
+- Explore the search functionality to interact with the ICAM Abstract Database.
+
+## Troubleshooting
+
+- **Modules Fail to Install**: Ensure you’re running Node.js version 14 or higher. Run `node -v` to check your version.
+- **Server Not Starting**: Check if another application is using port 3000. If so, stop it or modify the port in `package.json`.
+- **Frontend Not Loading Correctly**: Clear the browser cache or restart the development server with `npm run dev`.
