@@ -4,7 +4,7 @@ import json
 doping_data = '../../datasets/dop_toparse_169828.json'
 aunp_data = '../../datasets/aunp_recipes_characterization_filtered.json'
 example_data = '../../../LBL_NER_DATASETS/example.json'
-model = '../../matbert-base-uncased'
+model = './matbert-base-uncased'
 solid_state_state = '../../MatBERT_NER_models/matbert_solid_state_paragraph_iobes_crf_10_lamb_5_1_012_1e-04_2e-03_1e-02_0e+00_exponential_256_100/best.pt'
 doping_state = '../../MatBERT_NER_models/matbert_doping_paragraph_iobes_crf_10_lamb_5_1_012_1e-04_2e-03_1e-02_0e+00_exponential_256_100/best.pt'
 aunp6_state = '../../MatBERT_NER_models/matbert_aunp6_paragraph_iobes_crf_10_lamb_5_1_012_1e-04_2e-03_1e-02_0e+00_exponential_256_100/best.pt'

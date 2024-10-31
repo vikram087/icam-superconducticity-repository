@@ -256,3 +256,5 @@ models/
 utils/
 # data/
 *.pkl
+
+matbert-base-*

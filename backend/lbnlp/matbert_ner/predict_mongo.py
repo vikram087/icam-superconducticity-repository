@@ -15,7 +15,7 @@ def grouper(n, iterable):
             return
         yield chunk
 
-model_file = '../../matbert-base-uncased'
+model_file = './matbert-base-uncased'
 model_reference = 'matbert_solid_state_paragraph_iobes_crf_10_lamb_5_1_012_1e-04_2e-03_1e-02_0e+00_exponential_256_100'
 save_dir = './{}/'.format(model_reference)
 state_path = save_dir+'best.pt'
