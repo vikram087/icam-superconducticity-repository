@@ -5,7 +5,8 @@ matbert_ner @ git+https://github.com/lbnlp/MatBERT_NER@0.2#egg=matbert_ner
 ## Matscholar
 
 tensorflow==1.15.0
-numpy==1.18.4
+#numpy==1.18.4
+numpy>=1.19.5
 
 ## Shared
 
@@ -17,3 +18,8 @@ pymatgen==2018.11.30
 PubChemPy==1.0.4
 tqdm==4.61.0
 gensim==3.7.1
+protobuf==3.20.3
+
+## Relevance
+
+scikit-learn==0.20.2

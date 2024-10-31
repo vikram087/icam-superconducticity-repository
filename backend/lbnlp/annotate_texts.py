@@ -62,10 +62,10 @@ def model_selection(model_type):
     elif model_type == "matbert":
         from lbnlp.models.load.matbert_ner_2021v1 import load
         ner_model = load("solid_state")
-    elif model_selection == "relevance":
+    else:
         from lbnlp.models.load.relevance_2020v1 import load
         ner_model = load("relevance")
-        
+
     return ner_model
 
 def get_documents(num):
@@ -76,7 +76,7 @@ def annotate(docs, model, model_type):
     if model_type == "matscholar":
         tags = [model.tag_doc(doc) for doc in docs]
     elif model_type == "matbert":
-        tags = model.tag_doc(docs)
+        tags = model.tag_docs(docs)
     elif model_type == "relevance":
         tags = model.classify_many(docs)
     
