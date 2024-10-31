@@ -1,45 +1,109 @@
-## LBNLP
-##### Lawrence Berkeley National Lab Natural Language Processing
-###### Common text mining tools for materials science and chemistry, for groups at Lawrence Berkeley National Lab (LBNL) and beyond.
+# Setup of Lbnlp Models (Matbert, Matscholar, Relevance)
 
-<img src="./docs_src/static/lbnlp_logo.png" alt="logo" width="300"/>
+This guide provides steps for setting up Lbnlp models, useful for NER tasks on materials science texts. Original repositories:
 
-#### Warning: This package is being migrated/condensed from several source repos. It is non-working at the moment. This warning will be removed when it is ready for public usage.
+- [Lbnlp main repo (Matbert, Matscholar, Relevance implementation)](https://github.com/lbnlp/lbnlp)
+- [Lbnlp Matbert Repo (model download)](https://github.com/lbnlp/MatBERT)
+- [CederGroupHub Matbert Repo (model testing/training)](https://github.com/CederGroupHub/MatBERT_NER)
 
-- [Documentation](https://lbnlp.github.io/lbnlp)
+## Table of Contents
 
-MODEL NOTES:
+- [Prereqs](#prereqs)
+- [Common Setup (Required for all 3 models)](#common-setup-required-for-all-3-models)
+- [Matbert](#matbert)
+- [Matscholar/Relevance](#matscholarrelevance)
 
-- downgraded from pymatgen from 2019.9.8 -> 2018.11.30
-- python version 3.7.17
-- ubuntu 22.04 amd64, t2.xlarge (4vcpu, 16GiB mem)
-- had to edit site package for pdfminer venv3.7.17/lib/python3.7/site-packages/pdfminer/__init__.py
-before:
+## Prereqs
+- **Architecture**: Machine running `amd64` (tested on Ubuntu 22.04 amd64, t2.medium (2vcpu, 8GiB mem))
 
-#from importlib.metadata import version, PackageNotFoundError
+## Common Setup (Required for all 3 models)
 
-after:
+1. **Clone the repository**
 
-from importlib_metadata import version, PackageNotFoundError
+   Clone the repo and navigate to the lbnlp directory.
 
-- had to run cde data download to download chemdataextractor model
-- installed requirements.txt, requirements-matscholar_2020v1.txt
-- ran setup.py install and setup.py build after deps installed
-- had to move annotate_texts into lbnlp dir for imports
+   ```bash
+   git clone https://github.com/vikram087/icam-superconducticity-repository.git
+   cd icam-superconducticity-repository/backend/lbnlp
+   ```
 
-git clone https://github.com/vikram087/icam-superconducticity-repository.git
-sudo apt update
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt install python3.7
-sudo apt install python3.7-venv
-python3.7 -m venv venv3.7.17
-source venv3.7.17/bin/activate
-sudo apt install build-essential
-sudo apt install python3.7-dev
+2. **Install system dependencies**
+
+   Install necessary dependencies for Python 3.7 and building packages.
+
+   ```bash
+   sudo apt update 
+   sudo add-apt-repository ppa:deadsnakes/ppa 
+   sudo apt install python3.7 python3.7-venv python3.7-dev build-essential
+   ```
+
+3. **Install Python dependencies for the chosen model**
+
+   Choose the model-specific dependencies: [Matbert](#matbert) or [Matscholar/Relevance](#matscholarrelevance).
+
+---
+
+4. **Edit pdfminer library** 
+
+   > **Note**: If you encounter import errors with `pdfminer`, edit the `__init__.py` file as follows:
+
+   ```bash
+   vim <environment path>/lib/python3.7/site-packages/pdfminer/__init__.py
+   ```
+
+   Replace:
+   ```python
+   from importlib.metadata import version, PackageNotFoundError
+   ```
+   With:
+   ```python
+   from importlib_metadata import version, PackageNotFoundError
+   ```
+
+5. **Download chemdataextractor models**  
+
+   Download the required data for `chemdataextractor`.
+
+   ```bash
+   cde data download
+   ```
+
+6. **Run setup script**
+
+   Install the Lbnlp models using `setup.py`:
+
+   ```bash
+   python setup.py install
+   python setup.py build 
+   ```
+
+7. **Test the setup**
+
+   Run a test to verify that everything is set up correctly:
+
+   ```bash
+   python annotate_texts.py --model-type <model type>
+   ```
+   Replace `<model type>` with the model you want to test (`matbert`, `matscholar`, or `relevance`).
+
+## Matbert
+
+**Set up Python environment and install dependencies:**
+
+```bash
+python3.7 -m venv <environment path>
+source <environment path>/bin/activate
 pip install -r requirements.txt
-python setup.py install
-python setup.py build
-pip install protobuf==3.20.3
-edit site package
-cde data download
-python annotate_texts.py
+pip install -r requirements-matbert_ner_2021v1.txt
+```
+
+## Matscholar/Relevance
+
+**Set up Python environment and install dependencies:**
+
+```bash
+python3.7 -m venv <environment path>
+source <environment path>/bin/activate
+pip install -r requirements.txt
+pip install -r requirements-matscholar_2020v1.txt
+```

@@ -1,59 +1,58 @@
-# Superconductivity Paper Search Engine
+### Superconductivity Paper Search Engine
+
+*This project currently has a single maintainer, so please anticipate some wait time for bug fixes and updates.*
+
+---
 
 ## Overview
 
-This project is a comprehensive search engine for superconductivity papers. It combines advanced search capabilities with natural language processing to provide an efficient and user-friendly way to explore scientific literature in the field of superconductivity.
+This project is a **comprehensive search engine for superconductivity papers**. It combines **advanced search capabilities** with **natural language processing (NLP)** for an efficient, user-friendly way to explore scientific literature in the superconductivity field.
 
-## Features
+## Key Features
 
-- **Vector Search**: Utilizes HNSW (Hierarchical Navigable Small World) algorithm for efficient similarity searches.
-- **Sorting and Filtering**: Allows users to sort results by relevance or date, and filter based on various criteria including date range.
-- **Pagination**: Implements paginated results with customizable results per page.
-- **Natural Language Processing**: Employs a sentence transformer for query embedding and LLaMA-3 model for generating answers to specific questions based on paper abstracts.
-- **Caching**: Uses Redis for optimized performance, achieving 91% faster fetching for cached results.
-- **Fuzzy Search**: Implements fuzzy search for authors and categories to improve search flexibility.
+- **Vector Search**: Uses the **HNSW (Hierarchical Navigable Small World)** algorithm for efficient similarity-based searches.
+- **Advanced Sorting & Filtering**: Sort results by relevance or date and filter by criteria like date range.
+- **Flexible Pagination**: Customizable results per page for a smooth browsing experience.
+- **Natural Language Processing**: **Sentence Transformer** for embedding queries and **MatBERT** for extracting key properties from abstracts.
+- **Caching for Speed**: **Redis** caching optimizes performance, achieving a **91% improvement in fetching speed** for cached results.
+- **Fuzzy Search Capabilities**: Enhances author and category searches, increasing search flexibility.
+- **Custom Search Syntax**: Allows for more refined and targeted searches.
 
 ## Architecture
 
-### Backend
-- **Python**: Core scripting language
-- **Flask**: Web framework for the backend API
-- **Elasticsearch**: Database for storing and searching paper metadata and embeddings
-- **ArXiv API**: Used for compiling paper metadata
-- **Sentence Transformer**: For embedding queries
-- **Redis**: For caching and performance optimization
-- **LLaMA-3**: Large language model for generating answers to questions
+### Backend Stack
+- **Python**: Core scripting language.
+- **Flask**: Backend API framework.
+- **Elasticsearch**: Database for paper metadata and embeddings.
+- **ArXiv API**: Data source for paper metadata.
+- **Sentence Transformer**: Embeds query for similarity search.
+- **Redis**: Caching for high performance.
+- **MatBERT**: NER model for property extraction.
 
-### Frontend
-- **React.js**: JavaScript library for building the user interface
+### Frontend Stack
+- **React.js**: Library for a responsive and intuitive user interface.
 
 ### Deployment
-- **Docker**: Used for containerization and local hosting of Elasticsearch
+- **Docker**: Containerization and local hosting of **Elasticsearch**.
 
-## Usage
+## Setup
 
-### Searching
-- For titles and abstracts: Use context-based queries rather than keywords for better results.
-- For authors and categories: Use keyword-based searches.
+> ⚡ **Getting Started**  
+> Follow the README files below for manual setup instructions:
 
-### Filtering
-- Date Range: Use the date picker to filter papers within a specific time frame.
+- [Frontend Setup](./frontend/README.md)
+- [Backend Setup](./backend/README.md)
 
-### Sorting
-- Sort results by relevance or publication date using the dropdown menu.
+> 🐳 **Docker Support Coming Soon!**  
+> *We’re working on Docker support for streamlined setup and deployment.* Stay tuned for updates!
 
-### Pagination
-- Customize results per page using the dropdown.
-- Navigate through pages using the pagination controls.
+## Contact Information
 
-### Performance Tips
-- The search time increases with higher page numbers. For optimal performance, refine your search queries to find relevant results on earlier pages.
-- Cached results are fetched 91% faster, so frequently accessed papers will load more quickly.
+For questions or bug reports, please contact the lead developer:
 
-## Performance
+- **Lead Developer**: **Vikram Penumarti**  
+- **Email**: [vpenumarti@ucdavis.edu](mailto:vpenumarti@ucdavis.edu)
 
-- 91% faster fetching for cached results using Redis
+## Contribution
 
-## Contact
-
-- **Lead Developer**: Vikram Penumarti (vpenumarti@ucdavis.edu)
+This project is currently maintained by a single developer. If there is enough community interest, contributions may be opened to outside collaborators. For inquiries or to express interest in contributing, please reach out to **vpenumarti@ucdavis.edu**.

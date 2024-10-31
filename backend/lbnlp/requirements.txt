@@ -5,6 +5,4 @@ Unidecode==1.1.1
 pymatgen==2018.11.30
 PubChemPy==1.0.4
 tqdm==4.61.0
-tensorflow==1.15.0
-numpy==1.18.4
 gensim==3.7.1
