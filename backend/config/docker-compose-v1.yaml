@@ -3,8 +3,6 @@ volumes:
     driver: local
   esdata01:
     driver: local
-  # redis-data:
-  #   driver: local
   kibanadata:
     driver: local
 
@@ -141,82 +139,3 @@ services:
       retries: 120
     networks:
       - app-network
-
-  lbnlp:
-    platform: linux/amd64
-    build:
-      context: ../lbnlp
-    depends_on:
-      es01:
-        condition: service_healthy
-    environment:
-      - ES_URL=https://es01:9200
-      - API_KEY=${API_KEY}
-    networks:
-      - app-network
-
-  add-papers:
-    build:
-      context: ../scripts
-    depends_on:
-      es01:
-        condition: service_healthy
-    environment:
-      - ES_URL=https://es01:9200
-      - API_KEY=${API_KEY}
-    networks:
-      - app-network
-
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    networks:
-      - app-network
-    # volumes: # turned off for dev
-    #   - redis-data:/data
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  backend:
-    build:
-      context: ../server
-    depends_on:
-      es01:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    environment:
-      - ES_URL=https://es01:9200
-      - API_KEY=${API_KEY}
-      - DOCKER=true
-    networks:
-      - app-network
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080 || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  frontend:
-    build:
-      context: ../../frontend/icam-abstract-db
-    depends_on:
-      backend:
-        condition: service_healthy
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_BACKEND_URL=${BACKEND_URL}
-    networks:
-      - app-network
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:5173 || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3

@@ -43,7 +43,9 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		const search = parseInput(query).search;
 		const parsed = parseInput(query).boolean;
 
-		fetch("http://localhost:8080/api/papers", {
+		const backend_url = import.meta.env.VITE_BACKEND_URL;
+
+		fetch(`${backend_url}/api/papers`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -273,7 +275,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 						</div>
 					</div>
 					<ul className="list">
-						{papers.map((paper) => (
+						{papers?.map((paper, index) => (
 							<div
 								className={
 									index === expandedIndex ? "expanded-container" : "container"

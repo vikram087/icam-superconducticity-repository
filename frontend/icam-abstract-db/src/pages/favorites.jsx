@@ -20,7 +20,9 @@ function Favorites({ searchParams, setPrevUrl }) {
 		const storedStars = localStorage.getItem("highlightedStars");
 		setHighlightedStars(JSON.parse(storedStars));
 
-		fetch("http://localhost:8080/api/papers/fetch", {
+		const backend_url = import.meta.env.VITE_BACKEND_URL;
+
+		fetch(`${backend_url}/api/papers/fetch`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

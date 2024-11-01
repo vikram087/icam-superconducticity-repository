@@ -25,12 +25,7 @@ Clone the repository containing the server code, then navigate to the server dir
 
 ### 2. Create API Key
 
-This API key allows the server to securely communicate with Elasticsearch.
-
-1. Visit Kibana (default port `5601`).
-2. Log in with the **elastic** user and the password from `ELASTIC_PASSWORD` in your `.env` file.
-3. Navigate to **Management > Stack Management > API Keys > Create API Key**.
-4. Create an API key with no restrictions, then copy it for the next step.
+Reference steps from step 7. [Create API Key](../config/README.md)
 
 ### 3. Set up `.env` File
 

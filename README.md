@@ -43,8 +43,8 @@ This project is a **comprehensive search engine for superconductivity papers**. 
 - [Frontend Setup](./frontend/README.md)
 - [Backend Setup](./backend/README.md)
 
-> 🐳 **Docker Support Coming Soon!**  
-> *We’re working on Docker support for streamlined setup and deployment.* Stay tuned for updates!
+> 🐳 **Docker Supported!**  
+- [Docker Setup](./backend/config/README.md)
 
 ## Contact Information
 

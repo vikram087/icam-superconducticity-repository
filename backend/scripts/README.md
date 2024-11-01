@@ -33,11 +33,7 @@ Set up a Python virtual environment and install dependencies.
    pip install -r requirements.txt
    ```
 
-### 3. Configure `.env` File
-
-Ensure your `.env` file includes the necessary configuration values, such as database credentials and any Arxiv API keys (if applicable).
-
-### 4. Run the Script
+### 3. Run the Script
 
 Run the script to populate the database with papers from the Arxiv API.
 

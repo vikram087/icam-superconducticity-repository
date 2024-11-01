@@ -15,9 +15,11 @@ from sentence_transformers import SentenceTransformer  # type: ignore
 
 load_dotenv()
 API_KEY: str | None = os.getenv("API_KEY")
+ES_URL: str | None = os.getenv("ES_URL")
+DOCKER: str | None = os.getenv("DOCKER")
 
 client: Elasticsearch = Elasticsearch(
-    "https://localhost:9200", api_key=API_KEY, ca_certs="../config/ca.crt"
+    ES_URL, api_key=API_KEY, ca_certs="./ca.crt"
 )
 
 app: Flask = Flask(__name__)
@@ -48,6 +50,9 @@ def get_papers() -> tuple[Response, int] | Response:
     else:
         return jsonify({"error": "No results found"}), 404
 
+@app.route("/", methods=["GET"])
+def test():
+    return jsonify({"message": "Success"}), 200
 
 # /api/papers/${paperId}
 @app.route("/api/papers/<paper_id>", methods=["GET"])
@@ -59,11 +64,10 @@ def get_paper(paper_id: str) -> tuple[Response, int] | Response:
     else:
         return jsonify({"error": "No results found"}), 404
 
-
+redis_host = "redis" if DOCKER == "true" else "localhost"
 redis_client: Redis = redis.StrictRedis(
-    host="localhost", port=6379, db=0, decode_responses=True
+    host=redis_host, port=6379, db=0, decode_responses=True
 )
-
 
 def get_cached_results(cache_key: str) -> dict | None:
     cached_data = redis_client.get(cache_key)
@@ -253,11 +257,11 @@ def papers() -> tuple[Response, int] | Response:
             else []
         )
 
-    excluded_ids: list[str] = get_excluded_ids(
-        cache_key
-    )  # can leverage excluding ids for pagination
-    must_not_pre: dict = {"ids": {"values": excluded_ids}}
-    print(excluded_ids)
+    # excluded_ids: list[str] = get_excluded_ids(
+    #     cache_key
+    # )  # can leverage excluding ids for pagination
+    # must_not_pre: dict = {"ids": {"values": excluded_ids}}
+    # print(excluded_ids)
 
     quer = {
         "bool": {
@@ -299,10 +303,10 @@ def papers() -> tuple[Response, int] | Response:
                 knn={
                     "field": field,
                     "query_vector": get_embedding(query),
-                    "num_candidates": size,
+                    "num_candidates": size if size < 10000 else 10000,
                     # "k": k,
                     "k": num_results,
-                    "filter": must_not_pre,
+                    # "filter": must_not_pre,
                 },
                 query=quer,
                 from_=0,  # consider changing to (page-1)*num_results
@@ -360,4 +364,5 @@ def papers() -> tuple[Response, int] | Response:
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    # app.run(debug=True, port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)

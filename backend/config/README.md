@@ -1,15 +1,20 @@
-# Setup of Elasticsearch and Kibana
+# Setup of Docker/Elasticsearch
 
-This guide provides steps for setting up an Elasticsearch and Kibana stack using Docker Compose, useful for centralized logging, monitoring, and search capabilities. The setup is based on the Elastic blog article [Getting Started with the Elastic Stack and Docker Compose](https://www.elastic.co/blog/getting-started-with-the-elastic-stack-and-docker-compose).
+This guide provides steps for setting up the project using Docker Compose. The setup of elasticsearch is based on the Elastic blog article [Getting Started with the Elastic Stack and Docker Compose](https://www.elastic.co/blog/getting-started-with-the-elastic-stack-and-docker-compose).
+
+> Note: If you do not wish to use Docker for the whole project, you can run ```docker compose -f docker-compose-v1.yaml up -d``` which sets up a docker container for just ```Elasticsearch and Kibana```, and you can 
+setup the frontend and backend/scripts on your own.
 
 ## Table of Contents
 - [Setup](#setup)
-  - [Clone the Repository](#clone-the-repository)
-  - [Set up .env File](#set-up-env-file)
-  - [Install Docker](#install-docker)
-  - [Run the Docker Container](#run-the-docker-container)
-  - [Access Kibana](#access-kibana)
-  - [Stop the Docker Container](#stop-the-docker-container)
+  - [Clone the Repository](#1-clone-the-repository)
+  - [Set up .env File](#2-set-up-env-file)
+  - [Install Docker](#3-install-docker)
+  - [Run the Docker Container](#4-run-the-docker-container)
+  - [Download ca_cert](#5-download-ca_cert)
+  - [Access Kibana](#6-access-kibana)
+  - [Create API Key](#7-create-api-key)
+  - [Stop the Docker Container](#8-stop-the-docker-container)
 - [Troubleshooting](#troubleshooting)
 - [Next Steps](#next-steps)
 
@@ -57,6 +62,12 @@ Create a `.env` file to define environment variables required for the stack conf
 
    # Encryption key (for POC environments only)
    ENCRYPTION_KEY=c34d38b3a14956121ff2170e5030b471551370178f43e5626eec58b04a30fae2
+
+   # Steps for obtaining this value will be in step 7
+   API_KEY=YOUR_API_KEY
+
+   # The url for your backend, will be http://localhost:8080 for dev
+   BACKEND_URL=http://localhost:8080
    ```
 
 ### 3. Install Docker
@@ -69,13 +80,15 @@ Install Docker Desktop for your operating system:
 
 ### 4. Run the Docker Container
 
-Start the Docker container for Elasticsearch and Kibana.
+Start the Docker container.
 
    ```bash
-   docker compose up -d
+   docker compose up -d --build
    ```
 
 ### 5. Download ca_cert
+
+Dowload the certificate for a secure elasticsearch environment
 
    ```bash
    docker cp config-es01-1:/usr/share/elasticsearch/config/certs/ca/ca.crt ./.
@@ -88,7 +101,14 @@ After starting the Docker container, you can access Kibana at `http://localhost:
    - **Username**: `elastic`
    - **Password**: the `ELASTIC_PASSWORD` from your `.env` file
 
-### 6. Stop the Docker Container
+### 7. Create API Key
+
+This API key allows the server to securely communicate with Elasticsearch.
+
+1. Navigate to **Management > Stack Management > API Keys > Create API Key**.
+2. Create an API key with no restrictions, then copy it for the next step.
+
+### 8. Stop the Docker Container
 
 To stop the container, run:
 

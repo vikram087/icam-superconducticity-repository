@@ -13,9 +13,14 @@ function PaperDetail({ searchParams, prevUrl }) {
 
 	useEffect(() => {
 		const storedStars = localStorage.getItem("highlightedStars");
-		setHighlightedStars(JSON.parse(storedStars));
+		if (storedStars) {
+			setHighlightedStars(JSON.parse(storedStars));
+			// localStorage.clear();
+		}
 
-		fetch(`http://localhost:8080/api/papers/${id}`)
+		const backend_url = import.meta.env.VITE_BACKEND_URL;
+
+		fetch(`${backend_url}/api/papers/${id}`)
 			.then((response) => response.json())
 			.then((data) => {
 				setPaper(data);
@@ -26,7 +31,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 		if (prevUrl) {
 			window.location.href = prevUrl;
 		} else {
-			window.location.href = "http://localhost:5173/";
+			window.location.href = "http://localhost:5173/papers";
 		}
 	};
 
@@ -127,7 +132,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 					))}
 					<p>
 						<strong>Categories:</strong>{" "}
-						{paper.categories.map((category) => (
+						{paper.categories.map((category, index) => (
 							<span key={category}>
 								{category}
 								{index < paper.categories.length - 1 ? ", " : ""}

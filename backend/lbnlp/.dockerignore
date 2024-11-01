@@ -1,11 +1,5 @@
-## SERVER & SCRIPTS
-.env
-.DS_Store
-.venv*
 venv*
-.mypy_cache
-.ruff_cache
-__pycache__
+.venv*
 
 ## MATSCHOLAR
 *.py[cod]
@@ -66,5 +60,3 @@ utils/
 *.pkl
 
 matbert-base-*
-
-ca.crt

@@ -31,9 +31,10 @@ Created by Vikram Penumarti
 
 load_dotenv()
 API_KEY: Optional[str] = os.getenv("API_KEY")
+ES_URL: Optional[str] = os.getenv("ES_URL")
 
 client: Elasticsearch = Elasticsearch(
-    "https://localhost:9200", api_key=API_KEY, ca_certs="../../config/ca.crt"
+    ES_URL, api_key=API_KEY, ca_certs="./ca.crt"
 )
 
 # print(client.info())

@@ -20,7 +20,16 @@ Clone the repository containing the frontend code, then navigate to the frontend
    cd icam-superconducticity-repository/frontend/icam-abstract-db
    ```
 
-### 2. Install Node Modules
+### 2. Setup .env File
+
+Create a `.env` file to define environment variables required for the frontend configuration.
+
+   ```ini
+   # The url for your backend, will be http://localhost:8080 for dev
+   BACKEND_URL=http://localhost:8080
+   ```
+
+### 3. Install Node Modules
 
 Install the required dependencies for the frontend.
 
@@ -30,7 +39,7 @@ Install the required dependencies for the frontend.
 
    This command installs all necessary packages listed in `package.json`.
 
-### 3. Run the Frontend
+### 4. Run the Frontend
 
 Start the frontend development server:
 
@@ -43,7 +52,7 @@ Start the frontend development server:
 ## Next Steps
 
 After starting the development server:
-- Open your browser and go to `http://localhost:3000` to access the application.
+- Open your browser and go to `http://localhost:5173` to access the application.
 - Explore the search functionality to interact with the ICAM Abstract Database.
 
 ## Troubleshooting
