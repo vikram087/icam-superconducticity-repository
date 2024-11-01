@@ -1,8 +1,15 @@
 # Setup of Backend (Elasticsearch, Server, Scripts, and Models)
 
-Important: If you choose to use Docker for your configuration, you just need to configure .env files and go through the docker setup for the whole project, if you 
-want to build from source, you still have to use docker (sorry 😢), but just for Elasticsearch and Kibana, and you can setup the Server, Scripts, and Models as described
-in the READMEs. Good luck, this backend was not easy to setup from scratch 🫡
+Important: 
+
+If you want to use the full Docker setup, run the v1 Docker Compose file first, setup your API Key, add it to the .env file, destroy the config,
+then run the latest Docker Compose file. It is designed like this because elasticsearch must be fully setup including api key (must be done manually) to successfully run the 
+backend server and scripts. 
+
+You could theoretically run the latest Docker Compose, setup your API Key in elasticsearch, add it to the .env file, destroy the config, then run the same Docker Compose 
+setup, but this would take a little longer.
+
+The v1 Docker Compose is the same as latest, except without frontend and backend setup, just elasticsearch.
 
 ## Table of Contents
 
