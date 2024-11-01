@@ -5,10 +5,8 @@ This guide details how to set up and run the server, which integrates with Elast
 ## Table of Contents
 - [Setup](#setup)
   - [Clone the Repository](#1-clone-the-repository)
-  - [Create API Key](#2-create-api-key)
-  - [Set up .env File](#3-set-up-env-file)
-  - [Set up Python Environment](#4-setup-python-environment)
-  - [Run the Server](#5-run-the-server)
+  - [Set up Python Environment](#2-setup-python-environment)
+  - [Run the Server](#3-run-the-server)
 - [Troubleshooting](#troubleshooting)
 - [Next Steps](#next-steps)
 
@@ -23,20 +21,7 @@ Clone the repository containing the server code, then navigate to the server dir
    cd icam-superconducticity-repository/backend/server
    ```
 
-### 2. Create API Key
-
-Reference steps from step 7. [Create API Key](../config/README.md)
-
-### 3. Set up `.env` File
-
-Create a `.env` file for the Python Elasticsearch API. Replace `YOUR_API_KEY_HERE` with the API key you obtained.
-
-   ```ini
-   # API key for Elasticsearch
-   API_KEY=YOUR_API_KEY_HERE
-   ```
-
-### 4. Set up Python Environment
+### 2. Set up Python Environment
 
 Set up a virtual environment to isolate dependencies.
 
@@ -51,7 +36,7 @@ Set up a virtual environment to isolate dependencies.
      pip install -r requirements.txt
      ```
 
-### 5. Run the Server
+### 3. Run the Server
 
 Start the server to begin processing requests.
 
