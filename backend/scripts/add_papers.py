@@ -111,7 +111,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
 
         annotations = requests.post(
             f"{LBNLP_URL}/api/annotate/matbert",
-            data=paper_dict["summary"],
+            json={"doc": paper_dict["summary"]},
             headers={"Content-Type": "application/json"},
         )
         paper_dict["annotations"] = annotations
