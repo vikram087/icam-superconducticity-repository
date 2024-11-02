@@ -68,6 +68,9 @@ Create a `.env` file to define environment variables required for the stack conf
 
    # The url for your backend, will be http://localhost:8080 for dev
    BACKEND_URL=http://localhost:8080
+
+   # location of the NLP server to annotate texts
+   LBNLP_URL=http://localhost:8000
    ```
 
 ### 3. Install Docker

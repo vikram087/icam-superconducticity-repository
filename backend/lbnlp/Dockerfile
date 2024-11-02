@@ -17,10 +17,10 @@ COPY requirements.txt requirements-matbert_ner_2021v1.txt /app/
 
 # Create virtual environment and install dependencies
 RUN python3.7 -m venv /app/venv-matbert && \
-    /app/venv-matbert/bin/pip install -r /app/requirements.txt -r /app/requirements-matbert_ner_2021v1.txt
+    /app/venv-matbert/bin/pip install --no-cache-dir -r /app/requirements.txt -r /app/requirements-matbert_ner_2021v1.txt
 
 # Copy the rest of the application files
 COPY . /app/
 
 # Set entrypoint to use virtualenv and run the script
-# CMD ["/app/venv-matbert/bin/python", "annotate_texts.py", "--model-type", "matbert"]
+CMD ["/app/venv-matbert/bin/python", "annotate_texts.py"]

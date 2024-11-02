@@ -3,13 +3,14 @@ import os
 import time
 import urllib.request as libreq
 from argparse import Namespace
+from typing import Optional
 
 import feedparser  # type: ignore
+import requests
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from feedparser import FeedParserDict
 from sentence_transformers import SentenceTransformer  # type: ignore
-from typing import Optional
 
 program_name: str = """
 add_papers.py
@@ -32,10 +33,9 @@ Created by Vikram Penumarti
 load_dotenv()
 API_KEY: Optional[str] = os.getenv("API_KEY")
 ES_URL: Optional[str] = os.getenv("ES_URL")
+LBNLP_URL: str | None = os.getenv("LBNLP_URL")
 
-client: Elasticsearch = Elasticsearch(
-    ES_URL, api_key=API_KEY, ca_certs="./ca.crt"
-)
+client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
 # print(client.info())
 # exit()
@@ -80,9 +80,8 @@ def set_parser(
     return parser
 
 
-def findInfo(start: int, amount: int) -> list[dict]:
+def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
     search_query: str = "all:superconductivity"
-    #   wait_time = 60
 
     url: str = f"http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}"
 
@@ -110,14 +109,25 @@ def findInfo(start: int, amount: int) -> list[dict]:
             "primary_category": entry.get("arxiv_primary_category").get("term"),
         }
 
+        annotations = requests.post(
+            f"{LBNLP_URL}/api/annotate/matbert",
+            data=paper_dict["summary"],
+            headers={"Content-Type": "application/json"},
+        )
+        paper_dict["annotations"] = annotations
+
+        bad = client.options(ignore_status=[404]).get(
+            index="search-papers-meta", id=paper_dict["id"]
+        )
+        exists = bad.get("found")
+        if exists is True:
+            return paper_list, True
+
         paper_list.append(paper_dict)
 
     print(f"Collected papers {start} - {start + amount}")
 
-    #   print(f'Sleeping for {wait_time} seconds')
-    #   time.sleep(wait_time)
-
-    return replaceNullValues(paper_list)
+    return replaceNullValues(paper_list), False
 
 
 def replaceNullValues(papers_list: list[dict]) -> list[dict]:
@@ -177,13 +187,19 @@ def insert_documents(documents: list[dict], index: str):
 
 
 def upload_to_es(amount: int, iterations: int) -> None:
-    wait_time: int = 3
+    wait_time: int = 15
     start: int = client.count(index="search-papers-meta")["count"]
     print(f"Total documents in DB, start: {start}\n")
     for _ in range(iterations):
-        insert_documents(findInfo(start, amount), "search-papers-meta")
+        docs, ex = findInfo(start, amount)
+        insert_documents(docs, "search-papers-meta")
         print(f"Uploaded documents {start} - {start + amount}")
         start += amount
+
+        if ex:
+            print(f"Total documents in DB, finish: {start}\n")
+            print("Database is fully updated, exiting")
+            exit()
 
         print(f"Sleeping for {wait_time} seconds")
         time.sleep(wait_time)

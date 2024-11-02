@@ -3,8 +3,8 @@ volumes:
     driver: local
   esdata01:
     driver: local
-  # redis-data:
-  #   driver: local
+  redis-data:
+    driver: local
   kibanadata:
     driver: local
 
@@ -146,14 +146,15 @@ services:
     platform: linux/amd64
     build:
       context: ../lbnlp
-    depends_on:
-      es01:
-        condition: service_healthy
-    environment:
-      - ES_URL=https://es01:9200
-      - API_KEY=${API_KEY}
+    ports:
+      - "8000:8000"
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   add-papers:
     build:
@@ -161,9 +162,12 @@ services:
     depends_on:
       es01:
         condition: service_healthy
+      lbnlp:
+        condition: service_healthy
     environment:
       - ES_URL=https://es01:9200
       - API_KEY=${API_KEY}
+      - LBNLP_URL=${LBNLP_URL}
     networks:
       - app-network
 
@@ -173,8 +177,8 @@ services:
       - "6379:6379"
     networks:
       - app-network
-    # volumes: # turned off for dev
-    #   - redis-data:/data
+    volumes:
+      - redis-data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s

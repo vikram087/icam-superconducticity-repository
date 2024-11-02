@@ -37,4 +37,7 @@ Create a `.env` file for the Python Elasticsearch API. Replace `YOUR_API_KEY_HER
 
     # hard-coded value
     DOCKER=false
+
+    # location of the NLP server to annotate texts
+    LBNLP_URL=http://localhost:8000
    ```

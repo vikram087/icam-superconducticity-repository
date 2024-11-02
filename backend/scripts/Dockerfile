@@ -1,18 +1,29 @@
-# Use Python slim image for a smaller, faster base image
+# Use a base image with Python
 FROM python:3.10-slim
 
-# Set working directory
+# Set up the working directory
 WORKDIR /app
 
-# Copy only requirements first to cache pip installs
-COPY requirements.txt /app/
+# Copy your application files
+COPY . /app
 
-# Install Python dependencies
-RUN python3 -m venv /app/venv && \
-    /app/venv/bin/pip install -r /app/requirements.txt
+# Install any required dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application files
-COPY . /app/
+# Install cron
+RUN apt-get update && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
 
-# Set entrypoint to use virtualenv and run the script
-# CMD ["/app/venv/bin/python", "add_papers.py"]
+# Create a cron file
+RUN echo "0 2 * * 1 python3 /app/add_papers.py >> /var/log/cron.log 2>&1" > /etc/cron.d/add_papers_cron
+
+# Give execution rights to the cron job
+RUN chmod 0644 /etc/cron.d/add_papers_cron
+
+# Apply the cron job
+RUN crontab /etc/cron.d/add_papers_cron
+
+# Create the log file to be able to run tail
+RUN touch /var/log/cron.log
+
+# Start cron and the application
+CMD cron && tail -f /var/log/cron.log

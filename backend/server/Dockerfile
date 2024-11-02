@@ -1,7 +1,7 @@
 # Use Python slim image
 FROM python:3.10-slim
 
-RUN apt update && apt install -y curl
+RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -10,11 +10,10 @@ WORKDIR /app
 COPY requirements.txt /app/
 
 # Install dependencies in a virtual environment
-RUN python3 -m venv /app/venv && \
-    /app/venv/bin/pip install -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy the rest of the application files
 COPY . /app/
 
 # Set entrypoint to use virtualenv and run the server
-CMD ["/app/venv/bin/python", "server.py"]
+CMD ["python3", "server.py"]
