@@ -68,16 +68,7 @@ This guide provides steps for setting up Lbnlp models, useful for NER tasks on m
    cde data download
    ```
 
-6. **Run setup script**
-
-   Install the Lbnlp models using `setup.py`:
-
-   ```bash
-   python setup.py install
-   python setup.py build 
-   ```
-
-7. **Test the setup**
+6. **Test the setup**
 
    Run a test to verify that everything is set up correctly:
 
