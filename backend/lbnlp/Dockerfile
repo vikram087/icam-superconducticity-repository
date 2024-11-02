@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 
 # Install Python 3.7 and dependencies in a single RUN statement
 RUN apt update && \
-    apt install -y software-properties-common && \
+    apt install -y software-properties-common curl && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt install -y python3.7 python3.7-venv python3.7-dev build-essential git && \
     rm -rf /var/lib/apt/lists/*
