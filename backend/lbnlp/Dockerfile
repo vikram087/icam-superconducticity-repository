@@ -26,5 +26,7 @@ RUN cde data download
 # Copy the rest of the application files
 COPY . /app/
 
+RUN /app/venv/bin/python test.py --model-type matbert
+
 # Set entrypoint to use virtualenv and run the script
 CMD ["/app/venv/bin/python", "annotate_texts.py"]
