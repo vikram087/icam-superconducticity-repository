@@ -39,6 +39,8 @@ This guide provides steps for setting up Lbnlp models, useful for NER tasks on m
 
 3. **Install Python dependencies for the chosen model**
 
+   > Unfortunately, Matbert and Matscholar/Relevance have conflicting dependencies, so you must install them in separate virtual environments
+
    Choose the model-specific dependencies: [Matbert](#matbert) or [Matscholar/Relevance](#matscholarrelevance).
 
 ---
@@ -84,8 +86,8 @@ This guide provides steps for setting up Lbnlp models, useful for NER tasks on m
 ```bash
 python3.7 -m venv <environment path>
 source <environment path>/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-matbert_ner_2021v1.txt
+pip install -r requirements-shared.txt
+pip install -r requirements-matbert.txt
 ```
 
 ## Matscholar/Relevance
@@ -95,6 +97,6 @@ pip install -r requirements-matbert_ner_2021v1.txt
 ```bash
 python3.7 -m venv <environment path>
 source <environment path>/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-matscholar_2020v1.txt
+pip install -r requirements-shared.txt
+pip install -r requirements-matscholar-relevance.txt
 ```
