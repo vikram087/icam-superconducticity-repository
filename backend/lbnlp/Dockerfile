@@ -13,11 +13,11 @@ RUN apt update && \
 WORKDIR /app
 
 # Copy only requirements first to leverage Docker cache
-COPY requirements.txt requirements-matbert_ner_2021v1.txt /app/
+COPY requirements-shared.txt requirements-matbert.txt /app/
 
 # Create virtual environment and install dependencies
 RUN python3.7 -m venv /app/venv && \
-    /app/venv/bin/pip install --no-cache-dir -r /app/requirements.txt -r /app/requirements-matbert_ner_2021v1.txt
+    /app/venv/bin/pip install --no-cache-dir -r /app/requirements-shared.txt -r /app/requirements-matbert.txt
 
 COPY pdfminer.py /app/venv/lib/python3.7/site-packages/pdfminer/__init__.py
 
