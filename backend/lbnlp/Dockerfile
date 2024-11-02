@@ -16,11 +16,15 @@ WORKDIR /app
 COPY requirements.txt requirements-matbert_ner_2021v1.txt /app/
 
 # Create virtual environment and install dependencies
-RUN python3.7 -m venv /app/venv-matbert && \
-    /app/venv-matbert/bin/pip install --no-cache-dir -r /app/requirements.txt -r /app/requirements-matbert_ner_2021v1.txt
+RUN python3.7 -m venv /app/venv && \
+    /app/venv/bin/pip install --no-cache-dir -r /app/requirements.txt -r /app/requirements-matbert_ner_2021v1.txt
+
+COPY pdfminer.py /app/venv/lib/python3.7/site-packages/pdfminer/__init__.py
+
+RUN cde data download
 
 # Copy the rest of the application files
 COPY . /app/
 
 # Set entrypoint to use virtualenv and run the script
-CMD ["/app/venv-matbert/bin/python", "annotate_texts.py"]
+CMD ["/app/venv/bin/python", "annotate_texts.py"]
