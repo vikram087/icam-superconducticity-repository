@@ -63,17 +63,17 @@ def set_parser(
         "-i",
         "--iter",
         required=False,
-        default=1,
+        default=40,
         type=int,
-        help="[Optional] Number of iterations of file uploads to perform (higher number is more likely to get rate limited, min 1)\nDefault: 1",
+        help="[Optional] Number of iterations of file uploads to perform (higher number is more likely to get rate limited, min 1)\nDefault: 40",
     )
     parser.add_argument(
         "-a",
         "--amt",
         required=False,
-        default=2000,
+        default=50,
         type=int,
-        help="[Optional] Number of documents to fetch from arXiv (max 2000, min 1)\nDefault: 2000",
+        help="[Optional] Number of documents to fetch from arXiv (max 2000, min 1)\nDefault: 50",
     )
     parser.add_argument("-v", "--version", action="version", version=program_version)
 
