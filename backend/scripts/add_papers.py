@@ -208,6 +208,7 @@ def upload_to_es(amount: int, iterations: int) -> None:
 
 
 def main(args: Namespace) -> None:
+    createNewIndex(False, "search-papers-meta")
     amount: int = args.amt
     iterations: int = args.iter
     if amount > 2000 or amount < 1 or iterations < 1:
