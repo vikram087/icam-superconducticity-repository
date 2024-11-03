@@ -21,7 +21,7 @@ RUN python3.7 -m venv /app/venv && \
 
 COPY pdfminer.py /app/venv/lib/python3.7/site-packages/pdfminer/__init__.py
 
-RUN cde data download
+RUN /app/venv/bin/cde data download
 
 # Copy the rest of the application files
 COPY . /app/
