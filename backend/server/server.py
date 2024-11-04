@@ -18,9 +18,7 @@ API_KEY: str | None = os.getenv("API_KEY")
 ES_URL: str | None = os.getenv("ES_URL")
 DOCKER: str | None = os.getenv("DOCKER")
 
-client: Elasticsearch = Elasticsearch(
-    ES_URL, api_key=API_KEY, ca_certs="./ca.crt"
-)
+client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="../ca.crt")
 
 app: Flask = Flask(__name__)
 CORS(app)
@@ -50,9 +48,11 @@ def get_papers() -> tuple[Response, int] | Response:
     else:
         return jsonify({"error": "No results found"}), 404
 
+
 @app.route("/", methods=["GET"])
 def test():
     return jsonify({"message": "Success"}), 200
+
 
 # /api/papers/${paperId}
 @app.route("/api/papers/<paper_id>", methods=["GET"])
@@ -64,10 +64,12 @@ def get_paper(paper_id: str) -> tuple[Response, int] | Response:
     else:
         return jsonify({"error": "No results found"}), 404
 
+
 redis_host = "redis" if DOCKER == "true" else "localhost"
 redis_client: Redis = redis.StrictRedis(
     host=redis_host, port=6379, db=0, decode_responses=True
 )
+
 
 def get_cached_results(cache_key: str) -> dict | None:
     cached_data = redis_client.get(cache_key)

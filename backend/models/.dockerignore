@@ -1,0 +1,53 @@
+venv*
+
+## MATSCHOLAR
+*.py[cod]
+__pycache__/
+*.so  # Covers C extensions
+
+# Documentation builds
+docs/_build/
+
+# Distribution and packaging
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+parts/
+sdist/
+wheels/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.coverage.*
+.tox/
+htmlcov/
+.pytest_cache/
+.hypothesis/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# IDE and project-specific settings
+.idea/
+.pydevproject
+.spyderproject
+.spyproject
+.ropeproject
+
+# Dataset logs
+dataset_prep.log
+
+## MATBERT
+
+*.pkl
+
+matbert-base-*

@@ -1,7 +1,6 @@
 ## SERVER & SCRIPTS
 .env
 .DS_Store
-.venv*
 venv*
 .mypy_cache
 .ruff_cache
@@ -53,16 +52,8 @@ htmlcov/
 # Dataset logs
 dataset_prep.log
 
-# Dataset paths
-lbnlp/models/models/
-lbnlp/models/pkg/
-lbnlp/models/tmp/
-lbnlp/old-nlp/models/
-
 ## MATBERT
-models/
-utils/
-# data/
+
 *.pkl
 
 matbert-base-*

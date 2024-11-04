@@ -35,7 +35,7 @@ API_KEY: Optional[str] = os.getenv("API_KEY")
 ES_URL: Optional[str] = os.getenv("ES_URL")
 LBNLP_URL: str | None = os.getenv("LBNLP_URL")
 
-client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
+client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="../ca.crt")
 
 # print(client.info())
 # exit()
