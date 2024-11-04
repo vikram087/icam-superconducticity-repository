@@ -110,7 +110,7 @@ Replace ${ELASTIC_PASSWORD} with your elasticsearch password, and "your-api-key"
    sudo curl --cacert ../ca.crt -X POST "https://localhost:9200/_security/api_key" \
    -H "Content-Type: application/json" \
    -u "elastic:${ELASTIC_PASSWORD}" \
-   -d '{"name": "your-api-key"}' | jq -r .encoded | tee -a .env >> ../.env
+   -d '{"name": "your-api-key"}' | jq -r .encoded >> ../.env
    ```
 
 The command above automatically copies the api key to the file, if you wanna see the values after the command run the following (only copy the encoded value)
