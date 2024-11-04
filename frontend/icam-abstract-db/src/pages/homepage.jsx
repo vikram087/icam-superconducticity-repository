@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../styles/homepage.css";
 import Search from "../components/search.jsx";
 import NavBar from "../components/navbar.jsx";
+import SearchSyntax from "../components/search-syntax.jsx";
 
 function HomePage({ searchParams }) {
 	const navigate = useNavigate();
@@ -33,6 +34,7 @@ function HomePage({ searchParams }) {
 				</div>
 				<br />
 				<Search searchParams={searchParams} />
+				<SearchSyntax />
 				<section className="overview" style={{ marginTop: "40px" }}>
 					<h2>Overview</h2>
 					<p>
@@ -58,8 +60,8 @@ function HomePage({ searchParams }) {
 							frequently accessed papers.
 						</li>
 						<li>
-							<strong>Answer Generation:</strong> View inferences based on paper
-							abstracts.
+							<strong>Property Extraction:</strong> View material properties
+							based on paper abstracts.
 						</li>
 						<li>
 							<strong>Custom Search Parameters:</strong> Customize search
@@ -110,7 +112,6 @@ function HomePage({ searchParams }) {
 				</section>
 				<p>Funded by the Institute for Complex Adaptive Matter</p>
 				<p>Thank you to arXiv for use of its open access interoperability.</p>
-				<p>Powered with Elasticsearch & Meta Llama 3</p>
 			</div>
 		</div>
 	);

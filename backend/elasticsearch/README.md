@@ -82,7 +82,7 @@ Start the Docker container.
 Dowload the certificate for a secure elasticsearch environment
 
    ```bash
-   docker cp config-es01-1:/usr/share/elasticsearch/config/certs/ca/ca.crt ../
+   docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt ../server && cp ../server/ca.crt ../scripts/ca.crt
    ```
 
 ### 6. Access Kibana
@@ -107,7 +107,7 @@ This API key allows the server to securely communicate with Elasticsearch.
 Replace ${ELASTIC_PASSWORD} with your elasticsearch password, and "your-api-key" with your api key
 
    ```bash
-   sudo curl --cacert ../ca.crt -X POST "https://localhost:9200/_security/api_key" \
+   sudo curl --cacert ../server/ca.crt -X POST "https://localhost:9200/_security/api_key" \
    -H "Content-Type: application/json" \
    -u "elastic:${ELASTIC_PASSWORD}" \
    -d '{"name": "your-api-key"}' | jq -r .encoded >> ../.env
@@ -116,7 +116,7 @@ Replace ${ELASTIC_PASSWORD} with your elasticsearch password, and "your-api-key"
 The command above automatically copies the api key to the file, if you wanna see the values after the command run the following (only copy the encoded value)
 
    ```bash
-   sudo curl --cacert ../ca.crt -X POST "https://localhost:9200/_security/api_key" \
+   sudo curl --cacert ../server/ca.crt -X POST "https://localhost:9200/_security/api_key" \
    -H "Content-Type: application/json" \
    -u "elastic:${ELASTIC_PASSWORD}" \
    -d '{"name": "your-api-key"}'

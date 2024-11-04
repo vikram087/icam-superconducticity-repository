@@ -5,6 +5,7 @@ import { useState } from "react";
 import PaperDetail from "./paper-detail.jsx";
 import Favorites from "./favorites.jsx";
 import About from "./about.jsx";
+import Table from "./material-search.jsx";
 
 function App() {
 	const currentDate = new Date();
@@ -50,6 +51,10 @@ function App() {
 					}
 				/>
 				<Route path="/about" element={<About searchParams={searchParams} />} />
+				<Route
+					path="/material-search"
+					element={<Table searchParams={searchParams} />}
+				/>
 			</Routes>
 		</Router>
 	);

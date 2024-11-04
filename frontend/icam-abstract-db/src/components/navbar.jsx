@@ -18,6 +18,11 @@ function NavBar({ searchParams }) {
 						</Link>
 					</li>
 					<li className="navbar-item">
+						<Link to="/material-search" className="navbar-link">
+							Search Materials
+						</Link>
+					</li>
+					<li className="navbar-item">
 						<Link to="/favorites" className="navbar-link">
 							Favorites
 						</Link>

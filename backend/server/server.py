@@ -18,7 +18,7 @@ API_KEY: str | None = os.getenv("API_KEY")
 ES_URL: str | None = os.getenv("ES_URL")
 DOCKER: str | None = os.getenv("DOCKER")
 
-client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="../ca.crt")
+client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
 app: Flask = Flask(__name__)
 CORS(app)

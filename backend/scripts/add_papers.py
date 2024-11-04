@@ -6,7 +6,6 @@ from argparse import Namespace
 from typing import Optional
 
 import feedparser  # type: ignore
-import requests
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from feedparser import FeedParserDict
@@ -35,7 +34,7 @@ API_KEY: Optional[str] = os.getenv("API_KEY")
 ES_URL: Optional[str] = os.getenv("ES_URL")
 LBNLP_URL: str | None = os.getenv("LBNLP_URL")
 
-client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="../ca.crt")
+client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
 # print(client.info())
 # exit()
@@ -109,12 +108,12 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             "primary_category": entry.get("arxiv_primary_category").get("term"),
         }
 
-        annotations = requests.post(
-            f"{LBNLP_URL}/api/annotate/matbert",
-            json={"doc": paper_dict["summary"]},
-            headers={"Content-Type": "application/json"},
-        )
-        paper_dict["annotations"] = annotations
+        # annotations = requests.post(
+        #     f"{LBNLP_URL}/api/annotate/matbert",
+        #     json={"doc": paper_dict["summary"]},
+        #     headers={"Content-Type": "application/json"},
+        # )
+        # paper_dict["annotations"] = annotations
 
         bad = client.options(ignore_status=[404]).get(
             index="search-papers-meta", id=paper_dict["id"]

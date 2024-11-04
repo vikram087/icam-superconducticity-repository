@@ -268,6 +268,8 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 								style={{
 									fontSize: "large",
 									paddingBottom: "10px",
+									paddingLeft: "25vw",
+									maxWidth: "60vw",
 								}}
 							>
 								Displaying Results for: "{searchParams.query}"
