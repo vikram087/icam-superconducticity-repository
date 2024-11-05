@@ -52,7 +52,11 @@ function Favorites({ searchParams, setPrevUrl }) {
 			return newStars;
 		});
 
-		window.location.reload();
+		setPapers((prevPapers) => {
+        	    const updatedPapers = prevPapers.filter((paper) => paper.id !== id);
+        	    return updatedPapers;
+    		});
+
 	};
 
 	const toggleExpand = (index) => {
