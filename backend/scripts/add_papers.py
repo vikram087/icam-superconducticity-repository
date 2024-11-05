@@ -37,7 +37,8 @@ LBNLP_URL: str | None = os.getenv("LBNLP_URL")
 
 client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
+logging.getLogger("root").setLevel(logging.INFO)
 
 # logging.info(client.info())
 # exit()
@@ -96,20 +97,20 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             with libreq.urlopen(url) as response:
                 content = response.read()
         except Exception as e:
-            logging.info(f"Error fetching data from arXiv: {e}")
+            logging.error(f"Error fetching data from arXiv: {e}")
             exit()
 
         feed: FeedParserDict = feedparser.parse(content)
 
         if len(feed.entries) == 0:
             if i == 4:
-                logging.info(
+                logging.error(
                     "Something is wrong, you've been rate limited 5 times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query"
                 )
-                logging.info("Exiting program")
+                logging.error("Exiting program")
                 exit()
 
-            logging.info("You've been rate limited 💀💀\nSleeping for 300 seconds")
+            logging.warning("You've been rate limited 💀💀\nSleeping for 300 seconds")
             time.sleep(300)
             i += 1
             continue
