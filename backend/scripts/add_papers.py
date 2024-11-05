@@ -22,7 +22,7 @@ This is a python script to upload a specified number of documents to an elastics
 database from arXiv
 """
 program_epilog: str = """ 
-
+Higher values for amount and iterations are more likely to be rate limited
 """
 program_version: str = """
 Version 2.3.1 2024-06-01
@@ -64,7 +64,7 @@ def set_parser(
         required=False,
         default=40,
         type=int,
-        help="[Optional] Number of iterations of file uploads to perform (higher number is more likely to get rate limited, min 1)\nDefault: 40",
+        help="[Optional] Number of iterations of file uploads to perform (min 1)\nDefault: 40",
     )
     parser.add_argument(
         "-a",
@@ -81,52 +81,50 @@ def set_parser(
 
 def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
     search_query: str = "all:superconductivity"
-
-    url: str = f"http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}"
-
-    print(f"Searching arXiv for {search_query}")
-
-    with libreq.urlopen(url) as response:
-        content: bytes = response.read()
-
-    feed: FeedParserDict = feedparser.parse(content)
-
     paper_list: list[dict] = []
-    for entry in feed.entries:
-        paper_dict: dict = {
-            "id": entry.id.split("/abs/")[-1].replace("/", "-"),
-            "title": entry.title,
-            "links": [link["href"] for link in entry.get("links")],
-            "summary": entry.get("summary"),
-            "date": int(time.strftime("%Y%m%d", entry.get("published_parsed"))),
-            "updated": int(time.strftime("%Y%m%d", entry.get("updated_parsed"))),
-            "categories": [category["term"] for category in entry.get("tags")],
-            "authors": [author["name"] for author in entry.get("authors")],
-            "doi": entry.get("arxiv_doi"),
-            "journal_ref": entry.get("arxiv_journal_ref"),
-            "comments": entry.get("arxiv_comment"),
-            "primary_category": entry.get("arxiv_primary_category").get("term"),
-        }
 
-        # annotations = requests.post(
-        #     f"{LBNLP_URL}/api/annotate/matbert",
-        #     json={"doc": paper_dict["summary"]},
-        #     headers={"Content-Type": "application/json"},
-        # )
-        # paper_dict["annotations"] = annotations
+    while True:
+        url: str = f"http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}"
 
-        bad = client.options(ignore_status=[404]).get(
-            index="search-papers-meta", id=paper_dict["id"]
-        )
-        exists = bad.get("found")
-        if exists is True:
-            return paper_list, True
+        print(f"Searching arXiv for {search_query}")
 
-        paper_list.append(paper_dict)
+        with libreq.urlopen(url) as response:
+            content: bytes = response.read()
 
-    print(f"Collected papers {start} - {start + amount}")
+        feed: FeedParserDict = feedparser.parse(content)
 
-    return replaceNullValues(paper_list), False
+        if len(feed.entries) == 0:
+            print("You've been rate limited 💀💀\nSleeping for 300 seconds")
+            time.sleep(300)
+            continue
+
+        for entry in feed.entries:
+            paper_dict: dict = {
+                "id": entry.id.split("/abs/")[-1].replace("/", "-"),
+                "title": entry.title,
+                "links": [link["href"] for link in entry.get("links")],
+                "summary": entry.get("summary"),
+                "date": int(time.strftime("%Y%m%d", entry.get("published_parsed"))),
+                "updated": int(time.strftime("%Y%m%d", entry.get("updated_parsed"))),
+                "categories": [category["term"] for category in entry.get("tags")],
+                "authors": [author["name"] for author in entry.get("authors")],
+                "doi": entry.get("arxiv_doi"),
+                "journal_ref": entry.get("arxiv_journal_ref"),
+                "comments": entry.get("arxiv_comment"),
+                "primary_category": entry.get("arxiv_primary_category").get("term"),
+            }
+
+            bad = client.options(ignore_status=[404]).get(
+                index="search-papers-meta", id=paper_dict["id"]
+            )
+            exists = bad.get("found")
+            if exists is True:
+                return paper_list, True
+
+            paper_list.append(paper_dict)
+
+        print(f"Collected papers {start} - {start + amount}")
+        return replaceNullValues(paper_list), False
 
 
 def replaceNullValues(papers_list: list[dict]) -> list[dict]:
@@ -186,7 +184,7 @@ def insert_documents(documents: list[dict], index: str):
 
 
 def upload_to_es(amount: int, iterations: int) -> None:
-    wait_time: int = 15
+    wait_time: int = 3
     start: int = client.count(index="search-papers-meta")["count"]
     print(f"Total documents in DB, start: {start}\n")
     for _ in range(iterations):
