@@ -83,6 +83,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
     search_query: str = "all:superconductivity"
     paper_list: list[dict] = []
 
+    i = 0
     while True:
         url: str = f"http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}"
 
@@ -94,8 +95,14 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
         feed: FeedParserDict = feedparser.parse(content)
 
         if len(feed.entries) == 0:
+            if i == 4:
+                print("Something is wrong, you've been rate limited 5 times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query")
+                print("Exiting program")
+                exit()
+
             print("You've been rate limited 💀💀\nSleeping for 300 seconds")
             time.sleep(300)
+            i += 1
             continue
 
         for entry in feed.entries:
@@ -184,7 +191,7 @@ def insert_documents(documents: list[dict], index: str):
 
 
 def upload_to_es(amount: int, iterations: int) -> None:
-    wait_time: int = 3
+    wait_time: int = 10
     start: int = client.count(index="search-papers-meta")["count"]
     print(f"Total documents in DB, start: {start}\n")
     for _ in range(iterations):
