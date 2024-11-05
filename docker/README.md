@@ -64,7 +64,7 @@ Create a `.env` file to define environment variables required for the stack conf
    # Steps for obtaining this value will be in step 7
    API_KEY=YOUR_API_KEY
 
-   # Url of your backend container
+   # Url of your backend (if you are on a cloud instance, ensure you use its public DNS/IP for this)
    VITE_BACKEND_URL=http://localhost:8080
    ```
 
@@ -86,7 +86,7 @@ Start the Docker container.
 
 ### 5. Download ca_cert
 
-Dowload the certificate for a secure elasticsearch environment
+Dowload the certificate for a secure elasticsearch environment (if running docker with `sudo` ensure the ca.crt files are under user level permissions rather than `root`)
 
    ```bash
    docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt ../backend/server && cp ../backend/server/ca.crt ../backend/scripts/ca.crt
@@ -107,7 +107,7 @@ This API key allows the server to securely communicate with Elasticsearch.
 
    1. Navigate to **Management > Stack Management > API Keys > Create API Key**.
    2. Create an API key with no restrictions, then copy it for the next step.
-   3. Paste it into the .env file
+   3. Paste it into the .env file and backend/.env
 
 - **Command Line**
 
@@ -118,7 +118,7 @@ Replace ${ELASTIC_PASSWORD} with your elasticsearch password, and "your-api-key"
    -H "Content-Type: application/json" \
    -u "elastic:${ELASTIC_PASSWORD}" \
    -d '{"name": "your-api-key"}' | jq -r .encoded | \
-   xargs -I {} echo "API_KEY={}" >> .env
+   xargs -I {} echo "API_KEY={}" | tee -a .env >> ../backend/.env
    ```
 
 The command above automatically copies the api key to the file, if you wanna see the values after the command run the following (only copy the encoded value)

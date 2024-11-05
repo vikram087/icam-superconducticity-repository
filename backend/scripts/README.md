@@ -5,8 +5,9 @@ This guide details how to set up and run the `add_papers.py` script, which pulls
 ## Table of Contents
 - [Setup](#setup)
   - [Clone the Repository](#1-clone-the-repository)
-  - [Install Dependencies](#2-install-dependencies)
-  - [Run the Script](#3-run-the-script)
+  - [Verify ../backend/.env File](#2-verify-backendenv-file)
+  - [Install Dependencies](#3-install-dependencies)
+  - [Run the Script](#4-run-the-script)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Next Steps](#next-steps)
@@ -22,7 +23,22 @@ Clone the repository containing the script code, then navigate to the `scripts` 
    cd icam-superconducticity-repository/backend/scripts
    ```
 
-### 2. Install Dependencies
+### 2. Verify `../backend/.env` File
+
+For this script to run properly, ES_URL, LBNLP_URL, and API_KEY must be present in `../backend/.env`
+
+   ```ini
+    # API key for Elasticsearch
+    API_KEY=YOUR_API_KEY_HERE
+
+    # url for elasticsearch, defaults to https://localhost:9200
+    ES_URL=https://localhost:9200
+
+    # url for the NLP server to annotate texts
+    LBNLP_URL=http://localhost:8000
+   ```
+
+### 3. Install Dependencies
 
 Set up a Python virtual environment and install dependencies.
 
@@ -32,7 +48,7 @@ Set up a Python virtual environment and install dependencies.
    pip install -r requirements.txt
    ```
 
-### 3. Run the Script
+### 4. Run the Script
 
 Run the script to populate the database with papers from the Arxiv API.
 
