@@ -105,9 +105,9 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
         feed: FeedParserDict = feedparser.parse(content)
 
         if len(feed.entries) == 0:
-            if i == 4:
+            if i == 2:
                 logging.error(
-                    "Something is wrong, you've been rate limited 5 times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query"
+                    "Something is wrong, you've been rate limited three times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query"
                 )
                 logging.error("Exiting program")
                 exit()
@@ -203,7 +203,7 @@ def insert_documents(documents: list[dict], index: str):
 
 
 def upload_to_es(amount: int, iterations: int) -> None:
-    wait_time: int = 10
+    wait_time: int = 15
     start: int = client.count(index="search-papers-meta")["count"]
     logging.info(f"Total documents in DB, start: {start}\n")
     for _ in range(iterations):
