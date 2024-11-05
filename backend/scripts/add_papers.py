@@ -38,6 +38,8 @@ LBNLP_URL: str | None = os.getenv("LBNLP_URL")
 client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
 logging.basicConfig(level=logging.WARNING)
+logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+logging.getLogger("elastic_transport").setLevel(logging.WARNING)
 logging.getLogger("root").setLevel(logging.INFO)
 
 # logging.info(client.info())
