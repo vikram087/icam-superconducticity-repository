@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import time
 import urllib.request as libreq
@@ -36,7 +37,9 @@ LBNLP_URL: str | None = os.getenv("LBNLP_URL")
 
 client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
-# print(client.info())
+logging.basicConfig(level=logging.INFO)
+
+# logging.info(client.info())
 # exit()
 
 # client = Elasticsearch("http://localhost:9200")
@@ -87,20 +90,26 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
     while True:
         url: str = f"http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}"
 
-        print(f"Searching arXiv for {search_query}")
+        logging.info(f"Searching arXiv for {search_query}")
 
-        with libreq.urlopen(url) as response:
-            content: bytes = response.read()
+        try:
+            with libreq.urlopen(url) as response:
+                content = response.read()
+        except Exception as e:
+            logging.info(f"Error fetching data from arXiv: {e}")
+            exit()
 
         feed: FeedParserDict = feedparser.parse(content)
 
         if len(feed.entries) == 0:
             if i == 4:
-                print("Something is wrong, you've been rate limited 5 times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query")
-                print("Exiting program")
+                logging.info(
+                    "Something is wrong, you've been rate limited 5 times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query"
+                )
+                logging.info("Exiting program")
                 exit()
 
-            print("You've been rate limited 💀💀\nSleeping for 300 seconds")
+            logging.info("You've been rate limited 💀💀\nSleeping for 300 seconds")
             time.sleep(300)
             i += 1
             continue
@@ -130,7 +139,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
 
             paper_list.append(paper_dict)
 
-        print(f"Collected papers {start} - {start + amount}")
+        logging.info(f"Collected papers {start} - {start + amount}")
         return replaceNullValues(paper_list), False
 
 
@@ -164,7 +173,7 @@ def createNewIndex(delete: bool, index: str) -> None:
             # }
         )
     else:
-        print("Index already exists and no deletion specified")
+        logging.info("Index already exists and no deletion specified")
 
 
 def getEmbedding(text: str) -> list[int]:
@@ -172,7 +181,7 @@ def getEmbedding(text: str) -> list[int]:
 
 
 def insert_documents(documents: list[dict], index: str):
-    print("Starting Insertion")
+    logging.info("Starting Insertion")
     operations: list[dict] = []
     for document in documents:
         operations.append({"create": {"_index": index, "_id": document["id"]}})
@@ -183,32 +192,32 @@ def insert_documents(documents: list[dict], index: str):
                 "title_embedding": getEmbedding(document["title"]),
             }
         )
-        # print(operations[1])
+        # logging.info(operations[1])
         # break
 
-    print("Successfully Completed Insertion")
+    logging.info("Successfully Completed Insertion")
     return client.bulk(operations=operations)
 
 
 def upload_to_es(amount: int, iterations: int) -> None:
     wait_time: int = 10
     start: int = client.count(index="search-papers-meta")["count"]
-    print(f"Total documents in DB, start: {start}\n")
+    logging.info(f"Total documents in DB, start: {start}\n")
     for _ in range(iterations):
         docs, ex = findInfo(start, amount)
         insert_documents(docs, "search-papers-meta")
-        print(f"Uploaded documents {start} - {start + amount}")
+        logging.info(f"Uploaded documents {start} - {start + amount}")
         start += amount
 
         if ex:
-            print(f"Total documents in DB, finish: {start}\n")
-            print("Database is fully updated, exiting")
+            logging.info(f"Total documents in DB, finish: {start}\n")
+            logging.info("Database is fully updated, exiting")
             exit()
 
-        print(f"Sleeping for {wait_time} seconds")
+        logging.info(f"Sleeping for {wait_time} seconds")
         time.sleep(wait_time)
 
-    print(f"Total documents in DB, finish: {start}\n")
+    logging.info(f"Total documents in DB, finish: {start}\n")
 
 
 def main(args: Namespace) -> None:
