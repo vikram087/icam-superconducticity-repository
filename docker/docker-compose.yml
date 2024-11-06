@@ -175,7 +175,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - model-data:/app/models/models/pkg
+      - model-data:/app/lbnlp/models/models/pkg
     networks:
       - app-network
     healthcheck:

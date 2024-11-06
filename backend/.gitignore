@@ -54,7 +54,7 @@ dataset_prep.log
 
 ## MATBERT
 
-*.pkl
+# *.pkl
 
 matbert-base-*
 
