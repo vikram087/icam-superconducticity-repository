@@ -13,7 +13,7 @@ def get_annotation(model_type):
 
         if not isinstance(docs, list) or not all(isinstance(doc, str) for doc in docs):
             return jsonify(
-                {"error": "Invalid input format. 'docs' should be an array of strings."}
+                {"error": "Invalid input format. 'docs' should be a list of strings."}
             ), 400
 
         model = model_selection(model_type)
