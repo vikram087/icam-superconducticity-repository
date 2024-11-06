@@ -167,22 +167,22 @@ services:
       timeout: 5s
       retries: 3
 
-  # models:
-  #   container_name: models
-  #   platform: linux/amd64
-  #   build:
-  #     context: ../backend/models
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - model-data:/app/lbnlp/models/pkg
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: [ "CMD-SHELL", "curl -f http://localhost:8000 || exit 1" ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
+  models:
+    container_name: models
+    platform: linux/amd64
+    build:
+      context: ../backend/models
+    ports:
+      - "8000:8000"
+    volumes:
+      - model-data:/app/lbnlp/models/pkg
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   backend:
     container_name: backend

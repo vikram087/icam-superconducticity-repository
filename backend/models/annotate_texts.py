@@ -11,13 +11,10 @@ def get_annotation(model_type):
         data = request.get_json()
         docs = data.get("docs", [])
 
-        print(docs)
+        model = model_selection(model_type)
+        annotation = annotate(docs, model, model_type)
 
-        # model = model_selection(model_type)
-        # annotation = annotate(docs, model, model_type)
-
-        # return jsonify({"annotation": annotation}), 200
-        return jsonify({"annotation": "success"}), 200
+        return jsonify({"annotation": annotation}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
