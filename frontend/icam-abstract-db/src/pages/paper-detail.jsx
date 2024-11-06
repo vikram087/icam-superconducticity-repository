@@ -159,7 +159,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						<Content content={paper.summary} />
 					</div>
 					<p>
-						<strong>Material:</strong>{" "}
+						<strong>Materials:</strong>{" "}
 						{paper.annotations?.MAT?.map((item, index) => (
 							<span key={index}>
 								{item}
@@ -168,7 +168,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						))}
 					</p>
 					<p>
-						<strong>Description of Sample:</strong>{" "}
+						<strong>Descriptions of Sample:</strong>{" "}
 						{paper.annotations?.DSC?.map((item, index) => (
 							<span key={index}>
 								{item}
@@ -177,7 +177,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						))}
 					</p>
 					<p>
-						<strong>Symmetry or Phase Label:</strong>{" "}
+						<strong>Symmetry or Phase Labels:</strong>{" "}
 						{paper.annotations?.SPL?.map((item, index) => (
 							<span key={index}>
 								{item}
@@ -186,7 +186,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						))}
 					</p>
 					<p>
-						<strong>Synthesis Method:</strong>{" "}
+						<strong>Synthesis Methods:</strong>{" "}
 						{paper.annotations?.SMT?.map((item, index) => (
 							<span key={index}>
 								{item}
@@ -195,7 +195,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						))}
 					</p>
 					<p>
-						<strong>Characterization Method:</strong>{" "}
+						<strong>Characterization Methods:</strong>{" "}
 						{paper.annotations?.CMT?.map((item, index) => (
 							<span key={index}>
 								{item}
@@ -204,7 +204,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						))}
 					</p>
 					<p>
-						<strong>Property:</strong>{" "}
+						<strong>Properties:</strong>{" "}
 						{[
 							...(paper.annotations?.PRO || []),
 							...(paper.annotations?.PVL || []),
@@ -217,7 +217,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						))}
 					</p>
 					<p>
-						<strong>Application:</strong>{" "}
+						<strong>Applications:</strong>{" "}
 						{paper.annotations?.APL?.map((item, index) => (
 							<span key={index}>
 								{item}
