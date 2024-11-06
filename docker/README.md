@@ -9,7 +9,7 @@ This guide provides steps for setting up the project using Docker Compose. The s
   - [Install Docker](#3-install-docker)
   - [Run the Docker Container](#4-run-the-docker-container)
   - [Download ca_cert](#5-download-ca_cert)
-  - [Access Kibana](#6-access-kibana)
+  - [Access Kibana](#6-access-kibana-optional)
   - [Create API Key](#7-create-api-key)
   - [Stop the Docker Container](#8-stop-the-docker-container)
   - [Rerun the Docker Container](#9-rerun-the-docker-container)
@@ -92,7 +92,7 @@ Dowload the certificate for a secure elasticsearch environment (if running docke
    docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt ../backend/server && cp ../backend/server/ca.crt ../backend/scripts/ca.crt
    ```
 
-### 6. Access Kibana
+### 6. Access Kibana (optional)
 
 After starting the Docker container, you can access Kibana at `http://localhost:5601`. Log in with:
 
@@ -103,7 +103,7 @@ After starting the Docker container, you can access Kibana at `http://localhost:
 
 This API key allows the server to securely communicate with Elasticsearch.
 
-- **GUI**
+- **GUI (through Kibana)**
 
    1. Navigate to **Management > Stack Management > API Keys > Create API Key**.
    2. Create an API key with no restrictions, then copy it for the next step.

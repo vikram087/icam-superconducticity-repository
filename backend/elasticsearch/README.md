@@ -9,7 +9,7 @@ This guide provides steps for setting up Elasticsearch and Kibana using Docker C
   - [Install Docker](#3-install-docker)
   - [Run the Docker Container](#4-run-the-docker-container)
   - [Download ca_cert](#5-download-ca_cert)
-  - [Access Kibana](#6-access-kibana)
+  - [Access Kibana](#6-access-kibana-optional)
   - [Create API Key](#7-create-api-key)
 - [Stopping the Docker Container](#stopping-the-docker-container)
 - [Troubleshooting](#troubleshooting)
@@ -85,7 +85,7 @@ Dowload the certificate for a secure elasticsearch environment
    docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt ../server && cp ../server/ca.crt ../scripts/ca.crt
    ```
 
-### 6. Access Kibana
+### 6. Access Kibana (optional)
 
 After starting the Docker container, you can access Kibana at `http://localhost:5601`. Log in with:
 
@@ -96,7 +96,7 @@ After starting the Docker container, you can access Kibana at `http://localhost:
 
 This API key allows the server to securely communicate with Elasticsearch.
 
-- **GUI**
+- **GUI (through Kibana)**
 
    1. Navigate to **Management > Stack Management > API Keys > Create API Key**.
    2. Create an API key with no restrictions, then copy it for the next step.
