@@ -118,6 +118,10 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             i += 1
             continue
 
+        # Prepare summaries for batch annotation request
+        summaries = []
+        paper_dicts = []
+
         for entry in feed.entries:
             paper_dict: dict = {
                 "id": entry.id.split("/abs/")[-1].replace("/", "-"),
@@ -134,21 +138,33 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
                 "primary_category": entry.get("arxiv_primary_category").get("term"),
             }
 
-            annotations = requests.post(
-                f"{LBNLP_URL}/api/annotate/matbert",
-                json={"docs": [paper_dict["summary"]]},
-                headers={"Content-Type": "application/json"},
+            # Collect the summary for batch processing
+            summaries.append(paper_dict["summary"])
+            paper_dicts.append(paper_dict)
+
+        # Send a single POST request for all summaries
+        annotations_response = requests.post(
+            f"{LBNLP_URL}/api/annotate/matbert",
+            json={"docs": summaries},
+            headers={"Content-Type": "application/json"},
+        )
+
+        if annotations_response.status_code == 200:
+            logging.info("Batch annotation succeeded")
+            annotations = annotations_response.json().get("annotation", [])
+        else:
+            logging.error(
+                f"Batch annotation failed: {annotations_response.status_code}, {annotations_response.text}"
             )
+            annotations = [{}] * len(
+                paper_dicts
+            )  # Empty annotations if the request failed
 
-            if annotations.status_code == 200:
-                logging.info("Getting annotation succeeded")
-                paper_dict["annotations"] = annotations.json().get("annotation")[0]
-            else:
-                logging.error(f"Getting annotation failed: {annotations.status_code}, {annotations.text}")
-                paper_dict["annotations"] = {}
+        # Map each annotation back to the corresponding paper
+        for paper_dict, annotation in zip(paper_dicts, annotations):
+            paper_dict["annotations"] = annotation
 
-            print(paper_dict)
-
+            # Check if the paper exists in Elasticsearch
             bad = client.options(ignore_status=[404]).get(
                 index="search-papers-meta", id=paper_dict["id"]
             )
@@ -158,9 +174,84 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
 
             paper_list.append(paper_dict)
 
-        exit()
         logging.info(f"Collected papers {start} - {start + amount}")
         return replaceNullValues(paper_list), False
+
+
+# def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
+#     search_query: str = "all:superconductivity"
+#     paper_list: list[dict] = []
+
+#     i = 0
+#     while True:
+#         url: str = f"http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}"
+
+#         logging.info(f"Searching arXiv for {search_query}")
+
+#         try:
+#             with libreq.urlopen(url) as response:
+#                 content = response.read()
+#         except Exception as e:
+#             logging.error(f"Error fetching data from arXiv: {e}")
+#             exit()
+
+#         feed: FeedParserDict = feedparser.parse(content)
+
+#         if len(feed.entries) == 0:
+#             if i == 2:
+#                 logging.error(
+#                     "Something is wrong, you've been rate limited three times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query"
+#                 )
+#                 logging.error("Exiting program")
+#                 exit()
+
+#             logging.warning("You've been rate limited 💀💀\nSleeping for 300 seconds")
+#             time.sleep(300)
+#             i += 1
+#             continue
+
+#         for entry in feed.entries:
+#             paper_dict: dict = {
+#                 "id": entry.id.split("/abs/")[-1].replace("/", "-"),
+#                 "title": entry.title,
+#                 "links": [link["href"] for link in entry.get("links")],
+#                 "summary": entry.get("summary"),
+#                 "date": int(time.strftime("%Y%m%d", entry.get("published_parsed"))),
+#                 "updated": int(time.strftime("%Y%m%d", entry.get("updated_parsed"))),
+#                 "categories": [category["term"] for category in entry.get("tags")],
+#                 "authors": [author["name"] for author in entry.get("authors")],
+#                 "doi": entry.get("arxiv_doi"),
+#                 "journal_ref": entry.get("arxiv_journal_ref"),
+#                 "comments": entry.get("arxiv_comment"),
+#                 "primary_category": entry.get("arxiv_primary_category").get("term"),
+#             }
+
+#             annotations = requests.post(
+#                 f"{LBNLP_URL}/api/annotate/matbert",
+#                 json={"docs": [paper_dict["summary"]]},
+#                 headers={"Content-Type": "application/json"},
+#             )
+
+#             if annotations.status_code == 200:
+#                 logging.info("Getting annotation succeeded")
+#                 paper_dict["annotations"] = annotations.json().get("annotation")[0]
+#             else:
+#                 logging.error(
+#                     f"Getting annotation failed: {annotations.status_code}, {annotations.text}"
+#                 )
+#                 paper_dict["annotations"] = {}
+
+#             bad = client.options(ignore_status=[404]).get(
+#                 index="search-papers-meta", id=paper_dict["id"]
+#             )
+#             exists = bad.get("found")
+#             if exists is True:
+#                 return paper_list, True
+
+#             paper_list.append(paper_dict)
+
+#         logging.info(f"Collected papers {start} - {start + amount}")
+#         return replaceNullValues(paper_list), False
 
 
 def replaceNullValues(papers_list: list[dict]) -> list[dict]:
