@@ -11,8 +11,8 @@ This guide provides steps for setting up the project using Docker Compose. The s
   - [Download ca_cert](#5-download-ca_cert)
   - [Access Kibana](#6-access-kibana-optional)
   - [Create API Key](#7-create-api-key)
-  - [Stop the Docker Container](#8-stop-the-docker-container)
-  - [Rerun the Docker Container](#9-rerun-the-docker-container)
+  - [Rerun the Docker Container](#8-rerun-the-docker-container)
+- [Stopping the Docker Container](#stopping-the-docker-container)
 - [Troubleshooting](#troubleshooting)
 - [Next Steps](#next-steps)
 
@@ -130,20 +130,20 @@ The command above automatically copies the api key to the file, if you wanna see
    -d '{"name": "your-api-key"}'
    ```
 
-### 8. Stop the Docker Container
-
-To stop the container, run:
-
-   ```bash
-   docker compose down
-   ```
-
-### 9. Rerun the Docker Container
+### 8. Rerun the Docker Container
 
 Now that all the environment variables and ca.cert are in place, run the container again:
 
    ```bash
    docker compose up -d --build
+   ```
+
+### Stopping the Docker Container
+
+To stop the container, run:
+
+   ```bash
+   docker compose down
    ```
 
 ## Troubleshooting
