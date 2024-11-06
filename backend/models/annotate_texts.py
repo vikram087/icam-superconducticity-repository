@@ -11,15 +11,13 @@ def get_annotation(model_type):
         data = request.get_json()
         docs = data.get("docs", [])
 
-        if not isinstance(docs, list) or not all(isinstance(doc, str) for doc in docs):
-            return jsonify(
-                {"error": "Invalid input format. 'docs' should be a list of strings."}
-            ), 400
+        print(docs)
 
-        model = model_selection(model_type)
-        annotation = annotate(docs, model, model_type)
+        # model = model_selection(model_type)
+        # annotation = annotate(docs, model, model_type)
 
-        return jsonify({"annotation": annotation}), 200
+        # return jsonify({"annotation": annotation}), 200
+        return jsonify({"annotation": "success"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
