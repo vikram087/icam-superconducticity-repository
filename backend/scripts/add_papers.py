@@ -7,6 +7,7 @@ from argparse import Namespace
 from typing import Optional
 
 import feedparser  # type: ignore
+import requests
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from feedparser import FeedParserDict
@@ -132,6 +133,13 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
                 "comments": entry.get("arxiv_comment"),
                 "primary_category": entry.get("arxiv_primary_category").get("term"),
             }
+
+            annotations = requests.post(
+                f"{LBNLP_URL}/api/annotate/matbert",
+                json={"doc": [paper_dict["summary"]]},
+                headers={"Content-Type": "application/json"},
+            )
+            paper_dict["annotations"] = annotations
 
             bad = client.options(ignore_status=[404]).get(
                 index="search-papers-meta", id=paper_dict["id"]
