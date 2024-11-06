@@ -136,10 +136,18 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
 
             annotations = requests.post(
                 f"{LBNLP_URL}/api/annotate/matbert",
-                json={"doc": [paper_dict["summary"]]},
+                json={"docs": [paper_dict["summary"]]},
                 headers={"Content-Type": "application/json"},
             )
-            paper_dict["annotations"] = annotations
+
+            if annotations.status_code == 200:
+                logging.info("Getting annotation succeeded")
+                paper_dict["annotations"] = annotations.json().get("annotation")[0]
+            else:
+                logging.error(f"Getting annotation failed: {annotations.status_code}, {annotations.text}")
+                paper_dict["annotations"] = {}
+
+            print(paper_dict)
 
             bad = client.options(ignore_status=[404]).get(
                 index="search-papers-meta", id=paper_dict["id"]
@@ -150,6 +158,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
 
             paper_list.append(paper_dict)
 
+        exit()
         logging.info(f"Collected papers {start} - {start + amount}")
         return replaceNullValues(paper_list), False
 
