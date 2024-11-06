@@ -163,7 +163,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						{paper.annotations?.MAT?.map((item, index) => (
 							<span key={index}>
 								{item}
-								<br />
+								{index < paper.annotations.MAT.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
@@ -172,7 +172,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						{paper.annotations?.DSC?.map((item, index) => (
 							<span key={index}>
 								{item}
-								<br />
+								{index < paper.annotations.DSC.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
@@ -181,7 +181,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						{paper.annotations?.SPL?.map((item, index) => (
 							<span key={index}>
 								{item}
-								<br />
+								{index < paper.annotations.SPL.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
@@ -190,7 +190,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						{paper.annotations?.SMT?.map((item, index) => (
 							<span key={index}>
 								{item}
-								<br />
+								{index < paper.annotations.SMT.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
@@ -199,7 +199,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						{paper.annotations?.CMT?.map((item, index) => (
 							<span key={index}>
 								{item}
-								<br />
+								{index < paper.annotations.CMT.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
@@ -209,10 +209,10 @@ function PaperDetail({ searchParams, prevUrl }) {
 							...(paper.annotations?.PRO || []),
 							...(paper.annotations?.PVL || []),
 							...(paper.annotations?.PUT || []),
-						]?.map((item, index) => (
+						]?.map((item, index, array) => (
 							<span key={index}>
 								{item}
-								<br />
+								{index < array.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
@@ -221,7 +221,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 						{paper.annotations?.APL?.map((item, index) => (
 							<span key={index}>
 								{item}
-								<br />
+								{index < paper.annotations.APL.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>

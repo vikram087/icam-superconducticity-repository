@@ -327,12 +327,6 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 									className={expandedIndex === index ? "text expanded" : "text"}
 								>
 									<Content content={paper.summary} />
-									<div
-										className="expand-button"
-										onClick={() => toggleExpand(index)}
-									>
-										{expandedIndex === index ? "⌃" : "⌄"}
-									</div>
 									<p>
 										<strong>Material:</strong>{" "}
 										{paper.annotations?.MAT?.map((item, index) => (
@@ -342,6 +336,12 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 											</span>
 										))}
 									</p>
+									<div
+										className="expand-button"
+										onClick={() => toggleExpand(index)}
+									>
+										{expandedIndex === index ? "⌃" : "⌄"}
+									</div>
 								</div>
 							</div>
 						))}
