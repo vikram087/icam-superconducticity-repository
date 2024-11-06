@@ -158,6 +158,73 @@ function PaperDetail({ searchParams, prevUrl }) {
 						<strong>Abstract:</strong> <br />
 						<Content content={paper.summary} />
 					</div>
+					<p>
+						<strong>Material:</strong>{" "}
+						{paper.annotations?.MAT?.map((item, index) => (
+							<span key={index}>
+								{item}
+								<br />
+							</span>
+						))}
+					</p>
+					<p>
+						<strong>Description of Sample:</strong>{" "}
+						{paper.annotations?.DSC?.map((item, index) => (
+							<span key={index}>
+								{item}
+								<br />
+							</span>
+						))}
+					</p>
+					<p>
+						<strong>Symmetry or Phase Label:</strong>{" "}
+						{paper.annotations?.SPL?.map((item, index) => (
+							<span key={index}>
+								{item}
+								<br />
+							</span>
+						))}
+					</p>
+					<p>
+						<strong>Synthesis Method:</strong>{" "}
+						{paper.annotations?.SMT?.map((item, index) => (
+							<span key={index}>
+								{item}
+								<br />
+							</span>
+						))}
+					</p>
+					<p>
+						<strong>Characterization Method:</strong>{" "}
+						{paper.annotations?.CMT?.map((item, index) => (
+							<span key={index}>
+								{item}
+								<br />
+							</span>
+						))}
+					</p>
+					<p>
+						<strong>Property:</strong>{" "}
+						{[
+							...(paper.annotations?.PRO || []),
+							...(paper.annotations?.PVL || []),
+							...(paper.annotations?.PUT || []),
+						]?.map((item, index) => (
+							<span key={index}>
+								{item}
+								<br />
+							</span>
+						))}
+					</p>
+					<p>
+						<strong>Application:</strong>{" "}
+						{paper.annotations?.APL?.map((item, index) => (
+							<span key={index}>
+								{item}
+								<br />
+							</span>
+						))}
+					</p>
 				</div>
 			</div>
 		</div>
@@ -170,3 +237,11 @@ function PaperDetail({ searchParams, prevUrl }) {
 }
 
 export default PaperDetail;
+
+// MAT: material
+// DSC: description of sample
+// SPL: symmetry or phase label
+// SMT: synthesis method
+// CMT: characterization method
+// PRO: property - may also include PVL (property value) or PUT (property unit)
+// APL: application

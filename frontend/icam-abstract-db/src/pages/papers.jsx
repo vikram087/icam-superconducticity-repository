@@ -333,6 +333,15 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 									>
 										{expandedIndex === index ? "⌃" : "⌄"}
 									</div>
+									<p>
+										<strong>Material:</strong>{" "}
+										{paper.annotations?.MAT?.map((item, index) => (
+											<span key={index}>
+												{item}
+												<br />
+											</span>
+										))}
+									</p>
 								</div>
 							</div>
 						))}
