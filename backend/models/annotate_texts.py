@@ -6,18 +6,22 @@ CORS(app)
 
 
 @app.route("/api/annotate/<model_type>", methods=["POST"])
-def get_annotatation(model_type):
+def get_annotation(model_type):
     try:
         data = request.get_json()
-        doc = str(data.get("doc", ""))
+        docs = data.get("docs", [])
+
+        if not isinstance(docs, list) or not all(isinstance(doc, str) for doc in docs):
+            return jsonify(
+                {"error": "Invalid input format. 'docs' should be an array of strings."}
+            ), 400
 
         model = model_selection(model_type)
-
-        annotation = annotate(doc, model, model_type)
+        annotation = annotate(docs, model, model_type)
 
         return jsonify({"annotation": annotation}), 200
     except Exception as e:
-        return jsonify({"error": e}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/", methods=["GET"])
