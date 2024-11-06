@@ -334,15 +334,17 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 										{expandedIndex === index ? "⌃" : "⌄"}
 									</div>
 								</div>
-								<p>
-									<strong>Materials:</strong>{" "}
-									{paper.annotations?.MAT?.map((item, index) => (
-										<span key={index}>
-											{item}
-											{index < paper.annotations.MAT.length - 1 ? ", " : ""}
-										</span>
-									))}
-								</p>
+								{paper.annotations?.MAT?.length > 0 && (
+									<p>
+										<strong>Materials:</strong>{" "}
+										{paper.annotations.MAT.map((item, index) => (
+											<span key={index}>
+												{item}
+												{index < paper.annotations.MAT.length - 1 ? ", " : ""}
+											</span>
+										))}
+									</p>
+								)}
 							</div>
 						))}
 					</ul>
