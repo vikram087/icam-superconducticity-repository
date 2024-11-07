@@ -23,6 +23,4 @@ function Content({ content }) {
 	);
 }
 
-const x = "foijw";
-
 export default Content;

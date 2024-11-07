@@ -162,11 +162,17 @@ function PaperDetail({ searchParams, prevUrl }) {
 						<strong>Abstract:</strong> <br />
 						<Content content={paper.summary} />
 					</div>
-					<p>
+					<p
+						style={{
+							display: "flex",
+							flexWrap: "wrap",
+							alignItems: "center",
+						}}
+					>
 						<strong>Materials:</strong>{" "}
-						{paper.annotations?.MAT?.map((item, index) => (
-							<span key={index}>
-								{<Content content={item} />}
+						{paper.annotations.MAT.map((item, index) => (
+							<span key={index} style={{ display: "inline" }}>
+								<Content content={item} />
 								{index < paper.annotations.MAT.length - 1 ? ", " : ""}
 							</span>
 						))}
