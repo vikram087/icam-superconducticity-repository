@@ -66,6 +66,9 @@ Create a `.env` file to define environment variables required for the stack conf
 
    # Url of your backend (if you are on a cloud instance, ensure you use its public DNS/IP for this)
    VITE_BACKEND_URL=http://localhost:8080
+
+   # The url for your frontend, will be http://localhost:5173 for dev
+   VITE_FRONTEND_URL=http://localhost:5173
    ```
 
 ### 3. Install Docker

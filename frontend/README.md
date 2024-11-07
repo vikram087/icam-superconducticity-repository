@@ -26,7 +26,10 @@ Create a `.env` file to define environment variables required for the frontend c
 
    ```ini
    # The url for your backend, will be http://localhost:8080 for dev
-   BACKEND_URL=http://localhost:8080
+   VITE_BACKEND_URL=http://localhost:8080
+
+   # The url for your frontend, will be http://localhost:5173 for dev
+   VITE_FRONTEND_URL=http://localhost:5173
    ```
 
 ### 3. Install Node Modules

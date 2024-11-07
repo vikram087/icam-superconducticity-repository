@@ -31,7 +31,11 @@ function PaperDetail({ searchParams, prevUrl }) {
 		if (prevUrl) {
 			window.location.href = prevUrl;
 		} else {
-			window.location.href = "http://localhost:5173/papers";
+			window.location.href =
+				`${import.meta.env.VITE_FRONTEND_URL}/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
+				`&query=${searchParams.query}&sort=${searchParams.sorting}` +
+				`&pages=${searchParams.pages}&term=${searchParams.term}&` +
+				`${searchParams.date}`;
 		}
 	};
 
