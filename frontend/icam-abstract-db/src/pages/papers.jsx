@@ -339,7 +339,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 										<strong>Materials:</strong>{" "}
 										{paper.annotations.MAT.map((item, index) => (
 											<span key={index}>
-												{item}
+												{<Content content={item} />}
 												{index < paper.annotations.MAT.length - 1 ? ", " : ""}
 											</span>
 										))}

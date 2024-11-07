@@ -5,6 +5,28 @@ import Search from "../components/search.jsx";
 import NavBar from "../components/navbar.jsx";
 import SearchSyntax from "../components/search-syntax.jsx";
 
+// SciMat Explorer
+// MatSci Vault
+// ICAM Research Navigator
+// MatSci Literature Gateway
+// Materials Discovery Database
+// MatExplorer
+// MatXplorer
+// InnoMat Library
+// QuantumMat
+// Quantum Materials Library
+// MatSci Navigator
+// The Materials Index
+// MatIndex
+// SciFusion Materials Database
+// MatSci Archive
+// Materials Science Archive
+// MatSearch
+// Properties & Papers
+// MatterWorks Database
+// Materion Database
+// MatNav
+
 function HomePage({ searchParams }) {
 	const navigate = useNavigate();
 
