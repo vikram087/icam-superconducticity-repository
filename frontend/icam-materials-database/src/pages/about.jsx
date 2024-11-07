@@ -10,9 +10,9 @@ function About({ searchParams }) {
 				<h1>About Us</h1>
 				<p className="mission-statement">
 					Our mission is to provide a comprehensive and user-friendly search
-					engine to explore the scientific literature in the field of
-					superconductivity. We aim to make research more accessible and
-					efficient for scientists and researchers worldwide.
+					engine to explore the scientific literature in the field of materials
+					science. We aim to make research more accessible and efficient for
+					scientists and researchers worldwide.
 				</p>
 				<div className="people-cards">
 					<div className="card">

@@ -1,4 +1,4 @@
-### Superconductivity Paper Search Engine
+### Materials Science Paper Search Engine
 
 *This project currently has a single maintainer, so please anticipate some wait time for bug fixes and updates.*
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This project is a **comprehensive search engine for superconductivity papers**. It combines **advanced search capabilities** with **natural language processing (NLP)** for an efficient, user-friendly way to explore scientific literature in the superconductivity field.
+This project is a **comprehensive search engine for materials science papers**. It combines **advanced search capabilities** with **natural language processing (NLP)** for an efficient, user-friendly way to explore scientific literature in the materials science field.
 
 ## Key Features
 

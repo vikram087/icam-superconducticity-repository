@@ -19,8 +19,8 @@ This guide details how to set up and run the `add_papers.py` script, which pulls
 Clone the repository containing the script code, then navigate to the `scripts` directory.
 
    ```bash
-   git clone https://github.com/vikram087/icam-superconducticity-repository.git
-   cd icam-superconducticity-repository/backend/scripts
+   git clone https://github.com/vikram087/icam-materials-database.git
+   cd icam-materials-database/backend/scripts
    ```
 
 ### 2. Verify `../backend/.env` File

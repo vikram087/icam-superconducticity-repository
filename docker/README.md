@@ -23,8 +23,8 @@ This guide provides steps for setting up the project using Docker Compose. The s
 Clone the repo and navigate to the config directory
 
    ```bash
-   git clone https://github.com/vikram087/icam-superconducticity-repository.git
-   cd icam-superconducticity-repository/docker
+   git clone https://github.com/vikram087/iicam-materials-database.git
+   cd icam-materials-database/docker
    ```
 
 ### 2. Set up `.env` File

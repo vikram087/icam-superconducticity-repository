@@ -211,7 +211,7 @@ services:
   frontend:
     container_name: frontend
     build:
-      context: ../frontend/icam-abstract-db
+      context: ../frontend/icam-materials-database
     depends_on:
       backend:
         condition: service_healthy

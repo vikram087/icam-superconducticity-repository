@@ -5,28 +5,6 @@ import Search from "../components/search.jsx";
 import NavBar from "../components/navbar.jsx";
 import SearchSyntax from "../components/search-syntax.jsx";
 
-// SciMat Explorer
-// MatSci Vault
-// ICAM Research Navigator
-// MatSci Literature Gateway
-// Materials Discovery Database
-// MatExplorer
-// MatXplorer
-// InnoMat Library
-// QuantumMat
-// Quantum Materials Library
-// MatSci Navigator
-// The Materials Index
-// MatIndex
-// SciFusion Materials Database
-// MatSci Archive
-// Materials Science Archive
-// MatSearch
-// Properties & Papers
-// MatterWorks Database
-// Materion Database
-// MatNav
-
 function HomePage({ searchParams }) {
 	const navigate = useNavigate();
 
@@ -48,7 +26,7 @@ function HomePage({ searchParams }) {
 			<NavBar searchParams={searchParams} />
 			<div className="main">
 				<p className="home-title" onClick={() => navigate("/")}>
-					ICAM Superconductivity Database
+					ICAM Materials Database
 				</p>
 				<br />
 				<div onClick={() => goToSearch("all")}>
@@ -61,7 +39,7 @@ function HomePage({ searchParams }) {
 					<h2>Overview</h2>
 					<p>
 						This search engine provides an efficient and user-friendly way to
-						explore scientific literature in the field of superconductivity.
+						explore scientific literature in the field of materials science.
 						Utilize advanced search options and natural language processing to
 						find relevant papers.
 					</p>

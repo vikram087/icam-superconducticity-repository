@@ -16,8 +16,8 @@ This guide provides instructions to set up and run the frontend, which provides 
 Clone the repository containing the frontend code, then navigate to the frontend directory.
 
    ```bash
-   git clone https://github.com/vikram087/icam-superconducticity-repository.git
-   cd icam-superconducticity-repository/frontend/icam-abstract-db
+   git clone https://github.com/vikram087/icam-materials-database.git
+   cd icam-materials-database/frontend/icam-materials-database
    ```
 
 ### 2. Setup .env File
@@ -56,7 +56,7 @@ Start the frontend development server:
 
 After starting the development server:
 - Open your browser and go to `http://localhost:5173` to access the application.
-- Explore the search functionality to interact with the ICAM Abstract Database.
+- Explore the search functionality to interact with the ICAM Materials Database.
 
 ## Troubleshooting
 
