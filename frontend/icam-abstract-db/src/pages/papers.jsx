@@ -335,17 +335,11 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 									</div>
 								</div>
 								{paper.annotations?.MAT?.length > 0 && (
-									<p
-										style={{
-											display: "flex",
-											flexWrap: "wrap",
-											alignItems: "center",
-										}}
-									>
+									<p>
 										<strong>Materials:</strong>{" "}
 										{paper.annotations.MAT.map((item, index) => (
-											<span key={index} style={{ display: "inline" }}>
-												<Content content={item} />
+											<span key={index}>
+												{item}
 												{index < paper.annotations.MAT.length - 1 ? ", " : ""}
 											</span>
 										))}
