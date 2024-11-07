@@ -8,7 +8,6 @@ function Filters({ searchParams }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const [pageNumber, setPageNumber] = useState(searchParams.pages || 30);
 	const [sortVal, setSortVal] = useState(
 		searchParams.sorting || "Most-Relevant",
 	);
@@ -36,7 +35,6 @@ function Filters({ searchParams }) {
 		let searchTerm = query.get("term") || term;
 		let sorting = query.get("sort") || sortVal;
 		let perPage = Number(query.get("per_page")) || numResults; // need to add
-		let pages = Number(query.get("pages")) || pageNumber; // need to add
 		let date = query.get("date") || dateRange;
 		let startDate = date.split("-")[0];
 		let endDate = date.split("-")[1];
@@ -52,10 +50,6 @@ function Filters({ searchParams }) {
 			perPage = 20;
 		} else {
 			perPage = 10;
-		}
-
-		if (!Number.isInteger(pages) || pages <= 0) {
-			pages = 30;
 		}
 
 		if (dateRange.split("-").length !== 2) {
@@ -90,24 +84,17 @@ function Filters({ searchParams }) {
 
 		setNumResults(perPage);
 		setSortVal(sorting);
-		setPageNumber(pages);
 		setTerm(searchTerm);
 		setDateRange(date);
 		setStartDate(convertIntToDate(startDate));
 		setEndDate(convertIntToDate(endDate));
-	}, [location.search /*,numResults, sortVal, pageNumber, term, dateRange*/]); // FIXME: make sure this works well
+	}, [location.search /*,numResults, sortVal, term, dateRange*/]); // FIXME: make sure this works well
 
 	const handleButton = () => {
-		let pageValue = pageNumber;
-		if (pageNumber === "") {
-			setPageNumber(30);
-			pageValue = 30;
-		}
-
 		navigate(
 			`?page=${searchParams.page}&per_page=${numResults}` +
 				`&query=${searchParams.query}&sort=${sortVal}` +
-				`&pages=${pageValue}&term=${term}` +
+				`&term=${term}` +
 				`&date=${dateRange}`,
 		);
 	};
@@ -117,7 +104,7 @@ function Filters({ searchParams }) {
 		const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, "");
 
 		navigate(
-			`?page=1&per_page=20&query=all&sort=Most-Relevant&pages=30&term=Abstract&date=00000000-${now}`,
+			`?page=1&per_page=20&query=all&sort=Most-Relevant&term=Abstract&date=00000000-${now}`,
 		);
 	};
 
@@ -133,13 +120,6 @@ function Filters({ searchParams }) {
 		}
 
 		return dateTime;
-	};
-
-	const handleInputChange = (event) => {
-		const val = event.target.value;
-		if (val > 0 || val === "") {
-			setPageNumber(val);
-		}
 	};
 
 	const updateDateVal = (date, type) => {
@@ -179,14 +159,6 @@ function Filters({ searchParams }) {
 				setTerm={setNumResults}
 				value={"Per Page"}
 				term={numResults}
-			/>
-			<p className="bold">Page Limit</p>
-			<input
-				type="number"
-				min={1}
-				value={pageNumber}
-				onChange={handleInputChange}
-				className="styled-input"
 			/>
 			<p className="bold">Date Range</p>
 			<div>

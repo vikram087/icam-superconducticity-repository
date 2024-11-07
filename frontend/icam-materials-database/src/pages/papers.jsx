@@ -18,7 +18,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 	const [loading, setLoading] = useState(true);
 	const [accuracy, setAccuracy] = useState({});
 	const [time, setTime] = useState("");
-	const [highlightedStars, setHighlightedStars] = useState({});
+	const [highlightedStars, setHighlightedStars] = useState([]);
 
 	const navigate = useNavigate();
 
@@ -36,7 +36,6 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		query,
 		sorting,
 		startTime,
-		pages,
 		term,
 		dateRange,
 	) => {
@@ -45,7 +44,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 
 		const backend_url = import.meta.env.VITE_BACKEND_URL;
 
-		fetch(`${backend_url}/api/papers`, {
+		fetch(`${backend_url}/api/papers/${term}/${query}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -53,10 +52,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 			body: JSON.stringify({
 				page: page,
 				results: results,
-				query: search,
 				sorting: sorting,
-				pages: pages,
-				term: term,
 				date: dateRange,
 				parsedInput: parsed,
 			}),
@@ -169,22 +165,18 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		const perPage = Number(query.get("per_page")) || searchParams.per_page;
 		const search = query.get("query") || searchParams.query;
 		const sorting = query.get("sort") || searchParams.sorting;
-		const pages = Number(query.get("pages")) || searchParams.pages;
 		const term = query.get("term") || searchParams.term;
 		const date = query.get("date") || searchParams.date;
 
-		const storedStars = localStorage.getItem("highlightedStars");
-		if (storedStars) {
-			setHighlightedStars(JSON.parse(storedStars));
-			// localStorage.clear();
-		}
+		const storedStars =
+			JSON.parse(localStorage.getItem("highlightedStars")) || [];
+		setHighlightedStars(Array.isArray(storedStars) ? storedStars : []);
 
 		setSearchParams({
 			per_page: perPage,
 			page: page,
 			query: search,
 			sorting: sorting,
-			pages: pages,
 			term: term,
 			date: date,
 		});
@@ -193,14 +185,13 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 
 		setLoading(true);
 
-		getPapers(page, perPage, search, sorting, startTime, pages, term, date);
+		getPapers(page, perPage, search, sorting, startTime, term, date);
 	}, [
 		location.search,
 		/*searchParams.page,
 		searchParams.per_page,
 		searchParams.query,
 		searchParams.sorting,
-		searchParams.pages,
 		searchParams.term,
 		searchParams.date,
 		searchParams,
@@ -217,7 +208,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		navigate(
 			`?page=${page}&per_page=${searchParams.per_page}` +
 				`&query=${searchParams.query}&sort=${searchParams.sorting}` +
-				`&pages=${searchParams.pages}&term=${searchParams.term}&` +
+				`&term=${searchParams.term}&` +
 				`${searchParams.date}`,
 		);
 	};
@@ -232,10 +223,14 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		changePage(pageNumber);
 	};
 
-	const toggleStar = (id) => {
-		const uid = id.replaceAll("-", "_");
+	const toggleStar = (paper) => {
 		setHighlightedStars((prev) => {
-			const newStars = { ...prev, [uid]: !prev[uid] };
+			const isStarred = prev.some((p) => p.id === paper.id);
+
+			const newStars = isStarred
+				? prev.filter((p) => p.id !== paper.id)
+				: [...prev, paper];
+
 			localStorage.setItem("highlightedStars", JSON.stringify(newStars));
 			return newStars;
 		});
@@ -303,11 +298,11 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 										width={20}
 										height={20}
 										src={
-											highlightedStars[paper.id.replaceAll("-", "_")]
+											highlightedStars.some((p) => p.id === paper.id)
 												? "/filled_star.png"
 												: "/empty_star.png"
 										}
-										onClick={() => toggleStar(paper.id)}
+										onClick={() => toggleStar(paper)}
 										className="star-icon"
 										alt="star icon"
 									/>
@@ -334,13 +329,13 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 										{expandedIndex === index ? "⌃" : "⌄"}
 									</div>
 								</div>
-								{paper.annotations?.MAT?.length > 0 && (
+								{paper.MAT !== "N/A" && (
 									<p>
 										<strong>Materials:</strong>{" "}
-										{paper.annotations.MAT.map((item, index) => (
+										{paper.MAT.map((item, index) => (
 											<span key={index}>
 												{item}
-												{index < paper.annotations.MAT.length - 1 ? ", " : ""}
+												{index < paper.MAT.length - 1 ? ", " : ""}
 											</span>
 										))}
 									</p>

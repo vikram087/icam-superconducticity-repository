@@ -15,7 +15,7 @@ function Search({ searchParams }) {
 		navigate(
 			`/papers?page=1&per_page=${searchParams.per_page}&query=${quer}` +
 				`&sort=${searchParams.sorting}` +
-				`&pages=${searchParams.pages}&term=${searchParams.term}` +
+				`&term=${searchParams.term}` +
 				`&date=${searchParams.date}`,
 		);
 	};

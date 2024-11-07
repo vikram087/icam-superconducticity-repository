@@ -7,7 +7,7 @@ from typing import Mapping, Sequence
 import redis
 from dotenv import load_dotenv
 from elastic_transport import ObjectApiResponse
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 from redis import Redis
@@ -27,26 +27,6 @@ model: SentenceTransformer = SentenceTransformer("all-MiniLM-L6-v2")
 
 def get_embedding(text: str) -> list[int]:
     return model.encode(text)
-
-
-# /api/papers/fetch
-@app.route("/api/papers/fetch", methods=["POST"])
-def get_papers() -> tuple[Response, int] | Response:
-    data: dict = request.get_json()
-    stars: list[str] = [key.replace("_", "-") for key in list(data.keys()) if data[key]]
-
-    if len(stars) == 0:
-        return jsonify(None)
-
-    responses: list[ObjectApiResponse] = [
-        client.get(index="search-papers-meta", id=star) for star in stars
-    ]
-    papers: list[dict] = [response["_source"] for response in responses]
-
-    if papers:
-        return jsonify(papers)
-    else:
-        return jsonify({"error": "No results found"}), 404
 
 
 @app.route("/", methods=["GET"])
@@ -87,13 +67,12 @@ def make_cache_key(
     sorting: str,
     page: int,
     num_results: int,
-    pages: int,
     term: str,
     start_date: int,
     end_date: int,
     parsed_results: dict,
 ) -> str:
-    key: str = f"{query}_{sorting}_{page}_{num_results}_{pages}_{term}_{start_date}_{end_date}_{parsed_results['must']}_{parsed_results['not']}_{parsed_results['or']}"
+    key: str = f"{query}_{sorting}_{page}_{num_results}_{term}_{start_date}_{end_date}_{parsed_results['must']}_{parsed_results['not']}_{parsed_results['or']}"
     return key
 
 
@@ -112,6 +91,95 @@ def get_excluded_ids(cache_key: str) -> list[str]:
     return excluded_ids
 
 
+@app.route("/api/materials/<property>/<value>", methods=["GET"])
+def get_materials(property: str, value: str) -> Response:
+    # MAT: material
+    # DSC: description of sample
+    # SPL: symmetry or phase label
+    # SMT: synthesis method
+    # CMT: characterization method
+    # PRO: property - may also include PVL (property value) or PUT (property unit)
+    # APL: application
+    try:
+        data: dict = request.get_json()
+        page: int = int(data.get("page", 0))
+        num_results: int = int(data.get("results", 0))
+        sorting: str = str(data.get("sorting", ""))
+
+        today: datetime = datetime.today()
+        formatted_date: str = today.strftime("%Y%m%d")
+        date: str = str(data.get("date", f"00000000-{formatted_date}"))
+        start_date: int = int(date.split("-")[0])
+        end_date: int = int(date.split("-")[1])
+    except Exception:
+        return jsonify(None)
+
+    if sorting == "Most-Recent":
+        sort: str = "desc"
+    elif sorting == "Oldest-First":
+        sort = "asc"
+    else:
+        return jsonify(None)
+
+    valid_properties: dict = {
+        "Material": "MAT",
+        "Description": "DSC",
+        "Symmetry": "SPL",
+        "Synthesis": "SMT",
+        "Characterization": "CMT",
+        "Property": "PRO",
+        "Application": "APL",
+    }
+
+    if property not in valid_properties:
+        return jsonify(None)
+
+    cache_key = (
+        f"{property}_{value}_{page}_{num_results}_{sorting}_{start_date}_{end_date}"
+    )
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        data = json.loads(cached_data)
+        return jsonify({"papers": data[0], "total": data[1]})
+
+    prop: str = valid_properties[property]
+    try:
+        query = {
+            "query": {
+                "bool": {
+                    "must": [{"match": {prop: {"query": value, "fuzziness": "AUTO"}}}],
+                    "filter": [
+                        {"range": {"date": {"gte": start_date, "lte": end_date}}}
+                    ],
+                }
+            }
+        }
+
+        response: ObjectApiResponse = client.search(
+            index="search-papers-meta",
+            query=query,
+            size=num_results,
+            from_=(page - 1) * num_results,
+            sort=[{"date": {"order": sort}}]
+            if (sorting == "Most-Recent" or sorting == "Oldest-First")
+            else None,
+        )
+        total: int = response["hits"]["total"]["value"]
+        papers: list[dict] = [
+            paper["_source"]
+            for paper in response["hits"]["hits"]
+            if paper["_source"]["date"] > start_date
+            and paper["_source"]["date"] < end_date
+        ]
+
+        redis_client.setex(cache_key, 3600, (papers, total))
+
+        return jsonify({"papers": papers, "total": total})
+
+    except Exception:
+        return jsonify(None)
+
+
 # cache.clear()
 # print("Cleared cache")
 # redis-cli FLUSHALL # command on cli to clear cache
@@ -120,20 +188,15 @@ def get_excluded_ids(cache_key: str) -> list[str]:
 # fuzzy search for category, authors
 # vector-based search for title, summary
 # /api/papers
-@app.route("/api/papers", methods=["POST"])
-def papers() -> tuple[Response, int] | Response:
+@app.route("/api/papers/<term>/<query>", methods=["POST"])
+def papers(term: str, query: str) -> tuple[Response, int] | Response:
     try:
         data: dict = request.get_json()
         page: int = int(data.get("page", 0))
         num_results: int = int(data.get("results", 0))
-        query: str = str(data.get("query", ""))
         sorting: str = str(data.get("sorting", ""))
-        pages: int = int(data.get("pages", 30))
-        term: str = str(data.get("term", ""))
+        pages: int = 30
         parsed_input: dict = dict(data.get("parsedInput", []))
-
-        print(parsed_input)
-        print(query)
 
         must_v: list[str] = parsed_input["must"]
         or_v: list[str] = parsed_input["or"]
@@ -173,7 +236,6 @@ def papers() -> tuple[Response, int] | Response:
         sorting,
         page,
         num_results,
-        pages,
         term,
         start_date,
         end_date,
@@ -195,11 +257,12 @@ def papers() -> tuple[Response, int] | Response:
     # size: int = client.search(query={"match_all": {}}, index="search-papers-meta")[
     #     "hits"
     # ]["total"]["value"]
-    size: int = client.count(index="search-papers-meta")["count"]
-
-    if pages < 1:
+    try:
+        size: int = client.count(index="search-papers-meta")["count"]
+    except NotFoundError:
         return jsonify(None)
-    elif pages * num_results > size:
+
+    if pages * num_results > size:
         pages = math.ceil(size / num_results)
 
     k: int = page * num_results
@@ -329,15 +392,18 @@ def papers() -> tuple[Response, int] | Response:
         for hit in hits:
             papers.append(hit["_source"])
 
-    total: int = client.search(
-        query=quer,
-        size=num_results,
-        from_=(page - 1) * num_results,
-        sort=[{"date": {"order": sort}}],
-        index="search-papers-meta",
-    )["hits"]["total"]["value"]
+    try:
+        total: int = client.search(
+            query=quer,
+            size=num_results,
+            from_=(page - 1) * num_results,
+            sort=[{"date": {"order": sort}}],
+            index="search-papers-meta",
+        )["hits"]["total"]["value"]
+    except Exception:
+        return jsonify(None)
 
-    if total > num_results * pages:
+    if total > num_results * pages and knn_search:
         total = num_results * pages
 
     if knn_search:

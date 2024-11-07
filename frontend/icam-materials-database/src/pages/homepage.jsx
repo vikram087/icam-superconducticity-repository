@@ -16,7 +16,7 @@ function HomePage({ searchParams }) {
 		navigate(
 			`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
 				`&query=${quer}&sort=${searchParams.sorting}` +
-				`&pages=${searchParams.pages}&term=${searchParams.term}` +
+				`&term=${searchParams.term}` +
 				`&date=${searchParams.date}`,
 		);
 	};
@@ -92,10 +92,6 @@ function HomePage({ searchParams }) {
 					<ul>
 						<li>
 							Frequently searched queries will load faster due to caching.
-						</li>
-						<li>
-							Reduce the number of pages and results per page for faster
-							loading.
 						</li>
 						<li>
 							Earlier pages will load faster than later pages for vector

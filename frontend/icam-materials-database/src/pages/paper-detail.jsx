@@ -34,7 +34,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 			window.location.href =
 				`${import.meta.env.VITE_FRONTEND_URL}/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
 				`&query=${searchParams.query}&sort=${searchParams.sorting}` +
-				`&pages=${searchParams.pages}&term=${searchParams.term}&` +
+				`&term=${searchParams.term}&` +
 				`${searchParams.date}`;
 		}
 	};
@@ -71,10 +71,14 @@ function PaperDetail({ searchParams, prevUrl }) {
 		return `${day} ${month} ${year}`;
 	};
 
-	const toggleStar = (id) => {
-		const uid = id.replaceAll("-", "_");
+	const toggleStar = (paper) => {
 		setHighlightedStars((prev) => {
-			const newStars = { ...prev, [uid]: !prev[uid] };
+			const isStarred = prev.some((p) => p.id === paper.id);
+
+			const newStars = isStarred
+				? prev.filter((p) => p.id !== paper.id)
+				: [...prev, paper];
+
 			localStorage.setItem("highlightedStars", JSON.stringify(newStars));
 			return newStars;
 		});
@@ -103,11 +107,11 @@ function PaperDetail({ searchParams, prevUrl }) {
 							width={20}
 							height={20}
 							src={
-								highlightedStars[paper.id.replaceAll("-", "_")]
+								highlightedStars.some((p) => p.id === paper.id)
 									? "/filled_star.png"
 									: "/empty_star.png"
 							}
-							onClick={() => toggleStar(paper.id)}
+							onClick={() => toggleStar(paper)}
 							className="star-icon"
 							alt="star icon"
 						/>
@@ -164,70 +168,102 @@ function PaperDetail({ searchParams, prevUrl }) {
 					</div>
 					<p>
 						<strong>Materials:</strong>{" "}
-						{paper.annotations?.MAT?.map((item, index) => (
-							<span key={index}>
-								{item}
-								{index < paper.annotations.MAT.length - 1 ? ", " : ""}
-							</span>
-						))}
+						{Array.isArray(paper.MAT) ? (
+							paper.MAT?.map((item, index) => (
+								<span key={index}>
+									{item}
+									{index < paper.MAT.length - 1 ? ", " : ""}
+								</span>
+							))
+						) : (
+							<span>N/A</span>
+						)}
 					</p>
 					<p>
 						<strong>Descriptions of Sample:</strong>{" "}
-						{paper.annotations?.DSC?.map((item, index) => (
-							<span key={index}>
-								{item}
-								{index < paper.annotations.DSC.length - 1 ? ", " : ""}
-							</span>
-						))}
+						{Array.isArray(paper.DSC) ? (
+							paper.DSC?.map((item, index) => (
+								<span key={index}>
+									{item}
+									{index < paper.DSC.length - 1 ? ", " : ""}
+								</span>
+							))
+						) : (
+							<span>N/A</span>
+						)}
 					</p>
 					<p>
 						<strong>Symmetry or Phase Labels:</strong>{" "}
-						{paper.annotations?.SPL?.map((item, index) => (
-							<span key={index}>
-								{item}
-								{index < paper.annotations.SPL.length - 1 ? ", " : ""}
-							</span>
-						))}
+						{Array.isArray(paper.SPL) ? (
+							paper.SPL?.map((item, index) => (
+								<span key={index}>
+									{item}
+									{index < paper.SPL.length - 1 ? ", " : ""}
+								</span>
+							))
+						) : (
+							<span>N/A</span>
+						)}
 					</p>
 					<p>
 						<strong>Synthesis Methods:</strong>{" "}
-						{paper.annotations?.SMT?.map((item, index) => (
-							<span key={index}>
-								{item}
-								{index < paper.annotations.SMT.length - 1 ? ", " : ""}
-							</span>
-						))}
+						{Array.isArray(paper.SMT) ? (
+							paper.SMT?.map((item, index) => (
+								<span key={index}>
+									{item}
+									{index < paper.SMT.length - 1 ? ", " : ""}
+								</span>
+							))
+						) : (
+							<span>N/A</span>
+						)}
 					</p>
 					<p>
 						<strong>Characterization Methods:</strong>{" "}
-						{paper.annotations?.CMT?.map((item, index) => (
-							<span key={index}>
-								{item}
-								{index < paper.annotations.CMT.length - 1 ? ", " : ""}
-							</span>
-						))}
+						{Array.isArray(paper.CMT) ? (
+							paper.CMT?.map((item, index) => (
+								<span key={index}>
+									{item}
+									{index < paper.CMT.length - 1 ? ", " : ""}
+								</span>
+							))
+						) : (
+							<span>N/A</span>
+						)}
 					</p>
 					<p>
 						<strong>Properties:</strong>{" "}
 						{[
-							...(paper.annotations?.PRO || []),
-							...(paper.annotations?.PVL || []),
-							...(paper.annotations?.PUT || []),
-						]?.map((item, index, array) => (
-							<span key={index}>
-								{item}
-								{index < array.length - 1 ? ", " : ""}
-							</span>
-						))}
+							...(Array.isArray(paper.PRO) ? paper.PRO : []),
+							...(Array.isArray(paper.PVL) ? paper.PVL : []),
+							...(Array.isArray(paper.PUT) ? paper.PUT : []),
+						].length > 0 ? (
+							[
+								...(Array.isArray(paper.PRO) ? paper.PRO : []),
+								...(Array.isArray(paper.PVL) ? paper.PVL : []),
+								...(Array.isArray(paper.PUT) ? paper.PUT : []),
+							].map((item, index, array) => (
+								<span key={index}>
+									{item}
+									{index < array.length - 1 ? ", " : ""}
+								</span>
+							))
+						) : (
+							<span>N/A</span>
+						)}
 					</p>
 					<p>
 						<strong>Applications:</strong>{" "}
-						{paper.annotations?.APL?.map((item, index) => (
-							<span key={index}>
-								{item}
-								{index < paper.annotations.APL.length - 1 ? ", " : ""}
-							</span>
-						))}
+						{Array.isArray(paper.APL) ? (
+							paper.APL?.map((item, index) => (
+								<span key={index}>
+									{item}
+									{index < paper.APL.length - 1 ? ", " : ""}
+								</span>
+							))
+						) : (
+							<span>N/A</span>
+						)}
 					</p>
 				</div>
 			</div>

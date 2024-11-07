@@ -16,7 +16,6 @@ function App() {
 		page: 1,
 		query: "all",
 		sorting: "Most-Relevant",
-		pages: 30,
 		term: "Abstract",
 		date: `00000000-${now}`,
 	});

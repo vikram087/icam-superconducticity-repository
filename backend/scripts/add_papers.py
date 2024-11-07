@@ -162,7 +162,15 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
 
         # Map each annotation back to the corresponding paper
         for paper_dict, annotation in zip(paper_dicts, annotations):
-            paper_dict["annotations"] = annotation
+            paper_dict["APL"] = annotation.get("APL", [])
+            paper_dict["CMT"] = annotation.get("CMT", [])
+            paper_dict["DSC"] = annotation.get("DSC", [])
+            paper_dict["MAT"] = annotation.get("MAT", [])
+            paper_dict["PRO"] = annotation.get("PRO", [])
+            paper_dict["PVL"] = annotation.get("PVL", [])
+            paper_dict["PUT"] = annotation.get("PUT", [])
+            paper_dict["SMT"] = annotation.get("SMT", [])
+            paper_dict["SPL"] = annotation.get("SPL", [])
 
             # Check if the paper exists in Elasticsearch
             bad = client.options(ignore_status=[404]).get(

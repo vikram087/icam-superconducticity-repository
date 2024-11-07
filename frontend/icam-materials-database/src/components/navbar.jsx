@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../styles/navbar.css";
 
 function NavBar({ searchParams }) {
-	const papers = `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&pages=${searchParams.pages}&term=${searchParams.term}&date=${searchParams.date}`;
+	const papers = `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&term=${searchParams.term}&date=${searchParams.date}`;
 
 	return (
 		<nav className="navbar">

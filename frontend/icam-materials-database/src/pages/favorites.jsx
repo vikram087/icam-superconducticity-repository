@@ -8,8 +8,7 @@ import "../styles/search.css";
 import Fuse from "fuse.js";
 
 function Favorites({ searchParams, setPrevUrl }) {
-	const [highlightedStars, setHighlightedStars] = useState({});
-	const [papers, setPapers] = useState([]);
+	const [highlightedStars, setHighlightedStars] = useState([]);
 	const [papersCopy, setPapersCopy] = useState([]);
 	const [expandedIndex, setExpandedIndex] = useState(-1);
 	const [query, setQuery] = useState("");
@@ -17,26 +16,11 @@ function Favorites({ searchParams, setPrevUrl }) {
 
 	useEffect(() => {
 		setQuery("all");
-		const storedStars = localStorage.getItem("highlightedStars");
-		setHighlightedStars(JSON.parse(storedStars));
 
-		const backend_url = import.meta.env.VITE_BACKEND_URL;
-
-		fetch(`${backend_url}/api/papers/fetch`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: storedStars,
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				setPapers(data);
-				setPapersCopy(data);
-			})
-			.catch((error) => {
-				console.log(error);
-			});
+		const storedStars =
+			JSON.parse(localStorage.getItem("highlightedStars")) || [];
+		setHighlightedStars(Array.isArray(storedStars) ? storedStars : []);
+		setPapersCopy(Array.isArray(storedStars) ? storedStars : []);
 	}, []);
 
 	const changePaper = (paperId) => {
@@ -44,19 +28,17 @@ function Favorites({ searchParams, setPrevUrl }) {
 		navigate(`/papers/${paperId}`);
 	};
 
-	const toggleStar = (id) => {
-		const uid = id.replaceAll("-", "_");
+	const toggleStar = (paper) => {
 		setHighlightedStars((prev) => {
-			const newStars = { ...prev, [uid]: !prev[uid] };
+			const isStarred = prev.some((p) => p.id === paper.id);
+
+			const newStars = isStarred
+				? prev.filter((p) => p.id !== paper.id)
+				: [...prev, paper];
+
 			localStorage.setItem("highlightedStars", JSON.stringify(newStars));
 			return newStars;
 		});
-
-		setPapers((prevPapers) => {
-        	    const updatedPapers = prevPapers.filter((paper) => paper.id !== id);
-        	    return updatedPapers;
-    		});
-
 	};
 
 	const toggleExpand = (index) => {
@@ -73,8 +55,8 @@ function Favorites({ searchParams, setPrevUrl }) {
 			<div className="page-main">
 				<h1 style={{ textAlign: "center" }}>Favorites</h1>
 				<Search
-					papers={papers}
-					setPapers={setPapers}
+					papers={highlightedStars}
+					setPapers={setHighlightedStars}
 					papersCopy={papersCopy}
 					setQuery={setQuery}
 				/>
@@ -85,9 +67,9 @@ function Favorites({ searchParams, setPrevUrl }) {
 				</div>
 				<div className="page-container">
 					<div className="content-area">
-						{papers ? (
+						{highlightedStars.length > 0 ? (
 							<ul className="list" style={{ paddingLeft: "100px" }}>
-								{papers.map((paper, index) => (
+								{highlightedStars.map((paper, index) => (
 									<div
 										className={
 											index === expandedIndex
@@ -110,11 +92,11 @@ function Favorites({ searchParams, setPrevUrl }) {
 												width={20}
 												height={20}
 												src={
-													highlightedStars[paper.id.replaceAll("-", "_")]
+													highlightedStars.some((p) => p.id === paper.id)
 														? "/filled_star.png"
 														: "/empty_star.png"
 												}
-												onClick={() => toggleStar(paper.id)}
+												onClick={() => toggleStar(paper)}
 												className="star-icon"
 												alt="star icon"
 											/>
@@ -143,6 +125,17 @@ function Favorites({ searchParams, setPrevUrl }) {
 												{expandedIndex === index ? "⌃" : "⌄"}
 											</div>
 										</div>
+										{paper.MAT !== "N/A" && (
+											<p>
+												<strong>Materials:</strong>{" "}
+												{paper.MAT.map((item, index) => (
+													<span key={index}>
+														{item}
+														{index < paper.MAT.length - 1 ? ", " : ""}
+													</span>
+												))}
+											</p>
+										)}
 									</div>
 								))}
 							</ul>
