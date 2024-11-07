@@ -29,4 +29,7 @@ Create a `.env` file for the Python Elasticsearch API. Replace `YOUR_API_KEY_HER
 
     # location of the NLP server to annotate texts
     LBNLP_URL=http://localhost:8000
+
+   # url for kibana, will be http://localhost:5601 for dev
+   KIBANA_URL=http://localhost:5601
    ```
