@@ -12,11 +12,9 @@ function PaperDetail({ searchParams, prevUrl }) {
 	const { id } = useParams();
 
 	useEffect(() => {
-		const storedStars = localStorage.getItem("highlightedStars");
-		if (storedStars) {
-			setHighlightedStars(JSON.parse(storedStars));
-			// localStorage.clear();
-		}
+		const storedStars =
+			JSON.parse(localStorage.getItem("highlightedStars")) || [];
+		setHighlightedStars(Array.isArray(storedStars) ? storedStars : []);
 
 		const backend_url = import.meta.env.VITE_BACKEND_URL;
 
