@@ -193,19 +193,16 @@ def createNewIndex(delete: bool, index: str) -> None:
     if not client.indices.exists(index=index):
         client.indices.create(
             index=index,
-            mappings={
-                "properties": {
-                    "embedding": {"type": "dense_vector"},
-                    # 'elser_embedding': {
-                    #     'type': 'sparse_vector',
-                    # },
+            body={
+                "mappings": {
+                    "properties": {
+                        "embedding": {"type": "dense_vector"},
+                    },
+                },
+                "settings": {
+                    "number_of_replicas": 0,
                 },
             },
-            # settings={
-            #     'index': {
-            #         'default_pipeline': 'elser-ingest-pipeline'
-            #     }
-            # }
         )
     else:
         logging.info("Index already exists and no deletion specified")
