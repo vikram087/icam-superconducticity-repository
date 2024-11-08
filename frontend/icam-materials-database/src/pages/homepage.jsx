@@ -5,7 +5,10 @@ import Search from "../components/search.jsx";
 import NavBar from "../components/navbar.jsx";
 import SearchSyntax from "../components/search-syntax.jsx";
 
-function HomePage({ searchParams }) {
+function HomePage() {
+	const currentDate = new Date();
+	const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, "");
+
 	const navigate = useNavigate();
 
 	const goToSearch = (query) => {
@@ -14,16 +17,13 @@ function HomePage({ searchParams }) {
 			quer = "all";
 		}
 		navigate(
-			`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
-				`&query=${quer}&sort=${searchParams.sorting}` +
-				`&term=${searchParams.term}` +
-				`&date=${searchParams.date}`,
+			`/papers?page=1&per_page=20&query=${quer}&sort=Most-Relevant&term=Abstract&date=00000000-${now}`,
 		);
 	};
 
 	return (
 		<div>
-			<NavBar searchParams={searchParams} />
+			<NavBar />
 			<div className="main">
 				<p className="home-title" onClick={() => navigate("/")}>
 					ICAM Materials Database
@@ -33,7 +33,16 @@ function HomePage({ searchParams }) {
 					<GoTo />
 				</div>
 				<br />
-				<Search searchParams={searchParams} />
+				<Search
+					searchParams={{
+						per_page: 20,
+						page: 1,
+						query: "all",
+						sorting: "Most-Relevant",
+						term: "Abstract",
+						date: `00000000-${now}`,
+					}}
+				/>
 				<SearchSyntax />
 				<section className="overview" style={{ marginTop: "40px" }}>
 					<h2>Overview</h2>

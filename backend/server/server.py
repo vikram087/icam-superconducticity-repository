@@ -91,7 +91,7 @@ def get_excluded_ids(cache_key: str) -> list[str]:
     return excluded_ids
 
 
-@app.route("/api/materials/<property>/<value>", methods=["GET"])
+@app.route("/api/materials/<property>/<value>", methods=["POST"])
 def get_materials(property: str, value: str) -> Response:
     # MAT: material
     # DSC: description of sample
@@ -114,46 +114,46 @@ def get_materials(property: str, value: str) -> Response:
     except Exception:
         return jsonify(None)
 
-    if sorting == "Most-Recent":
+    if sorting == "Most-Recent" or sorting == "Most-Relevant":
         sort: str = "desc"
     elif sorting == "Oldest-First":
         sort = "asc"
     else:
+        print(sorting)
         return jsonify(None)
 
     valid_properties: dict = {
-        "Material": "MAT",
-        "Description": "DSC",
-        "Symmetry": "SPL",
-        "Synthesis": "SMT",
-        "Characterization": "CMT",
-        "Property": "PRO",
-        "Application": "APL",
+        "material": "MAT",
+        "description": "DSC",
+        "symmetry": "SPL",
+        "synthesis": "SMT",
+        "characterization": "CMT",
+        "property": "PRO",
+        "application": "APL",
     }
 
     if property not in valid_properties:
+        print(property)
         return jsonify(None)
 
     cache_key = (
         f"{property}_{value}_{page}_{num_results}_{sorting}_{start_date}_{end_date}"
     )
     cached_data = redis_client.get(cache_key)
-    if cached_data:
-        data = json.loads(cached_data)
-        return jsonify({"papers": data[0], "total": data[1]})
+    # if cached_data:
+    #     data = json.loads(cached_data)  # type: ignore
+    #     return jsonify({"papers": data[0], "total": data[1]})
 
     prop: str = valid_properties[property]
     try:
         query = {
-            "query": {
-                "bool": {
-                    "must": [{"match": {prop: {"query": value, "fuzziness": "AUTO"}}}],
-                    "filter": [
-                        {"range": {"date": {"gte": start_date, "lte": end_date}}}
-                    ],
-                }
+            "bool": {
+                "must": [{"match": {prop: {"query": value, "fuzziness": "AUTO"}}}],
+                "filter": [{"range": {"date": {"gte": start_date, "lte": end_date}}}],
             }
         }
+        if value == "all":
+            query["bool"]["must"] = {"match_all": {}}
 
         response: ObjectApiResponse = client.search(
             index="search-papers-meta",
@@ -176,7 +176,8 @@ def get_materials(property: str, value: str) -> Response:
 
         return jsonify({"papers": papers, "total": total})
 
-    except Exception:
+    except Exception as e:
+        print(e)
         return jsonify(None)
 
 
@@ -242,8 +243,8 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
         parsed_input,
     )
     cached: dict | None = get_cached_results(cache_key)
-    if cached:
-        return jsonify({"papers": cached[0], "total": cached[1], "accuracy": cached[2]})
+    # if cached:
+    #     return jsonify({"papers": cached[0], "total": cached[1], "accuracy": cached[2]})
 
     if sorting == "Most-Recent" or sorting == "Most-Relevant":
         sort: str = "desc"
@@ -362,6 +363,8 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
             return jsonify(None)
 
     elif field == "summary_embedding" or field == "title_embedding":
+        if size < num_results:
+            size = num_results
         knn_search = True
         try:
             results = client.search(
@@ -414,6 +417,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
             if paper["_source"]["date"] > start_date
             and paper["_source"]["date"] < end_date
         ]
+        filtered_papers = sorted(filtered_papers, key=lambda x: x["id"])
         for hit in hits:
             if not hit["_score"]:
                 break

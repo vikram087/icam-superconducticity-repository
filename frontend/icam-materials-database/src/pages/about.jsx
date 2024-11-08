@@ -2,10 +2,10 @@ import React from "react";
 import "../styles/about.css";
 import NavBar from "../components/navbar";
 
-function About({ searchParams }) {
+function About() {
 	return (
 		<div>
-			<NavBar searchParams={searchParams} />
+			<NavBar />
 			<div className="about-container">
 				<h1>About Us</h1>
 				<p className="mission-statement">

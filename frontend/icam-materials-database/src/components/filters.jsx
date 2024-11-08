@@ -4,7 +4,7 @@ import "../styles/filters.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-function Filters({ searchParams }) {
+function Filters({ searchParams, terms }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -16,7 +16,7 @@ function Filters({ searchParams }) {
 
 	const results = [10, 20, 50, 100];
 	const order = ["Most-Relevant", "Most-Recent", "Oldest-First"];
-	const terms = ["Abstract", "Title", "Authors", "Category"];
+	// const terms = ["Abstract", "Title", "Authors", "Category"];
 
 	const [startDate, setStartDate] = useState(new Date(0));
 	const [endDate, setEndDate] = useState(new Date());

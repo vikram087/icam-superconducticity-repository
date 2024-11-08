@@ -39,12 +39,11 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		term,
 		dateRange,
 	) => {
-		const search = parseInput(query).search;
-		const parsed = parseInput(query).boolean;
+		const parsed = parseInput(query);
 
 		const backend_url = import.meta.env.VITE_BACKEND_URL;
 
-		fetch(`${backend_url}/api/papers/${term}/${query}`, {
+		fetch(`${backend_url}/api/papers/${term}/${parsed.search}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -54,7 +53,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 				results: results,
 				sorting: sorting,
 				date: dateRange,
-				parsedInput: parsed,
+				parsedInput: parsed.boolean,
 			}),
 		})
 			.then((response) => response.json())
@@ -214,7 +213,13 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 	};
 
 	const changePaper = (paperId) => {
-		setPrevUrl(window.location.href);
+		const papers =
+			`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
+			`&query=${searchParams.query}&sort=${searchParams.sorting}` +
+			`&term=${searchParams.term}&` +
+			`${searchParams.date}`;
+
+		setPrevUrl(papers);
 		navigate(`/papers/${paperId}`);
 	};
 
@@ -355,7 +360,10 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 				<Search searchParams={searchParams} papers={papers} />
 				<div className="page-container">
 					<div className="filters">
-						<Filters searchParams={searchParams} />
+						<Filters
+							searchParams={searchParams}
+							terms={["Abstract", "Title", "Authors", "Category"]}
+						/>
 					</div>
 					<div className="page-wrapper">
 						<Pagination

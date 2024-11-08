@@ -2,8 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/navbar.css";
 
-function NavBar({ searchParams }) {
-	const papers = `/papers?page=${searchParams.page}&per_page=${searchParams.per_page}&query=${searchParams.query}&sort=${searchParams.sorting}&term=${searchParams.term}&date=${searchParams.date}`;
+function NavBar() {
+	const currentDate = new Date();
+	const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, "");
+
+	const papers = `/papers?page=1&per_page=20&query=all&sort=Most-Relevant&term=Abstract&date=00000000-${now}`;
 
 	return (
 		<nav className="navbar">

@@ -5,7 +5,7 @@ import Content from "../components/mathjax";
 import "../styles/paper-detail.css";
 import NavBar from "../components/navbar";
 
-function PaperDetail({ searchParams, prevUrl }) {
+function PaperDetail({ prevUrl }) {
 	const [paper, setPaper] = useState(null);
 	const [highlightedStars, setHighlightedStars] = useState([]);
 
@@ -29,11 +29,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 		if (prevUrl) {
 			window.location.href = prevUrl;
 		} else {
-			window.location.href =
-				`${import.meta.env.VITE_FRONTEND_URL}/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
-				`&query=${searchParams.query}&sort=${searchParams.sorting}` +
-				`&term=${searchParams.term}&` +
-				`${searchParams.date}`;
+			window.location.href = "/";
 		}
 	};
 
@@ -84,7 +80,7 @@ function PaperDetail({ searchParams, prevUrl }) {
 
 	return paper ? (
 		<div>
-			<NavBar searchParams={searchParams} />
+			<NavBar />
 			<div className="page-main">
 				<div className="paper">
 					<div className="button">

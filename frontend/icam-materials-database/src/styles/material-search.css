@@ -8,3 +8,55 @@
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	border-radius: 10px;
 }
+
+/* Table styling */
+.materials-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+/* Header styling */
+.materials-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 1em;
+}
+
+/* Body styling */
+.materials-table td {
+    padding: 10px 15px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Alternating row colors */
+.materials-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.materials-table tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Hover effect */
+.materials-table tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+/* Responsive styling */
+@media screen and (max-width: 768px) {
+    .materials-table, .materials-table th, .materials-table td {
+        font-size: 0.8em;
+    }
+    .mat-search-container h1 {
+        font-size: 1.5em;
+    }
+}

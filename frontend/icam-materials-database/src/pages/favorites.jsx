@@ -7,7 +7,7 @@ import { ScrollToBottom, ScrollToTop } from "./papers";
 import "../styles/search.css";
 import Fuse from "fuse.js";
 
-function Favorites({ searchParams, setPrevUrl }) {
+function Favorites({ setPrevUrl }) {
 	const [highlightedStars, setHighlightedStars] = useState([]);
 	const [papersCopy, setPapersCopy] = useState([]);
 	const [expandedIndex, setExpandedIndex] = useState(-1);
@@ -24,7 +24,7 @@ function Favorites({ searchParams, setPrevUrl }) {
 	}, []);
 
 	const changePaper = (paperId) => {
-		setPrevUrl(window.location.href);
+		setPrevUrl("/favorites");
 		navigate(`/papers/${paperId}`);
 	};
 
@@ -51,7 +51,7 @@ function Favorites({ searchParams, setPrevUrl }) {
 
 	return (
 		<div>
-			<NavBar searchParams={searchParams} />
+			<NavBar />
 			<div className="page-main">
 				<h1 style={{ textAlign: "center" }}>Favorites</h1>
 				<Search

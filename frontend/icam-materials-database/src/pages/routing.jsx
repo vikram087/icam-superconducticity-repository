@@ -20,39 +20,47 @@ function App() {
 		date: `00000000-${now}`,
 	});
 
+	const [tableParams, setTableParams] = useState({
+		per_page: 20,
+		page: 1,
+		query: "all",
+		sorting: "Most-Relevant",
+		term: "material",
+		date: `00000000-${now}`,
+	});
+
 	const [prevUrl, setPrevUrl] = useState("");
 
 	return (
 		<Router>
 			<Routes>
-				<Route path="/" element={<HomePage searchParams={searchParams} />} />
+				<Route path="/" element={<HomePage />} />
 				<Route
 					path="/papers"
 					element={
 						<Papers
+							setPrevUrl={setPrevUrl}
 							searchParams={searchParams}
 							setSearchParams={setSearchParams}
-							setPrevUrl={setPrevUrl}
 						/>
 					}
 					exact
 				/>
-				<Route
-					path="/papers/:id"
-					element={
-						<PaperDetail searchParams={searchParams} prevUrl={prevUrl} />
-					}
-				/>
+				<Route path="/papers/:id" element={<PaperDetail prevUrl={prevUrl} />} />
 				<Route
 					path="/favorites"
-					element={
-						<Favorites searchParams={searchParams} setPrevUrl={setPrevUrl} />
-					}
+					element={<Favorites setPrevUrl={setPrevUrl} />}
 				/>
-				<Route path="/about" element={<About searchParams={searchParams} />} />
+				<Route path="/about" element={<About />} />
 				<Route
 					path="/material-search"
-					element={<Table searchParams={searchParams} />}
+					element={
+						<Table
+							setPrevUrl={setPrevUrl}
+							tableParams={tableParams}
+							setTableParams={setTableParams}
+						/>
+					}
 				/>
 			</Routes>
 		</Router>
