@@ -7,7 +7,7 @@ function About() {
 		<div>
 			<NavBar />
 			<div className="about-container">
-				<h1>About Us</h1>
+				<h1 style={{ marginTop: "-10px" }}>About Us</h1>
 				<p className="mission-statement">
 					Our mission is to provide a comprehensive and user-friendly search
 					engine to explore the scientific literature in the field of materials

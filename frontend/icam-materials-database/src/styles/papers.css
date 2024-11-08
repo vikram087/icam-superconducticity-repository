@@ -6,7 +6,7 @@
 }
 
 .page-main {
-	max-width: 85%;
+	max-width: 90%;
 	min-height: 100vh;
 	margin: 0 auto;
 	padding: 20px;
@@ -23,7 +23,7 @@
 .filters {
 	flex: 0 1 auto;
 	border-right: 2px solid #eee;
-	margin-left: 2%;
+	/* margin-left: 2%; */
 	padding-right: 2%;
 	margin-right: 2%;
 	width: 300px;
@@ -44,8 +44,8 @@
 } */
 
 .list {
-	padding: 10px;
-	padding-right: 2%;
+	/* padding: 10px; */
+	/* padding-right: 2%; */
 }
 
 .papers-loader {
@@ -106,7 +106,7 @@
 
 .title {
 	font-size: xx-large;
-	margin-top: 20px;
+	margin-top: 10px;
 	padding-left: 5%;
 	cursor: pointer;
 }
@@ -180,7 +180,7 @@
 }
 
 .results {
-	padding-left: 30px;
+	/* padding-left: 30px; */
 	user-select: auto;
 	text-align: center;
 }

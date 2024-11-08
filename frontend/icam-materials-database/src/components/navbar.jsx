@@ -7,6 +7,7 @@ function NavBar() {
 	const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, "");
 
 	const papers = `/papers?page=1&per_page=20&query=all&sort=Most-Relevant&term=Abstract&date=00000000-${now}`;
+	const material = `/material-search?page=1&per_page=20&query=all&sort=Most-Relevant&term=Material&date=00000000-${now}`;
 
 	return (
 		<nav className="navbar">
@@ -21,7 +22,7 @@ function NavBar() {
 						</Link>
 					</li>
 					<li className="navbar-item">
-						<Link to="/material-search" className="navbar-link">
+						<Link to={material} className="navbar-link">
 							Search Materials
 						</Link>
 					</li>

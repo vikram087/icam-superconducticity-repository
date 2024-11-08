@@ -53,7 +53,7 @@ function Favorites({ setPrevUrl }) {
 		<div>
 			<NavBar />
 			<div className="page-main">
-				<h1 style={{ textAlign: "center" }}>Favorites</h1>
+				<h1 style={{ marginTop: "-10px" }}>Favorites</h1>
 				<Search
 					papers={highlightedStars}
 					setPapers={setHighlightedStars}

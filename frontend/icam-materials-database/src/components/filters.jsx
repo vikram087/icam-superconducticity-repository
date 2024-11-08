@@ -12,7 +12,7 @@ function Filters({ searchParams, terms }) {
 		searchParams.sorting || "Most-Relevant",
 	);
 	const [numResults, setNumResults] = useState(searchParams.per_page || 20);
-	const [term, setTerm] = useState(searchParams.term || "Abstract");
+	const [term, setTerm] = useState(searchParams.term || terms[0]);
 
 	const results = [10, 20, 50, 100];
 	const order = ["Most-Relevant", "Most-Recent", "Oldest-First"];
@@ -73,13 +73,8 @@ function Filters({ searchParams, terms }) {
 			sorting = "Most-Relevant";
 		}
 
-		if (
-			searchTerm !== "Abstract" &&
-			searchTerm !== "Title" &&
-			searchTerm !== "Category" &&
-			searchTerm !== "Authors"
-		) {
-			searchTerm = "Abstract";
+		if (!terms.includes(searchTerm)) {
+			searchTerm = terms[0];
 		}
 
 		setNumResults(perPage);
@@ -104,7 +99,7 @@ function Filters({ searchParams, terms }) {
 		const now = currentDate.toISOString().slice(0, 10).replaceAll(/-/g, "");
 
 		navigate(
-			`?page=1&per_page=20&query=all&sort=Most-Relevant&term=Abstract&date=00000000-${now}`,
+			`?page=1&per_page=20&query=all&sort=Most-Relevant&term=${terms[0]}&date=00000000-${now}`,
 		);
 	};
 

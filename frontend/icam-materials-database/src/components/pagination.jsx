@@ -3,7 +3,7 @@ import "../styles/pagination.css";
 
 function Pagination({ handlePageClick, totalPages }) {
 	const query = new URLSearchParams(location.search);
-	let page = Number(query.get("page")) || searchParams.page;
+	let page = Number(query.get("page")) || 1;
 	if (page < 0) {
 		page = 1;
 	}

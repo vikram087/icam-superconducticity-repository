@@ -356,8 +356,8 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		<div>
 			<NavBar searchParams={searchParams} />
 			<div className="page-main">
-				<h1 style={{ textAlign: "center" }}>Papers</h1>
-				<Search searchParams={searchParams} papers={papers} />
+				<h1 style={{ marginTop: "-10px" }}>Papers</h1>
+				<Search searchParams={searchParams} />
 				<div className="page-container">
 					<div className="filters">
 						<Filters

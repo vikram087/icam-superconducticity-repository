@@ -13,7 +13,7 @@ function Search({ searchParams }) {
 			quer = "all";
 		}
 		navigate(
-			`/papers?page=1&per_page=${searchParams.per_page}&query=${quer}` +
+			`?page=1&per_page=${searchParams.per_page}&query=${quer}` +
 				`&sort=${searchParams.sorting}` +
 				`&term=${searchParams.term}` +
 				`&date=${searchParams.date}`,

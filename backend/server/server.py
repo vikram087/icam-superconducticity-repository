@@ -119,8 +119,9 @@ def get_materials(property: str, value: str) -> Response:
     elif sorting == "Oldest-First":
         sort = "asc"
     else:
-        print(sorting)
         return jsonify(None)
+
+    property = property.lower()
 
     valid_properties: dict = {
         "material": "MAT",
@@ -133,7 +134,6 @@ def get_materials(property: str, value: str) -> Response:
     }
 
     if property not in valid_properties:
-        print(property)
         return jsonify(None)
 
     cache_key = (
