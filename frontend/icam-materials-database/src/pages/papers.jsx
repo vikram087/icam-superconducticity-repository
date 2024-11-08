@@ -257,7 +257,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 			return (
 				<div className="content-area">
 					<div>
-						<div>
+						<div style={{ textAlign: "center" }}>
 							<p>{!loading && `${total} Results in ${time} seconds`}</p>
 							<p>
 								{total === 10000

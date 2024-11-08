@@ -174,13 +174,15 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 								handlePageClick={handlePageClick}
 								totalPages={pageCount}
 							/>
-							<p>{!loading && `${total} Results in ${time} seconds`}</p>
-							<p>
-								{total === 10000
-									? "Results are Limited to the first 10,000 matching documents"
-									: ""}
-							</p>
-							<b>Displaying Results for: "{tableParams.query}"</b>
+							<div style={{ textAlign: "center" }}>
+								<p>{!loading && `${total} Results in ${time} seconds`}</p>
+								<p>
+									{total === 10000
+										? "Results are Limited to the first 10,000 matching documents"
+										: ""}
+								</p>
+								<b>Displaying Results for: "{tableParams.query}"</b>
+							</div>
 						</div>
 						{!loading ? (
 							<table className="materials-table">

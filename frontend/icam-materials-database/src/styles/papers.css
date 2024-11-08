@@ -23,9 +23,6 @@
 .filters {
 	flex: 0 1 auto;
 	border-right: 2px solid #eee;
-	/* margin-left: 2%; */
-	padding-right: 2%;
-	margin-right: 2%;
 	width: 300px;
 }
 
@@ -37,15 +34,6 @@
 .expanded-container {
 	border-radius: 10px;
 	margin-bottom: 10px;
-}
-
-/* .container:hover {
-  box-shadow: 1px 1px 5px grey;
-} */
-
-.list {
-	/* padding: 10px; */
-	/* padding-right: 2%; */
 }
 
 .papers-loader {
@@ -102,13 +90,6 @@
 	overflow: visible;
 	max-width: none;
 	display: block;
-}
-
-.title {
-	font-size: xx-large;
-	margin-top: 10px;
-	padding-left: 5%;
-	cursor: pointer;
 }
 
 .paper-title {

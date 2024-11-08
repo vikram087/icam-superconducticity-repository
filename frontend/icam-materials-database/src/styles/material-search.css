@@ -11,12 +11,11 @@
 
 .content-container {
     display: flex;
-    gap: 40px;
+    gap: 20px;
 }
 
 .filters-section {
-    flex: 0 0 250px;
-    padding-right: 5px;
+    flex: 0 0 240px;
     border-right: 2px solid #eee;
 }
 
