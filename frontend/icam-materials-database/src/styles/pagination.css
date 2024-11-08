@@ -3,7 +3,6 @@
 	justify-content: center;
 	width: 100%;
 	user-select: none;
-	margin-left: -430px;
 }
 
 .pagination-container {
@@ -48,6 +47,5 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	/* Center items horizontally */
 	width: 100%;
 }

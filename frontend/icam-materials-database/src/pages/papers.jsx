@@ -240,7 +240,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		if (!loading && total === 0) {
 			return (
 				<div className="content-area">
-					<div style={{ marginLeft: "-460px" }}>
+					<div>
 						<p className="pag-container results">
 							Please adjust search parameters to yield results
 						</p>
@@ -251,24 +251,15 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		if (!loading) {
 			return (
 				<div className="content-area">
-					<div style={{ marginLeft: "-460px" }}>
-						<div className="pag-container results">
+					<div>
+						<div>
 							<p>{!loading && `${total} Results in ${time} seconds`}</p>
 							<p>
 								{total === 10000
 									? "Results are Limited to the first 10,000 matching documents"
 									: ""}
 							</p>
-							<b
-								style={{
-									fontSize: "large",
-									paddingBottom: "10px",
-									paddingLeft: "25vw",
-									maxWidth: "60vw",
-								}}
-							>
-								Displaying Results for: "{searchParams.query}"
-							</b>
+							<b>Displaying Results for: "{searchParams.query}"</b>
 						</div>
 					</div>
 					<ul className="list">

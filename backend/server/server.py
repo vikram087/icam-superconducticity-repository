@@ -172,7 +172,7 @@ def get_materials(property: str, value: str) -> Response:
             and paper["_source"]["date"] < end_date
         ]
 
-        redis_client.setex(cache_key, 3600, (papers, total))
+        redis_client.setex(cache_key, 3600, json.dumps((papers, total)))
 
         return jsonify({"papers": papers, "total": total})
 

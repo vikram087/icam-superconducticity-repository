@@ -1,13 +1,10 @@
 .mat-search-container {
-	text-align: center;
-	max-width: 1100px;
+	max-width: 85%;
+	min-height: 100vh;
 	margin: 0 auto;
 	padding: 20px;
-	padding-left: 100px;
-	padding-right: 100px;
 	font-family: "Arial", sans-serif;
 	background-color: #f9f9f9;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	border-radius: 10px;
-	min-height: 100vh;
 }

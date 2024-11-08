@@ -6,7 +6,7 @@
 }
 
 .page-main {
-	max-width: 1260px;
+	max-width: 85%;
 	min-height: 100vh;
 	margin: 0 auto;
 	padding: 20px;
@@ -23,27 +23,20 @@
 .filters {
 	flex: 0 1 auto;
 	border-right: 2px solid #eee;
-	padding-top: 5%;
-	margin-left: 5%;
-	padding-right: 100px;
-	margin-right: 5%;
+	margin-left: 2%;
+	padding-right: 2%;
+	margin-right: 2%;
 	width: 300px;
 }
 
 .container {
-	padding: 10px;
 	border-radius: 10px;
 	margin-bottom: 10px;
-	margin-right: 5%;
-	width: 90%;
 }
 
 .expanded-container {
-	padding: 10px;
 	border-radius: 10px;
 	margin-bottom: 10px;
-	margin-right: 5%;
-	width: 90%;
 }
 
 /* .container:hover {
@@ -52,8 +45,7 @@
 
 .list {
 	padding: 10px;
-	padding-right: 5%;
-	width: 90%;
+	padding-right: 2%;
 }
 
 .papers-loader {
