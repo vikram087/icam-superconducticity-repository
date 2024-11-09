@@ -160,7 +160,7 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 			<NavBar />
 			<div className="mat-search-container">
 				<h1 style={{ marginTop: "-10px" }}>Search Materials</h1>
-				<Search searchParams={tableParams} to="/search-materials" />
+				<Search searchParams={tableParams} to="/material-search" />
 				<div className="content-container">
 					<div className="filters-section">
 						<Filters
