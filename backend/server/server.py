@@ -417,7 +417,6 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
             if paper["_source"]["date"] > start_date
             and paper["_source"]["date"] < end_date
         ]
-        filtered_papers = sorted(filtered_papers, key=lambda x: x["id"])
         for hit in hits:
             if not hit["_score"]:
                 break
