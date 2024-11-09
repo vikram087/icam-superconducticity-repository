@@ -7,7 +7,7 @@ import { ScrollToBottom, ScrollToTop } from "./papers";
 import "../styles/search.css";
 import Fuse from "fuse.js";
 
-function Favorites({ setPrevUrl }) {
+function Favorites({ setPrevUrl, setPaperToUse }) {
 	const [highlightedStars, setHighlightedStars] = useState([]);
 	const [papersCopy, setPapersCopy] = useState([]);
 	const [expandedIndex, setExpandedIndex] = useState(-1);
@@ -23,9 +23,11 @@ function Favorites({ setPrevUrl }) {
 		setPapersCopy(Array.isArray(storedStars) ? storedStars : []);
 	}, []);
 
-	const changePaper = (paperId) => {
+	const changePaper = (paper) => {
+		const id = paper.id.replace("/-/g", "/");
+		setPaperToUse(paper);
 		setPrevUrl("/favorites");
-		navigate(`/paper/${paperId}`);
+		navigate(`/paper/${id}`);
 	};
 
 	const toggleStar = (paper) => {
@@ -79,11 +81,7 @@ function Favorites({ setPrevUrl }) {
 										key={`${paper.id}_favs`}
 									>
 										<div className="title-container">
-											<div
-												onClick={() =>
-													changePaper(paper.id.replace("/-/g", "/"))
-												}
-											>
+											<div onClick={() => changePaper(paper)}>
 												<u className="paper-title">
 													<Content content={paper.title} />
 												</u>

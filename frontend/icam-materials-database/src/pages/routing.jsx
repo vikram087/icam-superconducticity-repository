@@ -54,7 +54,9 @@ function App() {
 				/>
 				<Route
 					path="/favorites"
-					element={<Favorites setPrevUrl={setPrevUrl} />}
+					element={
+						<Favorites setPrevUrl={setPrevUrl} setPaperToUse={setPaperToUse} />
+					}
 				/>
 				<Route path="/about" element={<About />} />
 				<Route
@@ -64,6 +66,7 @@ function App() {
 							setPrevUrl={setPrevUrl}
 							tableParams={tableParams}
 							setTableParams={setTableParams}
+							setPaperToUse={setPaperToUse}
 						/>
 					}
 				/>

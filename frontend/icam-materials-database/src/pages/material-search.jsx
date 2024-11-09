@@ -8,7 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Pagination from "../components/pagination";
 import { TailSpin } from "react-loader-spinner";
 
-function Table({ tableParams, setTableParams, setPrevUrl }) {
+function Table({ tableParams, setTableParams, setPrevUrl, setPaperToUse }) {
 	const [time, setTime] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [papers, setPapers] = useState([]);
@@ -135,16 +135,18 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 		);
 	};
 
-	const changePaper = (paperId) => {
-		console.log(paperId);
+	const changePaper = (paper) => {
+		const id = paper.id.replace("/-/g", "/");
+
 		const papers =
 			`/material-search?page=${tableParams.page}&per_page=${tableParams.per_page}` +
 			`&query=${tableParams.query}&sort=${tableParams.sorting}` +
 			`&term=${tableParams.term}&` +
 			`${tableParams.date}`;
 
+		setPaperToUse(paper);
 		setPrevUrl(papers);
-		navigate(`/paper/${paperId}`);
+		navigate(`/paper/${id}`);
 	};
 
 	const toggleExpand = (index) => {
@@ -214,9 +216,7 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 													}
 													key={column.key || `star-${index}`}
 													onClick={
-														column.key
-															? () => changePaper(row.id.replace("/-/g", "/"))
-															: undefined
+														column.key ? () => changePaper(row) : undefined
 													}
 												>
 													{column.key ? (
