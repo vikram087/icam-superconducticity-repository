@@ -144,7 +144,7 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 			`${tableParams.date}`;
 
 		setPrevUrl(papers);
-		navigate(`/papers/${paperId}`);
+		navigate(`/paper/${paperId}`);
 	};
 
 	const toggleExpand = (index) => {

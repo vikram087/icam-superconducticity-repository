@@ -25,7 +25,7 @@ function Favorites({ setPrevUrl }) {
 
 	const changePaper = (paperId) => {
 		setPrevUrl("/favorites");
-		navigate(`/papers/${paperId}`);
+		navigate(`/paper/${paperId}`);
 	};
 
 	const toggleStar = (paper) => {

@@ -12,14 +12,6 @@ function PaperDetail({ prevUrl, paper }) {
 		const storedStars =
 			JSON.parse(localStorage.getItem("highlightedStars")) || [];
 		setHighlightedStars(Array.isArray(storedStars) ? storedStars : []);
-
-		// const backend_url = import.meta.env.VITE_BACKEND_URL;
-
-		// fetch(`${backend_url}/api/papers/${id}`)
-		// 	.then((response) => response.json())
-		// 	.then((data) => {
-		// 		setPaper(data);
-		// 	});
 	}, []);
 
 	const goBack = () => {
