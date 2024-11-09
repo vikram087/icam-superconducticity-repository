@@ -123,17 +123,17 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
         if len(feed.entries) == 0:
             if i == 2:
                 logging.error(
-                    "Something is wrong, you've been rate limited three times in a row, take some time before you run this script again\nConsider increasing wait time, decreasing amount of papers fetched, or adjusting query"
+                    "Rate limited three times in a row. Consider increasing wait time or adjusting query."
                 )
                 logging.error("Exiting program")
                 exit()
 
-            logging.warning("You've been rate limited 💀💀\nSleeping for 300 seconds")
+            logging.warning("Rate limited. Sleeping for 300 seconds")
             time.sleep(300)
             i += 1
             continue
 
-        # Prepare summaries for batch annotation request
+        # Prepare summaries and paper_dicts for batch processing
         summaries = []
         paper_dicts = []
 
@@ -153,30 +153,48 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
                 "primary_category": entry.get("arxiv_primary_category").get("term"),
             }
 
-            # Collect the summary for batch processing
             summaries.append(paper_dict["summary"])
             paper_dicts.append(paper_dict)
 
-        # Send a single POST request for all summaries
-        annotations_response = requests.post(
-            f"{LBNLP_URL}/api/annotate/matbert",
-            json={"docs": summaries},
-            headers={"Content-Type": "application/json"},
-        )
+        # Define batch size
+        batch_size = 50
 
-        if annotations_response.status_code == 200:
-            logging.info("Batch annotation succeeded")
-            annotations = annotations_response.json().get("annotation", [])
-        else:
-            logging.error(
-                f"Batch annotation failed: {annotations_response.status_code}, {annotations_response.text}"
+        # Split summaries and paper_dicts into batches
+        num_batches = len(summaries) // batch_size + 1
+
+        all_annotations = []
+
+        for batch_num in range(num_batches):
+            batch_start = batch_num * batch_size
+            batch_end = batch_start + batch_size
+
+            batch_summaries = summaries[batch_start:batch_end]
+            batch_paper_dicts = paper_dicts[batch_start:batch_end]
+
+            # Send POST request for the batch
+            annotations_response = requests.post(
+                f"{LBNLP_URL}/api/annotate/matbert",
+                json={"docs": batch_summaries},
+                headers={"Content-Type": "application/json"},
             )
-            annotations = [{}] * len(
-                paper_dicts
-            )  # Empty annotations if the request failed
+
+            if annotations_response.status_code == 200:
+                logging.info(
+                    f"Batch {batch_num + 1}/{num_batches} annotation succeeded"
+                )
+                batch_annotations = annotations_response.json().get("annotation", [])
+            else:
+                logging.error(
+                    f"Batch {batch_num + 1}/{num_batches} annotation failed: "
+                    f"{annotations_response.status_code}, {annotations_response.text}"
+                )
+                batch_annotations = [{}] * len(batch_paper_dicts)
+
+            # Append batch annotations to all_annotations
+            all_annotations.extend(batch_annotations)
 
         # Map each annotation back to the corresponding paper
-        for paper_dict, annotation in zip(paper_dicts, annotations):
+        for paper_dict, annotation in zip(paper_dicts, all_annotations):
             paper_dict["APL"] = annotation.get("APL", [])
             paper_dict["CMT"] = annotation.get("CMT", [])
             paper_dict["DSC"] = annotation.get("DSC", [])
@@ -193,8 +211,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             )
             exists = bad.get("found")
             if exists is True:
-                continue
-                # return paper_list, True
+                return paper_list, True
 
             paper_list.append(paper_dict)
 
