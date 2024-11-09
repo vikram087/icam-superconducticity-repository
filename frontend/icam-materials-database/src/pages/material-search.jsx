@@ -205,10 +205,10 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 								<tbody>
 									{papers?.map((row, index) => (
 										<tr key={index}>
-											{columns.map((column, colIndex) => (
+											{columns.map((column) => (
 												<td
 													className={
-														colIndex === expandedIndex
+														index === expandedIndex
 															? "expanded-col"
 															: "minimized-col"
 													}
@@ -248,11 +248,11 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 															<div
 																onClick={(e) => {
 																	e.stopPropagation();
-																	toggleExpand(colIndex);
+																	toggleExpand(index);
 																}}
 																style={{ color: "#f09f9c" }}
 															>
-																{expandedIndex === colIndex ? "⌃" : "⌄"}
+																{expandedIndex === index ? "⌃" : "⌄"}
 															</div>
 														)}
 												</td>
