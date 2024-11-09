@@ -5,3 +5,4 @@ elasticsearch==8.15.0
 sentence-transformers==3.0.1
 mypy==1.11.2
 requests
+redis

@@ -94,7 +94,7 @@ def set_parser(
         required=False,
         default=False,
         action="store_true",
-        help="[Optional] Enabling flag flushes redis DB after papers added",
+        help="[Optional] Enabling flag flushes redis DB after papers added\nDefault: False",
     )
     parser.add_argument("-v", "--version", action="version", version=program_version)
 
@@ -193,7 +193,8 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             )
             exists = bad.get("found")
             if exists is True:
-                return paper_list, True
+                continue
+                # return paper_list, True
 
             paper_list.append(paper_dict)
 
