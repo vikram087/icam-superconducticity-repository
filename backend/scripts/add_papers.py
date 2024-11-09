@@ -105,6 +105,7 @@ def set_parser(
 def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
     search_query: str = "all:superconductivity"
     paper_list: list[dict] = []
+    dups: int = 0
 
     i = 0
     while True:
@@ -168,7 +169,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
         for batch_num in range(num_batches):
             batch_start = batch_num * batch_size
             batch_end = batch_start + batch_size
-
+            
             batch_summaries = summaries[batch_start:batch_end]
             batch_paper_dicts = paper_dicts[batch_start:batch_end]
 
@@ -212,11 +213,14 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             )
             exists = bad.get("found")
             if exists is True:
-                return paper_list, True
+                logging.info("Duplicate paper found")
+                dups += 1
+                continue
+                # return paper_list, True
 
             paper_list.append(paper_dict)
 
-        logging.info(f"Collected papers {start} - {start + amount}")
+        logging.info(f"Collected papers {start} - {start + amount - dups}")
         return replaceNullValues(paper_list), False
 
 
