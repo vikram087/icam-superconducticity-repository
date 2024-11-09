@@ -5,25 +5,22 @@ import Content from "../components/mathjax";
 import "../styles/paper-detail.css";
 import NavBar from "../components/navbar";
 
-function PaperDetail({ prevUrl }) {
-	const [paper, setPaper] = useState(null);
+function PaperDetail({ prevUrl, paper }) {
 	const [highlightedStars, setHighlightedStars] = useState([]);
-
-	const { id } = useParams();
 
 	useEffect(() => {
 		const storedStars =
 			JSON.parse(localStorage.getItem("highlightedStars")) || [];
 		setHighlightedStars(Array.isArray(storedStars) ? storedStars : []);
 
-		const backend_url = import.meta.env.VITE_BACKEND_URL;
+		// const backend_url = import.meta.env.VITE_BACKEND_URL;
 
-		fetch(`${backend_url}/api/papers/${id}`)
-			.then((response) => response.json())
-			.then((data) => {
-				setPaper(data);
-			});
-	}, [id]);
+		// fetch(`${backend_url}/api/papers/${id}`)
+		// 	.then((response) => response.json())
+		// 	.then((data) => {
+		// 		setPaper(data);
+		// 	});
+	}, []);
 
 	const goBack = () => {
 		if (prevUrl) {

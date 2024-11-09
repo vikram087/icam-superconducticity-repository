@@ -42,6 +42,7 @@ function HomePage() {
 						term: "Abstract",
 						date: `00000000-${now}`,
 					}}
+					to="/papers"
 				/>
 				<SearchSyntax />
 				<section className="overview" style={{ marginTop: "40px" }}>

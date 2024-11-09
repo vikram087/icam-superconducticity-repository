@@ -34,17 +34,6 @@ def test():
     return jsonify({"message": "Success"}), 200
 
 
-# /api/papers/${paperId}
-@app.route("/api/papers/<paper_id>", methods=["GET"])
-def get_paper(paper_id: str) -> tuple[Response, int] | Response:
-    results: ObjectApiResponse = client.get(index="search-papers-meta", id=paper_id)
-    paper: dict = results["_source"]
-    if paper:
-        return jsonify(paper)
-    else:
-        return jsonify({"error": "No results found"}), 404
-
-
 redis_host = "redis" if DOCKER == "true" else "localhost"
 redis_client: Redis = redis.StrictRedis(
     host=redis_host, port=6379, db=0, decode_responses=True
@@ -74,21 +63,6 @@ def make_cache_key(
 ) -> str:
     key: str = f"{query}_{sorting}_{page}_{num_results}_{term}_{start_date}_{end_date}_{parsed_results['must']}_{parsed_results['not']}_{parsed_results['or']}"
     return key
-
-
-def get_excluded_ids(cache_key: str) -> list[str]:
-    split_key: list[str] = cache_key.split("_")
-    excluded_ids: list[str] = []
-
-    for i in range(1, 501):
-        split_key[2] = str(i)
-        new_cache_key: str = "_".join(split_key)
-        cached: dict | None = get_cached_results(new_cache_key)
-        if cached:
-            id: str = cached[0]["id"]
-            excluded_ids.append(id)
-
-    return excluded_ids
 
 
 @app.route("/api/materials/<property>/<value>", methods=["POST"])
@@ -323,12 +297,6 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
             else []
         )
 
-    # excluded_ids: list[str] = get_excluded_ids(
-    #     cache_key
-    # )  # can leverage excluding ids for pagination
-    # must_not_pre: dict = {"ids": {"values": excluded_ids}}
-    # print(excluded_ids)
-
     quer = {
         "bool": {
             "must": must_clause,
@@ -388,12 +356,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
             return jsonify(None)
 
     hits: dict = results["hits"]["hits"]
-    papers: list[dict] = []
     accuracy: dict = {}
-
-    if not knn_search:
-        for hit in hits:
-            papers.append(hit["_source"])
 
     try:
         total: int = client.search(
@@ -410,19 +373,21 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
         total = num_results * pages
 
     if knn_search:
-        papers = hits[(page - 1) * num_results :]
-        filtered_papers: list[dict] = [
-            paper["_source"]
-            for paper in papers
-            if paper["_source"]["date"] > start_date
-            and paper["_source"]["date"] < end_date
-        ]
-        for hit in hits:
-            if not hit["_score"]:
-                break
-            accuracy[hit["_source"]["id"]] = float(str(hit["_score"])[1:])
+        papers: list[dict] = hits[(page - 1) * num_results :]
+        filtered_papers: list[dict] = []
+
+        for paper in papers:
+            source = paper["_source"]
+            source.pop("summary_embedding", None)
+            source.pop("title_embedding", None)
+
+            if start_date < source["date"] < end_date:
+                filtered_papers.append(source)
+
+            if paper.get("_score") is not None:
+                accuracy[source["id"]] = float(str(paper["_score"])[1:])
     else:
-        filtered_papers = list(papers)
+        filtered_papers = [hit["_source"] for hit in hits]
 
     if filtered_papers:
         cache_results(cache_key, (filtered_papers, total, accuracy))

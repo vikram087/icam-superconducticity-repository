@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/search.css";
 
-function Search({ searchParams }) {
+function Search({ searchParams, to }) {
 	const [inputValue, setInputValue] = useState("");
 
 	const navigate = useNavigate();
@@ -13,7 +13,7 @@ function Search({ searchParams }) {
 			quer = "all";
 		}
 		navigate(
-			`?page=1&per_page=${searchParams.per_page}&query=${quer}` +
+			`${to}?page=1&per_page=${searchParams.per_page}&query=${quer}` +
 				`&sort=${searchParams.sorting}` +
 				`&term=${searchParams.term}` +
 				`&date=${searchParams.date}`,

@@ -30,6 +30,7 @@ function App() {
 	});
 
 	const [prevUrl, setPrevUrl] = useState("");
+	const [paperToUse, setPaperToUse] = useState({});
 
 	return (
 		<Router>
@@ -42,11 +43,15 @@ function App() {
 							setPrevUrl={setPrevUrl}
 							searchParams={searchParams}
 							setSearchParams={setSearchParams}
+							setPaperToUse={setPaperToUse}
 						/>
 					}
 					exact
 				/>
-				<Route path="/papers/:id" element={<PaperDetail prevUrl={prevUrl} />} />
+				<Route
+					path="/paper/:id"
+					element={<PaperDetail prevUrl={prevUrl} paper={paperToUse} />}
+				/>
 				<Route
 					path="/favorites"
 					element={<Favorites setPrevUrl={setPrevUrl} />}
