@@ -140,9 +140,9 @@ def get_materials(property: str, value: str) -> Response:
         f"{property}_{value}_{page}_{num_results}_{sorting}_{start_date}_{end_date}"
     )
     cached_data = redis_client.get(cache_key)
-    # if cached_data:
-    #     data = json.loads(cached_data)  # type: ignore
-    #     return jsonify({"papers": data[0], "total": data[1]})
+    if cached_data:
+        data = json.loads(cached_data)  # type: ignore
+        return jsonify({"papers": data[0], "total": data[1]})
 
     prop: str = valid_properties[property]
     try:
@@ -243,8 +243,8 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
         parsed_input,
     )
     cached: dict | None = get_cached_results(cache_key)
-    # if cached:
-    #     return jsonify({"papers": cached[0], "total": cached[1], "accuracy": cached[2]})
+    if cached:
+        return jsonify({"papers": cached[0], "total": cached[1], "accuracy": cached[2]})
 
     if sorting == "Most-Recent" or sorting == "Most-Relevant":
         sort: str = "desc"

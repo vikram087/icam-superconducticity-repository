@@ -7,10 +7,12 @@ from argparse import Namespace
 from typing import Optional
 
 import feedparser  # type: ignore
+import redis
 import requests
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from feedparser import FeedParserDict
+from redis import Redis
 from sentence_transformers import SentenceTransformer  # type: ignore
 
 program_name: str = """
@@ -34,7 +36,8 @@ Created by Vikram Penumarti
 load_dotenv()
 API_KEY: Optional[str] = os.getenv("API_KEY")
 ES_URL: Optional[str] = os.getenv("ES_URL")
-LBNLP_URL: str | None = os.getenv("LBNLP_URL")
+LBNLP_URL: Optional[str] = os.getenv("LBNLP_URL")
+DOCKER: Optional[str] = os.getenv("DOCKER")
 
 client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
@@ -49,6 +52,11 @@ logging.getLogger("root").setLevel(logging.INFO)
 # client = Elasticsearch("http://localhost:9200")
 
 model: SentenceTransformer = SentenceTransformer("all-MiniLM-L6-v2")
+
+redis_host = "redis" if DOCKER == "true" else "localhost"
+redis_client: Redis = redis.StrictRedis(
+    host=redis_host, port=6379, db=0, decode_responses=True
+)
 
 
 def set_parser(
@@ -80,6 +88,13 @@ def set_parser(
         default=50,
         type=int,
         help="[Optional] Number of documents to fetch from arXiv (max 2000, min 1)\nDefault: 50",
+    )
+    parser.add_argument(
+        "--flush-all",
+        required=False,
+        default=False,
+        action="store_true",
+        help="[Optional] Enabling flag flushes redis DB after papers added",
     )
     parser.add_argument("-v", "--version", action="version", version=program_version)
 
@@ -270,6 +285,10 @@ def main(args: Namespace) -> None:
         )
 
     upload_to_es(amount, iterations)
+
+    if args.flush_all is True:
+        redis_client.flushall()
+        logging.info("Redis DB cleared")
 
 
 if __name__ == "__main__":
