@@ -15,6 +15,7 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 	const [total, setTotal] = useState(0);
 	const [pageCount, setPageCount] = useState(0);
 	const [highlightedStars, setHighlightedStars] = useState({});
+	const [expandedIndex, setExpandedIndex] = useState(-1);
 
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -146,6 +147,14 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 		navigate(`/papers/${paperId}`);
 	};
 
+	const toggleExpand = (index) => {
+		if (expandedIndex === index) {
+			setExpandedIndex(-1);
+		} else {
+			setExpandedIndex(index);
+		}
+	};
+
 	return (
 		<>
 			<NavBar />
@@ -196,13 +205,18 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 								<tbody>
 									{papers?.map((row, index) => (
 										<tr key={index}>
-											{columns.map((column) => (
+											{columns.map((column, colIndex) => (
 												<td
+													className={
+														colIndex === expandedIndex
+															? "expanded-col"
+															: "minimized-col"
+													}
 													key={column.key || `star-${index}`}
 													onClick={
 														column.key
 															? () => changePaper(row.id.replace("/-/g", "/"))
-															: undefined // Only make other cells clickable, not the star cell
+															: undefined
 													}
 												>
 													{column.key ? (
@@ -229,6 +243,18 @@ function Table({ tableParams, setTableParams, setPrevUrl }) {
 															alt="star icon"
 														/>
 													)}
+													{column.header !== "favorite" &&
+														row[column.key] !== "N/A" && (
+															<div
+																onClick={(e) => {
+																	e.stopPropagation();
+																	toggleExpand(colIndex);
+																}}
+																style={{ color: "#f09f9c" }}
+															>
+																{expandedIndex === colIndex ? "⌃" : "⌄"}
+															</div>
+														)}
 												</td>
 											))}
 										</tr>

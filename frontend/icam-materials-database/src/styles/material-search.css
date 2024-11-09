@@ -47,6 +47,19 @@
     color: #555;
 }
 
+.minimized-col {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    max-width: 150px;
+}
+
+.expanded-col {
+    white-space: normal;
+    overflow: visible;
+    max-width: 150px;
+}
+
 .materials-table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
