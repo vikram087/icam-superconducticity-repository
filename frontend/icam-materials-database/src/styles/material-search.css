@@ -51,13 +51,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: clip;
-    max-width: 150px;
+    max-width: 50px;
 }
 
 .expanded-col {
     white-space: normal;
     overflow: visible;
-    max-width: 150px;
+    max-width: 50px;
 }
 
 .materials-table tr:nth-child(even) {
