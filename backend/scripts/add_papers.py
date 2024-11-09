@@ -1,5 +1,6 @@
 import argparse
 import logging
+import math
 import os
 import time
 import urllib.request as libreq
@@ -160,7 +161,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
         batch_size = 50
 
         # Split summaries and paper_dicts into batches
-        num_batches = len(summaries) // batch_size + 1
+        num_batches = math.ceil(len(summaries) / batch_size)
 
         all_annotations = []
 
