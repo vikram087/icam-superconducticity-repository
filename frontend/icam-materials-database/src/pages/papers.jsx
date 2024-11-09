@@ -8,7 +8,7 @@ import Filters from "../components/filters.jsx";
 import "../styles/papers.css";
 import NavBar from "../components/navbar.jsx";
 
-function Papers({ searchParams, setSearchParams, setPrevUrl }) {
+function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 	const location = useLocation();
 
 	const [papers, setPapers] = useState([]);
@@ -212,7 +212,9 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 		);
 	};
 
-	const changePaper = (paperId) => {
+	const changePaper = (paper) => {
+		const id = paper.id.replace("/-/g", "/");
+
 		const papers =
 			`/papers?page=${searchParams.page}&per_page=${searchParams.per_page}` +
 			`&query=${searchParams.query}&sort=${searchParams.sorting}` +
@@ -220,7 +222,8 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 			`${searchParams.date}`;
 
 		setPrevUrl(papers);
-		navigate(`/papers/${paperId}`);
+		setPaperToUse(paper);
+		navigate(`/paper/${id}`);
 	};
 
 	const handlePageClick = (pageNumber) => {
@@ -283,9 +286,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl }) {
 										</div>
 									)}
 								<div className="title-container">
-									<div
-										onClick={() => changePaper(paper.id.replace("/-/g", "/"))}
-									>
+									<div onClick={() => changePaper(paper)}>
 										<u className="paper-title">
 											<Content content={paper.title} />
 										</u>
