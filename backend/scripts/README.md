@@ -23,9 +23,9 @@ Clone the repository containing the script code, then navigate to the `scripts` 
    cd icam-materials-database/backend/scripts
    ```
 
-### 2. Verify `../backend/.env` File
+### 2. Verify `../.env` File
 
-For this script to run properly, ES_URL, LBNLP_URL, and API_KEY must be present in `../backend/.env`
+For this script to run properly, ES_URL, LBNLP_URL, and API_KEY must be present in `../.env`
 
    ```ini
     # API key for Elasticsearch
@@ -36,6 +36,9 @@ For this script to run properly, ES_URL, LBNLP_URL, and API_KEY must be present 
 
     # url for the NLP server to annotate texts
     LBNLP_URL=http://localhost:8000
+
+    # hard coded value
+    DOCKER=false
    ```
 
 ### 3. Install Dependencies

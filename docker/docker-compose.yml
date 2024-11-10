@@ -219,7 +219,6 @@ services:
       - "5173:5173"
     environment:
       - VITE_BACKEND_URL=${VITE_BACKEND_URL}
-      - VITE_FRONTEND_URL=${VITE_FRONTEND_URL}
     networks:
       - app-network
     healthcheck:
