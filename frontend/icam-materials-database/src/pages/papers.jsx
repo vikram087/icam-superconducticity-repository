@@ -261,9 +261,12 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 				<div className="content-area">
 					<div>
 						<div style={{ textAlign: "center" }}>
-							<p>{!loading && `${total} Results in ${time} seconds`}</p>
 							<p>
-								{total === 10000
+								{!loading &&
+									`${total} Results in ${time} seconds (${pageCount} pages)`}
+							</p>
+							<p>
+								{total >= 10000
 									? "Results are Limited to the first 10,000 matching documents"
 									: ""}
 							</p>

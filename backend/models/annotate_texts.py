@@ -6,13 +6,13 @@ CORS(app)
 
 
 @app.route("/api/annotate/<model_type>", methods=["POST"])
-def get_annotation(model_type):
+def get_annotation(model_type: str) -> tuple:
     try:
-        data = request.get_json()
-        docs = data.get("docs", [])
+        data: dict = request.get_json()
+        docs: list = data.get("docs", [])
 
         model = model_selection(model_type)
-        annotation = annotate(docs, model, model_type)
+        annotation: list = annotate(docs, model, model_type)
 
         return jsonify({"annotation": annotation}), 200
     except Exception as e:
@@ -20,11 +20,11 @@ def get_annotation(model_type):
 
 
 @app.route("/", methods=["GET"])
-def test():
+def test() -> tuple:
     return jsonify({"message": "Success"}), 200
 
 
-def model_selection(model_type):
+def model_selection(model_type: str):
     if model_type == "matscholar":
         from lbnlp.models.load.matscholar_2020v1 import load
 
@@ -41,9 +41,9 @@ def model_selection(model_type):
     return ner_model
 
 
-def annotate(docs, model, model_type):
+def annotate(docs: list, model, model_type: str) -> list:
     if model_type == "matscholar":
-        tags = [model.tag_doc(doc) for doc in docs]
+        tags: list = [model.tag_doc(doc) for doc in docs]
     elif model_type == "matbert":
         tags = model.tag_docs(docs)
     elif model_type == "relevance":

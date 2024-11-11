@@ -1,12 +1,10 @@
 import json
-import math
 import os
 from datetime import datetime
-from typing import Mapping, Sequence
+from typing import Collection, Mapping, Sequence
 
 import redis
 from dotenv import load_dotenv
-from elastic_transport import ObjectApiResponse
 from elasticsearch import Elasticsearch, NotFoundError
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
@@ -17,6 +15,7 @@ load_dotenv()
 API_KEY: str | None = os.getenv("API_KEY")
 ES_URL: str | None = os.getenv("ES_URL")
 DOCKER: str | None = os.getenv("DOCKER")
+INDEX: str | None = os.getenv("INDEX")
 
 client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
@@ -25,12 +24,12 @@ CORS(app)
 model: SentenceTransformer = SentenceTransformer("all-MiniLM-L6-v2")
 
 
-def get_embedding(text: str) -> list[int]:
+def get_embedding(text: str):  # type: ignore
     return model.encode(text)
 
 
 @app.route("/", methods=["GET"])
-def test():
+def test() -> tuple[Response, int]:
     return jsonify({"message": "Success"}), 200
 
 
@@ -120,7 +119,7 @@ def get_materials(property: str, value: str) -> Response:
 
     prop: str = valid_properties[property]
     try:
-        query = {
+        query: dict = {
             "bool": {
                 "must": [{"match": {prop: {"query": value, "fuzziness": "AUTO"}}}],
                 "filter": [{"range": {"date": {"gte": start_date, "lte": end_date}}}],
@@ -129,8 +128,8 @@ def get_materials(property: str, value: str) -> Response:
         if value == "all":
             query["bool"]["must"] = {"match_all": {}}
 
-        response: ObjectApiResponse = client.search(
-            index="search-papers-meta",
+        response = client.search(
+            index=INDEX,
             query=query,
             size=num_results,
             from_=(page - 1) * num_results,
@@ -170,7 +169,6 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
         page: int = int(data.get("page", 0))
         num_results: int = int(data.get("results", 0))
         sorting: str = str(data.get("sorting", ""))
-        pages: int = 30
         parsed_input: dict = dict(data.get("parsedInput", []))
 
         must_v: list[str] = parsed_input["must"]
@@ -229,20 +227,10 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
 
     knn_search: bool = False
 
-    # size: int = client.search(query={"match_all": {}}, index="search-papers-meta")[
-    #     "hits"
-    # ]["total"]["value"]
     try:
-        size: int = client.count(index="search-papers-meta")["count"]
+        size: int = client.count(index=INDEX)["count"]
     except NotFoundError:
         return jsonify(None)
-
-    if pages * num_results > size:
-        pages = math.ceil(size / num_results)
-
-    k: int = page * num_results
-    if k > size:
-        k = size
 
     if sorting == "Most-Recent" or sorting == "Oldest-First":
         p_sort: Sequence[Mapping | str] = [{"date": {"order": sort}}, "_score"]
@@ -251,7 +239,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
 
     if query == "all" or field == "summary_embedding" or field == "title_embedding":
         tag = "summary" if field == "summary_embedding" else "title"
-        must_clause = (
+        must_clause: Collection[Collection] = (
             [
                 {"match": {tag: {"query": label, "fuzziness": "AUTO"}}}
                 for label in must_v
@@ -259,12 +247,12 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
             if must_v
             else {"match_all": {}}
         )
-        should_clause = (
+        should_clause: list[dict] = (
             [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in or_v]
             if or_v
             else []
         )
-        must_not_clause = (
+        must_not_clause: list[dict] = (
             [{"match": {tag: {"query": label, "fuzziness": "AUTO"}}} for label in not_v]
             if not_v
             else []
@@ -316,14 +304,14 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
     if query == "all" or field == "authors" or field == "categories":
         knn_search = False
         try:
-            results: ObjectApiResponse = client.search(
+            results = client.search(
                 query=quer,
                 size=num_results,
                 from_=(page - 1) * num_results,
                 sort=[{"date": {"order": sort}}]
                 if (sorting == "Most-Recent" or sorting == "Oldest-First")
                 else None,
-                index="search-papers-meta",
+                index=INDEX,
             )
         except Exception:
             return jsonify(None)
@@ -340,15 +328,13 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
                     "field": field,
                     "query_vector": get_embedding(query),
                     "num_candidates": size if size < 10000 else 10000,
-                    # "k": k,
                     "k": num_results,
-                    # "filter": must_not_pre,
                 },
                 query=quer,
                 from_=0,  # consider changing to (page-1)*num_results
                 size=page * num_results,
                 sort=p_sort,
-                index="search-papers-meta",
+                index=INDEX,
             )
         except Exception:
             return jsonify(None)
@@ -359,25 +345,36 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
     accuracy: dict = {}
 
     try:
+        if query != "all":
+            if field == "summary_embedding":
+                quer_field = "summary"
+            elif field == "title_embedding":
+                quer_field = "title"
+
+            quer["bool"]["must"] = [
+                {"match": {quer_field: {"query": query, "fuzziness": "AUTO"}}}
+            ]
         total: int = client.search(
             query=quer,
             size=num_results,
-            from_=(page - 1) * num_results,
-            sort=[{"date": {"order": sort}}],
-            index="search-papers-meta",
+            from_=(page - 1)
+            * num_results,  # try with this, if different total for every page, switch to line below
+            # from_=0,
+            # sort=[{"date": {"order": sort}}],
+            index=INDEX,
         )["hits"]["total"]["value"]
     except Exception:
         return jsonify(None)
 
-    if total > num_results * pages and knn_search:
-        total = num_results * pages
+    if total < 100 and knn_search and size >= 100:
+        total = 100
 
     if knn_search:
         papers: list[dict] = hits[(page - 1) * num_results :]
         filtered_papers: list[dict] = []
 
         for paper in papers:
-            source = paper["_source"]
+            source: dict = paper["_source"]
             source.pop("summary_embedding", None)
             source.pop("title_embedding", None)
 

@@ -18,18 +18,21 @@ Reference steps from step 7. [Create API Key](./elasticsearch/README.md)
 Create a `.env` file for the Python Elasticsearch API. Replace `YOUR_API_KEY_HERE` with the API key you obtained.
 
    ```ini
-    # API key for Elasticsearch
-    API_KEY=YOUR_API_KEY_HERE
+   # API key for Elasticsearch
+   API_KEY=YOUR_API_KEY_HERE
 
-    # url for elasticsearch, defaults to https://localhost:9200
-    ES_URL=https://localhost:9200
+   # url for elasticsearch, defaults to https://localhost:9200
+   ES_URL=https://localhost:9200
 
-    # hard-coded value
-    DOCKER=false
+   # hard-coded value
+   DOCKER=false
 
-    # location of the NLP server to annotate texts
-    LBNLP_URL=http://localhost:8000
+   # location of the NLP server to annotate texts
+   LBNLP_URL=http://localhost:8000
 
    # url for kibana, will be http://localhost:5601 for dev
    KIBANA_URL=http://localhost:5601
+
+   # name of index you want to use in elasticsearch
+   INDEX=name-of-index
    ```

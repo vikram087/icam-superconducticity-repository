@@ -69,6 +69,9 @@ Create a `.env` file to define environment variables required for the stack conf
 
    # url for kibana, will be http://localhost:5601 for dev
    KIBANA_URL=http://localhost:5601
+
+   # name of index you want to use
+   INDEX=name-of-index
    ```
 
 ### 3. Install Docker

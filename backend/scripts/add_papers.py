@@ -2,10 +2,10 @@ import argparse
 import logging
 import math
 import os
+import subprocess
 import time
 import urllib.request as libreq
 from argparse import Namespace
-from typing import Optional
 
 import feedparser  # type: ignore
 import redis
@@ -35,10 +35,11 @@ Created by Vikram Penumarti
 """
 
 load_dotenv()
-API_KEY: Optional[str] = os.getenv("API_KEY")
-ES_URL: Optional[str] = os.getenv("ES_URL")
-LBNLP_URL: Optional[str] = os.getenv("LBNLP_URL")
-DOCKER: Optional[str] = os.getenv("DOCKER")
+API_KEY: str | None = os.getenv("API_KEY")
+ES_URL: str | None = os.getenv("ES_URL")
+LBNLP_URL: str | None = os.getenv("LBNLP_URL")
+DOCKER: str | None = os.getenv("DOCKER")
+INDEX: str = os.getenv("INDEX") or ""
 
 client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
 
@@ -46,11 +47,6 @@ logging.basicConfig(level=logging.WARNING)
 logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
 logging.getLogger("elastic_transport").setLevel(logging.WARNING)
 logging.getLogger("root").setLevel(logging.INFO)
-
-# logging.info(client.info())
-# exit()
-
-# client = Elasticsearch("http://localhost:9200")
 
 model: SentenceTransformer = SentenceTransformer("all-MiniLM-L6-v2")
 
@@ -80,7 +76,7 @@ def set_parser(
         required=False,
         default=40,
         type=int,
-        help="[Optional] Number of iterations of file uploads to perform (min 1)\nDefault: 40",
+        help="[Optional] Number of iterations of document uploads to perform (min 1)\nDefault: 40",
     )
     parser.add_argument(
         "-a",
@@ -88,26 +84,75 @@ def set_parser(
         required=False,
         default=50,
         type=int,
-        help="[Optional] Number of documents to fetch from arXiv (max 2000, min 1)\nDefault: 50",
+        help="[Optional] Number of papers to fetch from arXiv (max 2000, min 1)\nDefault: 50",
     )
     parser.add_argument(
+        "-f",
         "--flush-all",
         required=False,
         default=False,
         action="store_true",
         help="[Optional] Enabling flag flushes redis DB after papers added\nDefault: False",
     )
+    parser.add_argument(
+        "-b",
+        "--batch-size",
+        required=False,
+        default=50,
+        type=int,
+        help="[Optional] Batch size of documents to be annotated at once\nDefault: 50",
+    )
+    parser.add_argument(
+        "-s",
+        "--sleep-between-calls",
+        type=int,
+        required=False,
+        default=15,
+        help="[Optional] Sleep time (in seconds) between API calls to arXiv\nDefault: 15",
+    )
+    parser.add_argument(
+        "-r",
+        "--sleep-after-rate-limit",
+        type=int,
+        required=False,
+        default=300,
+        help="[Optional] Sleep time (in seconds) after hitting rate limit before making next API call\nDefault: 300",
+    )
+    parser.add_argument(
+        "-d",
+        "--drop-batches",
+        required=False,
+        default=False,
+        action="store_true",
+        help="[Optional] Enabling flag does not upload an iteration of papers if all the batches do not successfully complete\nDefault: False",
+    )
+    parser.add_argument(
+        "--restart",
+        required=False,
+        default=False,
+        action="store_true",
+        help="[Optional] Enabling flag tries to restart the 'models' docker container upon connection failure\nDefault: False",
+    )
     parser.add_argument("-v", "--version", action="version", version=program_version)
 
     return parser
 
 
-def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
+def sleep_with_timer(seconds: int) -> None:
+    for remaining in range(seconds, 0, -1):
+        print(f"INFO:root:Resuming in {remaining} seconds...", end="\r", flush=True)
+        time.sleep(1)
+    logging.info("\nResuming now...")
+
+
+def findInfo(
+    start: int,
+) -> tuple[list[dict], bool, bool]:
     search_query: str = "all:superconductivity"
     paper_list: list[dict] = []
     dups: int = 0
 
-    i = 0
+    i: int = 0
     while True:
         url: str = f"http://export.arxiv.org/api/query?search_query={search_query}&start={start}&max_results={amount}"
 
@@ -115,7 +160,7 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
 
         try:
             with libreq.urlopen(url) as response:
-                content = response.read()
+                content: bytes = response.read()
         except Exception as e:
             logging.error(f"Error fetching data from arXiv: {e}")
             exit()
@@ -130,14 +175,15 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
                 logging.error("Exiting program")
                 exit()
 
-            logging.warning("Rate limited. Sleeping for 300 seconds")
-            time.sleep(300)
+            logging.warning(
+                f"Rate limited. Sleeping for {sleep_after_rate_limit} seconds"
+            )
+            sleep_with_timer(sleep_after_rate_limit)
             i += 1
             continue
 
-        # Prepare summaries and paper_dicts for batch processing
-        summaries = []
-        paper_dicts = []
+        summaries: list[str] = []
+        paper_dicts: list[dict] = []
 
         for entry in feed.entries:
             paper_dict: dict = {
@@ -158,27 +204,84 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             summaries.append(paper_dict["summary"])
             paper_dicts.append(paper_dict)
 
-        # Define batch size
-        batch_size = 50
+        num_batches: int = math.ceil(len(summaries) / batch_size)
 
-        # Split summaries and paper_dicts into batches
-        num_batches = math.ceil(len(summaries) / batch_size)
+        all_annotations: list[dict] = []
+        interrupted: bool = False
 
-        all_annotations = []
+        batch_num: int = 0
+        subprocess_run: bool = False
 
-        for batch_num in range(num_batches):
-            batch_start = batch_num * batch_size
-            batch_end = batch_start + batch_size
-            
-            batch_summaries = summaries[batch_start:batch_end]
-            batch_paper_dicts = paper_dicts[batch_start:batch_end]
+        while batch_num < num_batches:
+            batch_start: int = batch_num * batch_size
+            batch_end: int = batch_start + batch_size
 
-            # Send POST request for the batch
-            annotations_response = requests.post(
-                f"{LBNLP_URL}/api/annotate/matbert",
-                json={"docs": batch_summaries},
-                headers={"Content-Type": "application/json"},
-            )
+            batch_summaries: list[str] = summaries[batch_start:batch_end]
+            batch_paper_dicts: list[dict] = paper_dicts[batch_start:batch_end]
+
+            try:
+                annotations_response: requests.Response = requests.post(
+                    f"{LBNLP_URL}/api/annotate/matbert",
+                    json={"docs": batch_summaries},
+                    headers={"Content-Type": "application/json"},
+                )
+            except requests.exceptions.ConnectionError:
+                if restart and not subprocess_run:
+                    try:
+                        logging.info("Attempting to restart 'models' docker container")
+                        result = subprocess.run(
+                            [
+                                "docker",
+                                "compose",
+                                "-f",
+                                "../../docker/docker-compose.yml",
+                                "up",
+                                "-d",
+                                "--build",
+                                "models",
+                            ],
+                            capture_output=True,
+                            text=True,
+                            check=True,
+                        )
+
+                        logging.info(result.stdout)
+                        logging.error(result.stderr)
+
+                        subprocess_run = True
+                        logging.info(
+                            "Sleeping for 15s to ensure container restarted successfully"
+                        )
+                        sleep_with_timer(30)
+                        continue
+                    except Exception:
+                        logging.error(
+                            "Subprocess failed to restart docker container, exiting"
+                        )
+                        exit()
+                elif restart and subprocess_run:
+                    logging.error(
+                        "Docker container failed twice in same iteration, exiting"
+                    )
+                    exit()
+
+                if not drop_batches and batch_size >= amount:
+                    logging.error(
+                        "Batch did not successfully complete and current payload is empty, exiting"
+                    )
+                    exit()
+
+                elif not drop_batches:
+                    interrupted = True
+                    logging.warning(
+                        "Batch did not successfully complete, uploading current documents"
+                    )
+                    break
+
+                logging.error(
+                    "Batch did not successfully complete, dropping all batches\nTo upload partial iterations, please enable the --drop-batches flag"
+                )
+                exit()
 
             if annotations_response.status_code == 200:
                 logging.info(
@@ -192,10 +295,10 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
                 )
                 batch_annotations = [{}] * len(batch_paper_dicts)
 
-            # Append batch annotations to all_annotations
             all_annotations.extend(batch_annotations)
 
-        # Map each annotation back to the corresponding paper
+            batch_num += 1
+
         for paper_dict, annotation in zip(paper_dicts, all_annotations):
             paper_dict["APL"] = annotation.get("APL", [])
             paper_dict["CMT"] = annotation.get("CMT", [])
@@ -207,21 +310,19 @@ def findInfo(start: int, amount: int) -> tuple[list[dict], bool]:
             paper_dict["SMT"] = annotation.get("SMT", [])
             paper_dict["SPL"] = annotation.get("SPL", [])
 
-            # Check if the paper exists in Elasticsearch
             bad = client.options(ignore_status=[404]).get(
-                index="search-papers-meta", id=paper_dict["id"]
+                index=INDEX, id=paper_dict["id"]
             )
             exists = bad.get("found")
             if exists is True:
                 logging.info("Duplicate paper found")
                 dups += 1
                 continue
-                # return paper_list, True
 
             paper_list.append(paper_dict)
 
         logging.info(f"Collected papers {start} - {start + amount - dups}")
-        return replaceNullValues(paper_list), False
+        return replaceNullValues(paper_list), False, interrupted
 
 
 def replaceNullValues(papers_list: list[dict]) -> list[dict]:
@@ -254,7 +355,7 @@ def createNewIndex(delete: bool, index: str) -> None:
         logging.info("Index already exists and no deletion specified")
 
 
-def getEmbedding(text: str) -> list[int]:
+def getEmbedding(text: str):  # type: ignore
     return model.encode(text)
 
 
@@ -270,20 +371,22 @@ def insert_documents(documents: list[dict], index: str):
                 "title_embedding": getEmbedding(document["title"]),
             }
         )
-        # logging.info(operations[1])
-        # break
 
     logging.info("Successfully Completed Insertion")
     return client.bulk(operations=operations)
 
 
-def upload_to_es(amount: int, iterations: int) -> None:
-    wait_time: int = 15
-    start: int = client.count(index="search-papers-meta")["count"]
+def upload_to_es() -> None:
+    start: int = client.count(index=INDEX)["count"]
     logging.info(f"Total documents in DB, start: {start}\n")
+
     for _ in range(iterations):
-        docs, ex = findInfo(start, amount)
-        insert_documents(docs, "search-papers-meta")
+        docs, ex, interrupted = findInfo(start)
+        if len(docs) == 0:
+            logging.error("No docs to upload, exiting")
+            exit()
+
+        insert_documents(docs, INDEX)
         logging.info(f"Uploaded documents {start} - {start + amount}")
         start += amount
 
@@ -292,24 +395,27 @@ def upload_to_es(amount: int, iterations: int) -> None:
             logging.info("Database is fully updated, exiting")
             exit()
 
-        logging.info(f"Sleeping for {wait_time} seconds")
-        time.sleep(wait_time)
+        logging.info(f"Sleeping for {sleep_between_calls} seconds")
+        sleep_with_timer(sleep_between_calls)
+
+        if interrupted:
+            logging.warning("Exiting due to all batches not successfully completing")
+            exit()
 
     logging.info(f"Total documents in DB, finish: {start}\n")
 
 
-def main(args: Namespace) -> None:
-    createNewIndex(False, "search-papers-meta")
-    amount: int = args.amt
-    iterations: int = args.iter
+def main() -> None:
+    createNewIndex(False, INDEX)
+
     if amount > 2000 or amount < 1 or iterations < 1:
         raise Exception(
             "Flag error: please ensure your flag values match the specifications"
         )
 
-    upload_to_es(amount, iterations)
+    upload_to_es()
 
-    if args.flush_all is True:
+    if flush_all is True:
         redis_client.flushall()
         logging.info("Redis DB cleared")
 
@@ -323,4 +429,14 @@ if __name__ == "__main__":
         program_version,
     )
     args: Namespace = parser.parse_args()
-    main(args)
+
+    amount: int = args.amt
+    iterations: int = args.iter
+    batch_size: int = args.batch_size
+    sleep_after_rate_limit: int = args.sleep_after_rate_limit
+    sleep_between_calls: int = args.sleep_between_calls
+    drop_batches: bool = args.drop_batches
+    restart: bool = args.restart
+    flush_all: bool = args.flush_all
+
+    main()
