@@ -366,7 +366,9 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
     except Exception:
         return jsonify(None)
 
+    inflated: int | None = None
     if total < 100 and knn_search and size >= 100:
+        inflated = total
         total = 100
 
     if knn_search:
@@ -390,7 +392,12 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
         cache_results(cache_key, (filtered_papers, total, accuracy))
 
         return jsonify(
-            {"papers": filtered_papers, "total": total, "accuracy": accuracy}
+            {
+                "papers": filtered_papers,
+                "total": total,
+                "accuracy": accuracy,
+                "inflated": inflated,
+            }
         )
     else:
         return jsonify({"error": "No results found"}), 404
