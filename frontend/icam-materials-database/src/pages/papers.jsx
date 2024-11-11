@@ -73,7 +73,6 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 				setAccuracy(data.accuracy);
 				setPageCount(Math.ceil(data.total / searchParams.per_page));
 				setInflated(data.inflated);
-				console.log(data.inflated);
 			})
 			.catch((error) => {
 				setExpandedIndex(-1);

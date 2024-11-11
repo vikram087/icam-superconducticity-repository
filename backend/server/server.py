@@ -46,7 +46,7 @@ def get_cached_results(cache_key: str) -> dict | None:
     return None
 
 
-def cache_results(cache_key: str, data: tuple[list[dict], int, dict]) -> None:
+def cache_results(cache_key: str, data: tuple[list[dict], int, dict, int]) -> None:
     redis_client.setex(cache_key, 3600, json.dumps(data))
 
 
@@ -216,7 +216,14 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
     )
     cached: dict | None = get_cached_results(cache_key)
     if cached:
-        return jsonify({"papers": cached[0], "total": cached[1], "accuracy": cached[2]})
+        return jsonify(
+            {
+                "papers": cached[0],
+                "total": cached[1],
+                "accuracy": cached[2],
+                "inflated": cached[3],
+            }
+        )
 
     if sorting == "Most-Recent" or sorting == "Most-Relevant":
         sort: str = "desc"
@@ -389,7 +396,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
         filtered_papers = [hit["_source"] for hit in hits]
 
     if filtered_papers:
-        cache_results(cache_key, (filtered_papers, total, accuracy))
+        cache_results(cache_key, (filtered_papers, total, accuracy, inflated))
 
         return jsonify(
             {
