@@ -351,6 +351,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
     hits: dict = results["hits"]["hits"]
     accuracy: dict = {}
 
+    total: int = results["hits"]["total"]["value"]
     inflated: int = -1
     if knn_search:
         try:
@@ -363,7 +364,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
                 quer["bool"]["must"] = [
                     {"match": {quer_field: {"query": query, "fuzziness": "AUTO"}}}
                 ]
-            total: int = client.search(
+            total = client.search(
                 query=quer,
                 size=num_results,
                 from_=(page - 1)
