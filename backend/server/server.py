@@ -366,7 +366,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
     except Exception:
         return jsonify(None)
 
-    inflated: int | None = None
+    inflated: int = -1
     if total < 100 and knn_search and size >= 100:
         inflated = total
         total = 100

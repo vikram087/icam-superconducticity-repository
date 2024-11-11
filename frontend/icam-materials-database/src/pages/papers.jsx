@@ -19,7 +19,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 	const [accuracy, setAccuracy] = useState({});
 	const [time, setTime] = useState("");
 	const [highlightedStars, setHighlightedStars] = useState([]);
-	const [inflated, setInflated] = useState(null);
+	const [inflated, setInflated] = useState(-1);
 
 	const navigate = useNavigate();
 
@@ -73,6 +73,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 				setAccuracy(data.accuracy);
 				setPageCount(Math.ceil(data.total / searchParams.per_page));
 				setInflated(data.inflated);
+				console.log(data.inflated);
 			})
 			.catch((error) => {
 				setExpandedIndex(-1);
@@ -80,7 +81,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 				setPapers([]);
 				setAccuracy({});
 				setPageCount(0);
-				setInflated(null);
+				setInflated(-1);
 			});
 	};
 
@@ -274,7 +275,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 									: ""}
 							</p>
 							<b>Displaying Results for: "{searchParams.query}"</b>
-							{inflated && (
+							{inflated !== -1 && (
 								<p>
 									Not many relevant papers, expanding from {inflated} to 100
 									results
