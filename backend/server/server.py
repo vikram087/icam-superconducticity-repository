@@ -351,34 +351,34 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
     hits: dict = results["hits"]["hits"]
     accuracy: dict = {}
 
-    try:
-        if query != "all":
-            if field == "summary_embedding":
-                quer_field = "summary"
-            elif field == "title_embedding":
-                quer_field = "title"
-
-            quer["bool"]["must"] = [
-                {"match": {quer_field: {"query": query, "fuzziness": "AUTO"}}}
-            ]
-        total: int = client.search(
-            query=quer,
-            size=num_results,
-            from_=(page - 1)
-            * num_results,  # try with this, if different total for every page, switch to line below
-            # from_=0,
-            # sort=[{"date": {"order": sort}}],
-            index=INDEX,
-        )["hits"]["total"]["value"]
-    except Exception:
-        return jsonify(None)
-
     inflated: int = -1
-    if total < 100 and knn_search and size >= 100:
-        inflated = total
-        total = 100
-
     if knn_search:
+        try:
+            if query != "all":
+                if field == "summary_embedding":
+                    quer_field = "summary"
+                elif field == "title_embedding":
+                    quer_field = "title"
+
+                quer["bool"]["must"] = [
+                    {"match": {quer_field: {"query": query, "fuzziness": "AUTO"}}}
+                ]
+            total: int = client.search(
+                query=quer,
+                size=num_results,
+                from_=(page - 1)
+                * num_results,  # try with this, if different total for every page, switch to line below
+                # from_=0,
+                # sort=[{"date": {"order": sort}}],
+                index=INDEX,
+            )["hits"]["total"]["value"]
+        except Exception:
+            return jsonify(None)
+
+        if total < 100 and size >= 100:
+            inflated = total
+            total = 100
+
         papers: list[dict] = hits[(page - 1) * num_results :]
         filtered_papers: list[dict] = []
 
