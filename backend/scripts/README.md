@@ -56,12 +56,11 @@ Set up a Python virtual environment and install dependencies.
 Run the script to populate the database with papers from the Arxiv API.
 
    ```bash
-   python3 add_papers.py [options] -i <ITER> -a <AMT>
+   python3 add_papers.py [options]
    ```
 
-   - `-i ITER`: Number of iterations to fetch papers.
-   - `-a AMT`: Amount of papers per iteration (max: 2000).
-
+   > **Note**: Run ```python3 add_papers.py --help``` to see help on the usage of the script.
+   
    > **Note**: The Arxiv API limits requests to 2000 papers at a time. If you need to pull more than 2000, wait before making additional requests to avoid throttling.
 
 ## Troubleshooting
