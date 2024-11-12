@@ -7,6 +7,7 @@ import Pagination from "../components/pagination.jsx";
 import Filters from "../components/filters.jsx";
 import "../styles/papers.css";
 import NavBar from "../components/navbar.jsx";
+import SearchSyntax from "../components/search-syntax.jsx";
 
 function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 	const location = useLocation();
@@ -227,6 +228,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 		setPrevUrl(papers);
 		setPaperToUse(paper);
 		navigate(`/paper/${id}`);
+		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
 	const handlePageClick = (pageNumber) => {
@@ -245,6 +247,29 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 			localStorage.setItem("highlightedStars", JSON.stringify(newStars));
 			return newStars;
 		});
+	};
+
+	const numToDate = (date) => {
+		const monthsReversed = {
+			"01": "January,",
+			"02": "February,",
+			"03": "March,",
+			"04": "April,",
+			"05": "May,",
+			"06": "June,",
+			"07": "July,",
+			"08": "August,",
+			"09": "September,",
+			10: "October,",
+			11: "November,",
+			12: "December,",
+		};
+
+		const year = date.substring(0, 4);
+		const month = monthsReversed[date.substring(4, 6)];
+		const day = date.substring(6);
+
+		return `${day} ${month} ${year}`;
 	};
 
 	const chooseBody = () => {
@@ -282,7 +307,7 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 							)}
 						</div>
 					</div>
-					<ul className="list">
+					<ul style={{ paddingRight: "40px" }}>
 						{papers?.map((paper, index) => (
 							<div
 								className={
@@ -325,7 +350,8 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 												{index < paper.authors.length - 1 ? ", " : ""}
 											</em>
 										</span>
-									))}
+									))}{" "}
+									&mdash; {numToDate(String(paper.date))}
 								</p>
 								<div
 									className={expandedIndex === index ? "text expanded" : "text"}
@@ -369,8 +395,11 @@ function Papers({ searchParams, setSearchParams, setPrevUrl, setPaperToUse }) {
 		<div>
 			<NavBar searchParams={searchParams} />
 			<div className="page-main">
-				<h1 style={{ marginTop: "-10px" }}>Papers</h1>
+				<h1 style={{ marginTop: "10px" }}>Papers</h1>
 				<Search searchParams={searchParams} to="/papers" />
+				<div style={{ textAlign: "center", marginTop: "-20px" }}>
+					<SearchSyntax />
+				</div>
 				<div className="page-container">
 					<div className="filters">
 						<Filters

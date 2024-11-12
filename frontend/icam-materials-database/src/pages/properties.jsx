@@ -1,5 +1,5 @@
 import NavBar from "../components/navbar";
-import "../styles/material-search.css";
+import "../styles/properties.css";
 import { ScrollToBottom, ScrollToTop } from "./papers";
 import { useEffect, useState } from "react";
 import Search from "../components/search";
@@ -139,7 +139,7 @@ function Table({ tableParams, setTableParams, setPrevUrl, setPaperToUse }) {
 		const id = paper.id.replace("/-/g", "/");
 
 		const papers =
-			`/material-search?page=${tableParams.page}&per_page=${tableParams.per_page}` +
+			`/properties?page=${tableParams.page}&per_page=${tableParams.per_page}` +
 			`&query=${tableParams.query}&sort=${tableParams.sorting}` +
 			`&term=${tableParams.term}&` +
 			`${tableParams.date}`;
@@ -147,6 +147,7 @@ function Table({ tableParams, setTableParams, setPrevUrl, setPaperToUse }) {
 		setPaperToUse(paper);
 		setPrevUrl(papers);
 		navigate(`/paper/${id}`);
+		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
 	const toggleExpand = (index) => {
@@ -160,9 +161,9 @@ function Table({ tableParams, setTableParams, setPrevUrl, setPaperToUse }) {
 	return (
 		<>
 			<NavBar />
-			<div className="mat-search-container">
-				<h1 style={{ marginTop: "-10px" }}>Search Materials</h1>
-				<Search searchParams={tableParams} to="/material-search" />
+			<div style={{ paddingBottom: "20px" }}>
+				<h1 style={{ marginTop: "10px" }}>Properties</h1>
+				<Search searchParams={tableParams} to="/properties" />
 				<div className="content-container">
 					<div className="filters-section">
 						<Filters
@@ -186,7 +187,10 @@ function Table({ tableParams, setTableParams, setPrevUrl, setPaperToUse }) {
 								totalPages={pageCount}
 							/>
 							<div style={{ textAlign: "center" }}>
-								<p>{!loading && `${total} Results in ${time} seconds`}</p>
+								<p>
+									{!loading &&
+										`${total} Results in ${time} seconds (${pageCount} pages)`}
+								</p>
 								<p>
 									{total === 10000
 										? "Results are Limited to the first 10,000 matching documents"

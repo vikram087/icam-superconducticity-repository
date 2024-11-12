@@ -11,25 +11,23 @@ function HomePage() {
 
 	const navigate = useNavigate();
 
-	const goToSearch = (query) => {
+	const goToSearch = (query, page, term) => {
 		let quer = query;
 		if (query === "") {
 			quer = "all";
 		}
 		navigate(
-			`/papers?page=1&per_page=20&query=${quer}&sort=Most-Relevant&term=Abstract&date=00000000-${now}`,
+			`${page}?page=1&per_page=20&query=${quer}&sort=Most-Relevant&term=${term}&date=00000000-${now}`,
 		);
+		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
 	return (
 		<div>
 			<NavBar />
 			<div className="main">
-				<p className="home-title" onClick={() => navigate("/")}>
-					ICAM Materials Database
-				</p>
-				<br />
-				<div onClick={() => goToSearch("all")}>
+				<p className="home-title">ICAM Materials Database</p>
+				<div onClick={() => goToSearch("all", "/papers", "Abstract")}>
 					<GoTo />
 				</div>
 				<br />
@@ -44,78 +42,137 @@ function HomePage() {
 					}}
 					to="/papers"
 				/>
-				<SearchSyntax />
-				<section className="overview" style={{ marginTop: "40px" }}>
-					<h2>Overview</h2>
+				<div style={{ marginTop: "-20px" }}>
+					<SearchSyntax />
+				</div>
+
+				<section className="media-section media-container">
+					<div className="media-placeholder">
+						<a
+							style={{ cursor: "pointer" }}
+							onClick={() => goToSearch("all", "/papers", "Abstract")}
+						>
+							<img
+								alt="Search Papers"
+								src="/search-papers.png"
+								className="feature-image"
+							/>
+						</a>
+						<a
+							style={{ cursor: "pointer" }}
+							onClick={() => goToSearch("all", "/properties", "Material")}
+						>
+							<img
+								alt="Search Materials"
+								src="/search-properties.png"
+								className="feature-image"
+							/>
+						</a>
+					</div>
+				</section>
+
+				<section
+					id="features"
+					className="features-section homepage-container"
+					style={{ marginBottom: "40px" }}
+				>
+					<h3>Features</h3>
+					<div className="features-grid">
+						<div
+							className="feature-card"
+							style={{ cursor: "pointer" }}
+							onClick={() => goToSearch("all", "/papers", "Abstract")}
+						>
+							<h4>Search Papers</h4>
+							<p>
+								Leverage advanced AI technology to locate papers based on their
+								semantic relevance, offering a more intuitive search experience
+								beyond traditional keyword matching.
+							</p>
+						</div>
+						<div
+							className="feature-card"
+							style={{ cursor: "pointer" }}
+							onClick={() => goToSearch("all", "/properties", "Material")}
+						>
+							<h4>Search Properties</h4>
+							<p>
+								Explore research papers through AI-extracted insights, allowing
+								you to search by specific materials, synthesis methods, unique
+								properties, and potential applications for a deeper
+								understanding.
+							</p>
+						</div>
+						<div
+							className="feature-card"
+							style={{ cursor: "pointer" }}
+							onClick={() => {
+								navigate("/favorites");
+								window.scrollTo({ top: 0, behavior: "smooth" });
+							}}
+						>
+							<h4>Favorites</h4>
+							<p>
+								Bookmark and save your favorite papers for quick access anytime,
+								all without the need to sign in—perfect for seamless, on-the-go
+								research.
+							</p>
+						</div>
+					</div>
+				</section>
+
+				{/* <section id="about" className="about-section homepage-container">
+					<h3>About Us</h3>
 					<p>
-						This search engine provides an efficient and user-friendly way to
-						explore scientific literature in the field of materials science.
-						Utilize advanced search options and natural language processing to
-						find relevant papers.
+						Our mission is to make scientific research more accessible by
+						creating a user-friendly and robust search platform tailored to
+						material science researchers.
 					</p>
+					<div className="media-placeholder">
+						<p>[Insert Team/Platform Overview Image or Video here]</p>
+					</div>
+				</section> */}
+
+				<section id="contact" className="contact-section">
+					<div className="homepage-container text-center">
+						<h3>Get in Touch</h3>
+						<p style={{ paddingBottom: "10px" }}>
+							Have questions? Reach out to us for more information about our
+							platform.
+						</p>
+						<a
+							href="mailto:vpenumarti@ucdavis.edu"
+							rel="noopener noreferrer"
+							className="cta-button"
+						>
+							Contact Us
+						</a>
+					</div>
 				</section>
-				<section className="features">
-					<h2>Features</h2>
-					<ul>
-						<li>
-							<strong>Vector Search:</strong> Find papers using natural language
-							queries.
-						</li>
-						<li>
-							<strong>Fuzzy Search:</strong> Improved search flexibility for
-							authors and categories.
-						</li>
-						<li>
-							<strong>Performance:</strong> Optimized for fast retrieval of
-							frequently accessed papers.
-						</li>
-						<li>
-							<strong>Property Extraction:</strong> View material properties
-							based on paper abstracts.
-						</li>
-						<li>
-							<strong>Custom Search Parameters:</strong> Customize search
-							parameters to view results unique to your needs.
-						</li>
-						<li>
-							<strong>Favorites:</strong> Favorite research papers to revisit
-							them later.
-						</li>
-					</ul>
-				</section>
-				<section className="usage">
-					<h2>Usage</h2>
-					<ul>
-						<li>Search by Abstract, titles, authors, and categories</li>
-						<li>
-							Use natural language queries for titles and abstracts to get the
-							best results.
-						</li>
-						<li>Use keywords for authors and categories.</li>
-						<li>Sort results by relevance or publication date.</li>
-						<li>Customize number of results per page and page limit.</li>
-						<li>Filter papers by date range using the date picker.</li>
-					</ul>
-				</section>
-				<section className="performance">
-					<h2>Performance Tips</h2>
-					<ul>
-						<li>
-							Frequently searched queries will load faster due to caching.
-						</li>
-						<li>
-							Earlier pages will load faster than later pages for vector
-							searching.
-						</li>
-					</ul>
-				</section>
-				<section className="contact">
-					<h2>Contact</h2>
+
+				<section
+					id="contribute"
+					className="contribute-section homepage-container"
+				>
+					<h3>Contribute</h3>
 					<p>
-						<strong>Lead Developer:</strong> Vikram Penumarti
-						(vpenumarti@ucdavis.edu)
+						Interested in contributing to our platform? Check out our GitHub
+						repository to learn more and start collaborating with us.
 					</p>
+					<a
+						href="https://github.com/vikram087/icam-materials-database"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="github-link"
+					>
+						<img
+							src="/github-mark/github-mark.png"
+							alt="GitHub"
+							className="github-image"
+						/>
+					</a>
 				</section>
+
 				<p>Funded by the Institute for Complex Adaptive Matter</p>
 				<p>Thank you to arXiv for use of its open access interoperability.</p>
 			</div>
@@ -129,7 +186,7 @@ function GoTo() {
 			<span className="circle" aria-hidden="true">
 				<span className="icon arrow" />
 			</span>
-			<span className="button-text">Go To Papers</span>
+			<span className="button-text">Search Papers</span>
 		</button>
 	);
 }

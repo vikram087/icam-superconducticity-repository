@@ -6,8 +6,8 @@ function About() {
 	return (
 		<div>
 			<NavBar />
-			<div className="about-container">
-				<h1 style={{ marginTop: "-10px" }}>About Us</h1>
+			<div style={{ paddingBottom: "20px" }}>
+				<h1 style={{ marginTop: "10px" }}>About Us</h1>
 				<p className="mission-statement">
 					Our mission is to provide a comprehensive and user-friendly search
 					engine to explore the scientific literature in the field of materials
@@ -24,9 +24,8 @@ function About() {
 						<h2>Vikram Penumarti</h2>
 						<p>
 							Vikram Penumarti is a 3rd year undergraduate student at UC Davis
-							studying Computer Science. With the guidance of Dr. Rajiv Singh,
-							he created this website utilizing knowledge of computer science
-							and materials science.
+							studying Computer Science. He created this website under the
+							guidance of Dr. Rajiv Singh.
 						</p>
 					</div>
 					<div className="card">

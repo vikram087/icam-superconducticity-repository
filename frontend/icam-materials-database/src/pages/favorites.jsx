@@ -1,6 +1,5 @@
 import NavBar from "../components/navbar";
 import { useState, useEffect } from "react";
-import "../styles/favorites.css";
 import { useNavigate } from "react-router-dom";
 import Content from "../components/mathjax";
 import { ScrollToBottom, ScrollToTop } from "./papers";
@@ -28,6 +27,7 @@ function Favorites({ setPrevUrl, setPaperToUse }) {
 		setPaperToUse(paper);
 		setPrevUrl("/favorites");
 		navigate(`/paper/${id}`);
+		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
 	const toggleStar = (paper) => {
@@ -54,8 +54,8 @@ function Favorites({ setPrevUrl, setPaperToUse }) {
 	return (
 		<div>
 			<NavBar />
-			<div className="page-main">
-				<h1 style={{ marginTop: "-10px" }}>Favorites</h1>
+			<div>
+				<h1 style={{ marginTop: "10px" }}>Favorites</h1>
 				<Search
 					papers={highlightedStars}
 					setPapers={setHighlightedStars}
@@ -70,7 +70,7 @@ function Favorites({ setPrevUrl, setPaperToUse }) {
 				<div className="page-container">
 					<div className="content-area">
 						{highlightedStars.length > 0 ? (
-							<ul className="list" style={{ paddingLeft: "100px" }}>
+							<ul style={{ paddingLeft: "40px", paddingRight: "40px" }}>
 								{highlightedStars.map((paper, index) => (
 									<div
 										className={

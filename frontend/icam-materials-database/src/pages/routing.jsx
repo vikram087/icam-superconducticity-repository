@@ -5,7 +5,7 @@ import { useState } from "react";
 import PaperDetail from "./paper-detail.jsx";
 import Favorites from "./favorites.jsx";
 import About from "./about.jsx";
-import Table from "./material-search.jsx";
+import Table from "./properties.jsx";
 
 function App() {
 	const currentDate = new Date();
@@ -60,7 +60,7 @@ function App() {
 				/>
 				<Route path="/about" element={<About />} />
 				<Route
-					path="/material-search"
+					path="/properties"
 					element={
 						<Table
 							setPrevUrl={setPrevUrl}

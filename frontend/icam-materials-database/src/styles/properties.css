@@ -1,22 +1,13 @@
-.mat-search-container {
-    max-width: 90%;
-    min-height: 100vh;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: "Arial", sans-serif;
-    background-color: #f9f9f9;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-
 .content-container {
     display: flex;
     gap: 20px;
+    padding-right: 20px;
 }
 
 .filters-section {
     flex: 0 0 240px;
     border-right: 2px solid #eee;
+    margin-left: 30px;
 }
 
 .table-section {

@@ -5,7 +5,7 @@
 	width: 100%;
 }
 
-.page-main {
+/* .page-main {
 	max-width: 90%;
 	min-height: 100vh;
 	margin: 0 auto;
@@ -14,7 +14,7 @@
 	background-color: #f9f9f9;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	border-radius: 10px;
-}
+} */
 
 .journals {
 	padding-top: 10px;
@@ -24,6 +24,7 @@
 	flex: 0 1 auto;
 	border-right: 2px solid #eee;
 	width: 300px;
+	margin-left: 30px;
 }
 
 .container {
