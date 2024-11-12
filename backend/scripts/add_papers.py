@@ -250,7 +250,7 @@ def findInfo(
 
                         subprocess_run = True
                         logging.info(
-                            "Sleeping for 15s to ensure container restarted successfully"
+                            "Sleeping for 30s to ensure container restarted successfully"
                         )
                         sleep_with_timer(30)
                         continue
