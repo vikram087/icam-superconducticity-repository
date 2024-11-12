@@ -388,8 +388,7 @@ def papers(term: str, query: str) -> tuple[Response, int] | Response:
             source.pop("summary_embedding", None)
             source.pop("title_embedding", None)
 
-            if start_date < source["date"] < end_date:
-                filtered_papers.append(source)
+            filtered_papers.append(source)
 
             if paper.get("_score") is not None:
                 accuracy[source["id"]] = float(str(paper["_score"])[1:])
