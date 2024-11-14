@@ -36,7 +36,7 @@ function Table({ tableParams, setTableParams, setPrevUrl, setPaperToUse }) {
 	const columns = [
 		{ header: "Material", key: "MAT" },
 		{ header: "Description", key: "DSC" },
-		{ header: "Symmetry", key: "SPL" },
+		{ header: "Symmetry or Phase Labels", key: "SPL" },
 		{ header: "Synthesis", key: "SMT" },
 		{ header: "Characterization", key: "CMT" },
 		{ header: "Property", key: "PRO" },
