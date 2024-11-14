@@ -176,6 +176,7 @@ services:
     platform: linux/amd64
     build:
       context: ../backend/models
+    # image: vikrampen/icam-models:latest
     ports:
       - "8000:8000"
     volumes:
@@ -192,6 +193,7 @@ services:
     container_name: backend
     build:
       context: ../backend/server
+    # image: vikrampen/icam-backend:latest
     depends_on:
       es01:
         condition: service_healthy
@@ -252,6 +254,7 @@ services:
     container_name: frontend
     build:
       context: ../frontend/icam-materials-database
+    # image: vikrampen/icam-frontend:latest
     depends_on:
       backend:
         condition: service_healthy

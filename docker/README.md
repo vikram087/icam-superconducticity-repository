@@ -2,6 +2,8 @@
 
 This guide provides steps for setting up the project using Docker Compose. The setup of elasticsearch is based on the Elastic blog article [Getting Started with the Elastic Stack and Docker Compose](https://www.elastic.co/blog/getting-started-with-the-elastic-stack-and-docker-compose).
 
+> Note: If you want to use prebuilt images, comment out build and context for the models, backend, and frontend, containers and uncomment the image: ... lines.
+
 ## Table of Contents
 - [Setup](#setup)
   - [Clone the Repository](#1-clone-the-repository)
