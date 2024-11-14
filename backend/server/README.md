@@ -5,8 +5,9 @@ This guide details how to set up and run the server, which integrates with Elast
 ## Table of Contents
 - [Setup](#setup)
   - [Clone the Repository](#1-clone-the-repository)
-  - [Set up Python Environment](#2-setup-python-environment)
-  - [Run the Server](#3-run-the-server)
+  - [Set up .env File](#2-set-up-env-file)
+  - [Set up Python Environment](#3-setup-python-environment)
+  - [Run the Server](#4-run-the-server)
 - [Troubleshooting](#troubleshooting)
 - [Next Steps](#next-steps)
 
@@ -21,7 +22,25 @@ Clone the repository containing the server code, then navigate to the server dir
    cd icam-materials-database/backend/server
    ```
 
-### 2. Set up Python Environment
+### 2. Set up `.env` File
+
+Create a `./env/.env` file for the Python Elasticsearch API. Replace `YOUR_API_KEY_HERE` with the API key you obtained from [Elasticsearch](../elasticsearch/README.md).
+
+   ```ini
+   # API key for Elasticsearch
+   API_KEY=YOUR_API_KEY_HERE
+
+   # url for elasticsearch, defaults to https://localhost:9200
+   ES_URL=https://localhost:9200
+
+   # hard-coded value
+   DOCKER=false
+
+   # name of index you want to use in elasticsearch
+   INDEX=name-of-index
+   ```
+
+### 3. Set up Python Environment
 
 Set up a virtual environment to isolate dependencies.
 
@@ -36,7 +55,7 @@ Set up a virtual environment to isolate dependencies.
      pip install -r requirements.txt
      ```
 
-### 3. Run the Server
+### 4. Run the Server
 
 Start the server to begin processing requests.
 

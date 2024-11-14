@@ -8,10 +8,7 @@ This guide provides steps for setting up the project using Docker Compose. The s
   - [Set up .env File](#2-set-up-env-file)
   - [Install Docker](#3-install-docker)
   - [Run the Docker Container](#4-run-the-docker-container)
-  - [Download ca_cert](#5-download-ca_cert)
-  - [Access Kibana](#6-access-kibana-optional)
-  - [Create API Key](#7-create-api-key)
-  - [Rerun the Docker Container](#8-rerun-the-docker-container)
+  - [Access Kibana](#5-access-kibana-optional)
 - [Stopping the Docker Container](#stopping-the-docker-container)
 - [Troubleshooting](#troubleshooting)
 - [Next Steps](#next-steps)
@@ -61,9 +58,6 @@ Create a `.env` file to define environment variables required for the stack conf
    # Encryption key (for POC environments only, if using, please change)
    ENCRYPTION_KEY=c34d38b3a14956121ff2170e5030b471551370178f43e5626eec58b04a30fae2
 
-   # Steps for obtaining this value will be in step 7
-   API_KEY=YOUR_API_KEY
-
    # Url of your backend (if you are on a cloud instance, ensure you use its public DNS/IP for this)
    VITE_BACKEND_URL=http://localhost:8080
 
@@ -90,59 +84,13 @@ Start the Docker container.
    docker compose up -d --build
    ```
 
-### 5. Download ca_cert
-
-Dowload the certificate for a secure elasticsearch environment (if running docker with `sudo` ensure the ca.crt files are under user level permissions rather than `root`)
-
-   ```bash
-   docker cp es01:/usr/share/elasticsearch/config/certs/ca/ca.crt ../backend/server && cp ../backend/server/ca.crt ../backend/scripts/ca.crt
-   ```
-
-### 6. Access Kibana (optional)
+### 5. Access Kibana (optional)
 
 After starting the Docker container, you can access Kibana at `http://localhost:5601`. Log in with:
 
    - **Username**: `elastic`
    - **Password**: the `ELASTIC_PASSWORD` from your `.env` file
 
-### 7. Create API Key
-
-This API key allows the server to securely communicate with Elasticsearch.
-
-- **GUI (through Kibana)**
-
-   1. Navigate to **Management > Stack Management > API Keys > Create API Key**.
-   2. Create an API key with no restrictions, then copy it for the next step.
-   3. Paste it into the .env file and backend/.env
-
-- **Command Line**
-
-Replace ${ELASTIC_PASSWORD} with your elasticsearch password, and "your-api-key" with your api key
-
-   ```bash
-   sudo curl --cacert ../backend/server/ca.crt -X POST "https://localhost:9200/_security/api_key" \
-   -H "Content-Type: application/json" \
-   -u "elastic:${ELASTIC_PASSWORD}" \
-   -d '{"name": "your-api-key"}' | jq -r .encoded | \
-   xargs -I {} echo "API_KEY={}" | tee -a .env >> ../backend/.env
-   ```
-
-The command above automatically copies the api key to the file, if you wanna see the values after the command run the following (only copy the encoded value)
-
-   ```bash
-   sudo curl --cacert ../backend/server/ca.crt -X POST "https://localhost:9200/_security/api_key" \
-   -H "Content-Type: application/json" \
-   -u "elastic:${ELASTIC_PASSWORD}" \
-   -d '{"name": "your-api-key"}'
-   ```
-
-### 8. Rerun the Docker Container
-
-Now that all the environment variables and ca.cert are in place, run the container again:
-
-   ```bash
-   docker compose up -d --build
-   ```
 
 ### Stopping the Docker Container
 

@@ -14,6 +14,9 @@ volumes:
   model-data:
     driver: local
     name: model-data
+  api-key:
+    driver: local
+    name: api-key
 
 networks:
   app-network:
@@ -194,13 +197,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      api-key-setup:
+        condition: service_healthy
     ports:
       - "8080:8080"
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+      - api-key:/app/env
     environment:
       - ES_URL=https://es01:9200
-      - API_KEY=${API_KEY}
       - DOCKER=true
       - INDEX=${INDEX}
+      - CERT_PATH=/usr/share/elasticsearch/config/certs/ca/ca.crt
     networks:
       - app-network
     healthcheck:
@@ -208,6 +216,37 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  api-key-setup:
+    container_name: api-key-setup
+    image: alpine
+    depends_on:
+      es01:
+        condition: service_healthy
+    volumes:
+      - api-key:/app/env
+      - certs:/usr/share/elasticsearch/config/certs
+    networks:
+      - app-network
+    command: >
+      sh -c '
+        if [ ! -f /app/env/.env ]; then
+          apk add --no-cache curl jq && \
+          curl --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -X POST "https://es01:9200/_security/api_key" \
+          -H "Content-Type: application/json" \
+          -u "elastic:${ELASTIC_PASSWORD}" \
+          -d "{\"name\": \"icam-docker\"}" | jq -r .encoded | \
+          xargs -I {} echo "API_KEY={}" > /app/env/.env;
+        else
+          echo ".env already exists, skipping API key generation";
+        fi
+        sleep infinity
+      '
+    healthcheck:
+      test: [ "CMD-SHELL", "[ -f /app/env/.env ]" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   frontend:
     container_name: frontend

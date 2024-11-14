@@ -11,13 +11,14 @@ from flask_cors import CORS
 from redis import Redis
 from sentence_transformers import SentenceTransformer  # type: ignore
 
-load_dotenv()
+load_dotenv(dotenv_path="./env/.env")
 API_KEY: str | None = os.getenv("API_KEY")
 ES_URL: str | None = os.getenv("ES_URL")
 DOCKER: str | None = os.getenv("DOCKER")
 INDEX: str | None = os.getenv("INDEX")
+CERT_PATH: str = os.getenv("CERT_PATH") or ""
 
-client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs="./ca.crt")
+client: Elasticsearch = Elasticsearch(ES_URL, api_key=API_KEY, ca_certs=CERT_PATH)
 
 app: Flask = Flask(__name__)
 CORS(app)

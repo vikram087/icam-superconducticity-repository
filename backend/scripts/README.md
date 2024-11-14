@@ -5,7 +5,7 @@ This guide details how to set up and run the `add_papers.py` script, which pulls
 ## Table of Contents
 - [Setup](#setup)
   - [Clone the Repository](#1-clone-the-repository)
-  - [Verify ../backend/.env File](#2-verify-backendenv-file)
+  - [Set up .env file](#2-set-up-env-file)
   - [Install Dependencies](#3-install-dependencies)
   - [Run the Script](#4-run-the-script)
 - [Usage](#usage)
@@ -23,9 +23,7 @@ Clone the repository containing the script code, then navigate to the `scripts` 
    cd icam-materials-database/backend/scripts
    ```
 
-### 2. Verify `../.env` File
-
-For this script to run properly, ES_URL, LBNLP_URL, and API_KEY must be present in `../.env`
+### 2. Set up `.env` File
 
    ```ini
     # API key for Elasticsearch
@@ -39,6 +37,9 @@ For this script to run properly, ES_URL, LBNLP_URL, and API_KEY must be present 
 
     # hard coded value
     DOCKER=false
+
+    # index you want to use
+    INDEX=name-of-index
    ```
 
 ### 3. Install Dependencies
