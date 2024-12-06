@@ -50,7 +50,7 @@ function App() {
 				/>
 				<Route
 					path="/paper/:id"
-					element={<PaperDetail prevUrl={prevUrl} paper={paperToUse} />}
+					element={<PaperDetail prevUrl={prevUrl} selectedPaper={paperToUse} />}
 				/>
 				<Route
 					path="/favorites"

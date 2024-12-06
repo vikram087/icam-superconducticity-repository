@@ -160,6 +160,16 @@ def get_materials(property: str, value: str) -> Response:
 # redis-cli FLUSHALL # command on cli to clear cache
 
 
+@app.route("/api/papers/<paper_id>", methods=["GET"])
+def get_paper(paper_id: str) -> tuple[Response, int] | Response:
+    results = client.get(index="search-papers-meta", id=paper_id)
+    paper: dict = results["_source"]
+    if paper:
+        return jsonify(paper)
+    else:
+        return jsonify({"error": "No results found"}), 404
+
+
 # fuzzy search for category, authors
 # vector-based search for title, summary
 # /api/papers

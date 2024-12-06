@@ -2,6 +2,8 @@
 
 This guide provides steps for setting up the ICAM Materials Database project using Kubernetes.
 
+> Note: This setup is currently in progress, so it is not complete
+
 ## Table of Contents
 - [Setup](#setup)
   - [1. Clone the Repository](#1-clone-the-repository)

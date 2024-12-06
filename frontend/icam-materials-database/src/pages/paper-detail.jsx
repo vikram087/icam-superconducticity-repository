@@ -5,14 +5,27 @@ import Content from "../components/mathjax";
 import "../styles/paper-detail.css";
 import NavBar from "../components/navbar";
 
-function PaperDetail({ prevUrl, paper }) {
+function PaperDetail({ prevUrl, selectedPaper }) {
 	const [highlightedStars, setHighlightedStars] = useState([]);
+	const [paper, setPaper] = useState(selectedPaper);
+	const { id } = useParams();
 
 	useEffect(() => {
 		const storedStars =
 			JSON.parse(localStorage.getItem("highlightedStars")) || [];
 		setHighlightedStars(Array.isArray(storedStars) ? storedStars : []);
-	}, []);
+
+		if (!selectedPaper?.id) {
+			console.log("Fetching paper");
+			const backend_url = import.meta.env.VITE_BACKEND_URL;
+
+			fetch(`${backend_url}/api/papers/${id}`)
+				.then((response) => response.json())
+				.then((data) => {
+					setPaper(data);
+				});
+		}
+	}, [id, selectedPaper]);
 
 	const goBack = () => {
 		if (prevUrl) {
@@ -23,6 +36,7 @@ function PaperDetail({ prevUrl, paper }) {
 	};
 
 	const replaceID = (id) => {
+		if (!id) return "";
 		const lastIndex = id.lastIndexOf("-");
 
 		if (lastIndex !== -1) {
@@ -56,10 +70,10 @@ function PaperDetail({ prevUrl, paper }) {
 
 	const toggleStar = (paper) => {
 		setHighlightedStars((prev) => {
-			const isStarred = prev.some((p) => p.id === paper.id);
+			const isStarred = prev.some((p) => p.id === paper?.id);
 
 			const newStars = isStarred
-				? prev.filter((p) => p.id !== paper.id)
+				? prev.filter((p) => p.id !== paper?.id)
 				: [...prev, paper];
 
 			localStorage.setItem("highlightedStars", JSON.stringify(newStars));
@@ -84,13 +98,13 @@ function PaperDetail({ prevUrl, paper }) {
 								paddingBottom: "10px",
 							}}
 						>
-							<Content content={paper.title} />
+							<Content content={paper?.title} />
 						</h3>
 						<img
 							width={20}
 							height={20}
 							src={
-								highlightedStars.some((p) => p.id === paper.id)
+								highlightedStars.some((p) => p.id === paper?.id)
 									? "/filled_star.png"
 									: "/empty_star.png"
 							}
@@ -101,21 +115,21 @@ function PaperDetail({ prevUrl, paper }) {
 					</div>
 					<p>
 						<strong>Authors:</strong>{" "}
-						{paper.authors.map((author, index) => (
+						{paper?.authors?.map((author, index) => (
 							<span key={`${author}_detail`}>
 								{author}
-								{index < paper.authors.length - 1 ? ", " : ""}
+								{index < paper?.authors?.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
 					<p>
-						<strong>arXiv ID:</strong> {replaceID(paper.id)}
+						<strong>arXiv ID:</strong> {replaceID(paper?.id)}
 					</p>
 					<p>
-						<strong>DOI:</strong> {paper.doi}
+						<strong>DOI:</strong> {paper?.doi}
 					</p>
 					<strong>Links:</strong>
-					{paper.links.map((link) => (
+					{paper?.links?.map((link) => (
 						<a href={link} key={link} target="_blank" rel="noreferrer">
 							<br />
 							{link}
@@ -123,39 +137,39 @@ function PaperDetail({ prevUrl, paper }) {
 					))}
 					<p>
 						<strong>Categories:</strong>{" "}
-						{paper.categories.map((category, index) => (
+						{paper?.categories?.map((category, index) => (
 							<span key={category}>
 								{category}
-								{index < paper.categories.length - 1 ? ", " : ""}
+								{index < paper?.categories?.length - 1 ? ", " : ""}
 							</span>
 						))}
 					</p>
 					<p>
-						<strong>Submission Date:</strong> {numToDate(String(paper.date))}
+						<strong>Submission Date:</strong> {numToDate(String(paper?.date))}
 					</p>
 					<p>
-						<strong>Update Date:</strong> {numToDate(String(paper.updated))}
+						<strong>Update Date:</strong> {numToDate(String(paper?.updated))}
 					</p>
 					<p>
-						<strong>Comments:</strong> {paper.comments}
+						<strong>Comments:</strong> {paper?.comments}
 					</p>
 					<p>
-						<strong>Primary Category:</strong> {paper.primary_category}
+						<strong>Primary Category:</strong> {paper?.primary_category}
 					</p>
 					<p>
-						<strong>Journal Ref:</strong> {paper.journal_ref}
+						<strong>Journal Ref:</strong> {paper?.journal_ref}
 					</p>
 					<div className="abstract">
 						<strong>Abstract:</strong> <br />
-						<Content content={paper.summary} />
+						<Content content={paper?.summary} />
 					</div>
 					<p>
 						<strong>Materials:</strong>{" "}
-						{Array.isArray(paper.MAT) ? (
-							paper.MAT?.map((item, index) => (
+						{Array.isArray(paper?.MAT) ? (
+							paper?.MAT?.map((item, index) => (
 								<span key={index}>
 									{item}
-									{index < paper.MAT.length - 1 ? ", " : ""}
+									{index < paper?.MAT.length - 1 ? ", " : ""}
 								</span>
 							))
 						) : (
@@ -164,11 +178,11 @@ function PaperDetail({ prevUrl, paper }) {
 					</p>
 					<p>
 						<strong>Descriptions of Sample:</strong>{" "}
-						{Array.isArray(paper.DSC) ? (
-							paper.DSC?.map((item, index) => (
+						{Array.isArray(paper?.DSC) ? (
+							paper?.DSC?.map((item, index) => (
 								<span key={index}>
 									{item}
-									{index < paper.DSC.length - 1 ? ", " : ""}
+									{index < paper?.DSC.length - 1 ? ", " : ""}
 								</span>
 							))
 						) : (
@@ -177,11 +191,11 @@ function PaperDetail({ prevUrl, paper }) {
 					</p>
 					<p>
 						<strong>Symmetry or Phase Labels:</strong>{" "}
-						{Array.isArray(paper.SPL) ? (
-							paper.SPL?.map((item, index) => (
+						{Array.isArray(paper?.SPL) ? (
+							paper?.SPL?.map((item, index) => (
 								<span key={index}>
 									{item}
-									{index < paper.SPL.length - 1 ? ", " : ""}
+									{index < paper?.SPL.length - 1 ? ", " : ""}
 								</span>
 							))
 						) : (
@@ -190,11 +204,11 @@ function PaperDetail({ prevUrl, paper }) {
 					</p>
 					<p>
 						<strong>Synthesis Methods:</strong>{" "}
-						{Array.isArray(paper.SMT) ? (
-							paper.SMT?.map((item, index) => (
+						{Array.isArray(paper?.SMT) ? (
+							paper?.SMT?.map((item, index) => (
 								<span key={index}>
 									{item}
-									{index < paper.SMT.length - 1 ? ", " : ""}
+									{index < paper?.SMT.length - 1 ? ", " : ""}
 								</span>
 							))
 						) : (
@@ -203,11 +217,11 @@ function PaperDetail({ prevUrl, paper }) {
 					</p>
 					<p>
 						<strong>Characterization Methods:</strong>{" "}
-						{Array.isArray(paper.CMT) ? (
-							paper.CMT?.map((item, index) => (
+						{Array.isArray(paper?.CMT) ? (
+							paper?.CMT?.map((item, index) => (
 								<span key={index}>
 									{item}
-									{index < paper.CMT.length - 1 ? ", " : ""}
+									{index < paper?.CMT.length - 1 ? ", " : ""}
 								</span>
 							))
 						) : (
@@ -217,14 +231,14 @@ function PaperDetail({ prevUrl, paper }) {
 					<p>
 						<strong>Properties:</strong>{" "}
 						{[
-							...(Array.isArray(paper.PRO) ? paper.PRO : []),
-							...(Array.isArray(paper.PVL) ? paper.PVL : []),
-							...(Array.isArray(paper.PUT) ? paper.PUT : []),
+							...(Array.isArray(paper?.PRO) ? paper?.PRO : []),
+							...(Array.isArray(paper?.PVL) ? paper?.PVL : []),
+							...(Array.isArray(paper?.PUT) ? paper?.PUT : []),
 						].length > 0 ? (
 							[
-								...(Array.isArray(paper.PRO) ? paper.PRO : []),
-								...(Array.isArray(paper.PVL) ? paper.PVL : []),
-								...(Array.isArray(paper.PUT) ? paper.PUT : []),
+								...(Array.isArray(paper?.PRO) ? paper?.PRO : []),
+								...(Array.isArray(paper?.PVL) ? paper?.PVL : []),
+								...(Array.isArray(paper?.PUT) ? paper?.PUT : []),
 							].map((item, index, array) => (
 								<span key={index}>
 									{item}
@@ -237,11 +251,11 @@ function PaperDetail({ prevUrl, paper }) {
 					</p>
 					<p>
 						<strong>Applications:</strong>{" "}
-						{Array.isArray(paper.APL) ? (
-							paper.APL?.map((item, index) => (
+						{Array.isArray(paper?.APL) ? (
+							paper?.APL?.map((item, index) => (
 								<span key={index}>
 									{item}
-									{index < paper.APL.length - 1 ? ", " : ""}
+									{index < paper?.APL.length - 1 ? ", " : ""}
 								</span>
 							))
 						) : (
